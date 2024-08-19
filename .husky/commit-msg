@@ -1,0 +1,3 @@
+pnpm exec commitlint --edit 
+pnpm run test:types
+pnpm run test:unit --changed

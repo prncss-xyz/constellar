@@ -1,0 +1,50 @@
+{
+	"name": "constellar",
+	"private": false,
+	"version": "0.0.0",
+	"description": "",
+	"type": "module",
+	"scripts": {
+		"release": "release-it",
+		"format": "prettier --write packages/*/*/src",
+		"test:types": "pnpm --stream -r run test:types",
+		"test:unit": "pnpm --stream -r run test:unit --passWithNoTests",
+		"build": "pnpm --stream -r run build",
+		"test:lint": "eslint packages/** --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
+		"test:knip": "knip",
+		"prepare": "husky"
+	},
+	"keywords": [],
+	"author": "Juliette Lamarche",
+	"license": "MIT",
+	"devDependencies": {
+		"@commitlint/cli": "^19.4.0",
+		"@commitlint/config-conventional": "^19.2.2",
+		"@ianvs/prettier-plugin-sort-imports": "^4.3.1",
+		"@typescript-eslint/eslint-plugin": "^8.1.0",
+		"@typescript-eslint/parser": "^8.1.0",
+		"eslint": "^8.57.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-react-hooks": "^4.6.2",
+		"eslint-plugin-react-refresh": "^0.4.9",
+		"husky": "^9.1.4",
+		"knip": "^5.27.2",
+		"lint-staged": "^15.2.9",
+		"release-it": "^17.6.0",
+		"release-it-pnpm": "^4.6.3",
+		"typescript": "^5.5.4",
+		"vitest": "^2.0.5"
+	},
+	"release-it": {
+		"git": {
+			"requireCleanWorkingDir": false,
+			"commitArgs": "--no-verify"
+		},
+		"plugins": {
+			"release-it-pnpm": {
+				"inFile": "CHANGELOG.md",
+				"publishCommand": "echo 'skip publish'"
+			}
+		}
+	}
+}
