@@ -1,5 +1,4 @@
 export * from './flow'
-export * from './compose'
 
 export const noop = () => {}
 

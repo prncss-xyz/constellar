@@ -13,25 +13,6 @@ import {
 	Monoid,
 } from '@constellar/utils'
 
-// touched
-
-/*
-function compose2opt<Fail, P, Q, R>(
-	isFaillure: (v: unknown) => v is Fail,
-	f: (p: P) => Q | Fail,
-	g: (q: Q, x: R) => R,
-): (p: P, x: R) => R {
-	if (f === id) return g as unknown as (p: P, x: R) => R
-	if (g === id) return f as unknown as (p: P, x: R) => R
-	if (isFaillure === isNever) return (p: P, x: R) => g(f(p) as Q, x)
-	return (p: P, x: R) => {
-		const q = f(p)
-		if (isFaillure(q)) return x
-		return g(q, x)
-	}
-}
-*/
-
 export const REMOVE = Symbol('REMOVE')
 function isRemove(v: unknown) {
 	return v === REMOVE
@@ -76,35 +57,6 @@ function cmpFaillure<F1, F2>(
 }
 /* c8 ignore stop */
 
-function newSetter<B, Part, Whole>(
-	thisSetter: Setter<Part, Whole>,
-	oSetter: Setter<B, Part>,
-): (b: B, part: Part, w: Whole) => Whole {
-	if (thisSetter === id) {
-		if (oSetter === id) return id as any
-		return (b, p) => oSetter(b, p) as any
-	}
-	if (oSetter === id) return (b, _p, w) => oSetter(b, w as any) as any
-	return (b, p, w) => thisSetter(oSetter(b, p), w)
-}
-
-function cmpSetter<B, Part, Whole>(
-	thisGetter: Getter<Part, Whole, never>,
-	thisSetter: Setter<Part, Whole>,
-	oSetter: Setter<B, Part>,
-): Setter<B, Whole> {
-	if (thisSetter === id) {
-		if (oSetter === id) return id as any
-		if (thisGetter === id) return (b, w) => oSetter(b, w as any) as any
-		if (thisSetter === id)
-			return (b, w) => oSetter(b, thisGetter(w) as Part) as any
-	}
-	if (oSetter === id) return (b, w) => thisSetter(b as any, w) as any
-	if (thisGetter === id)
-		return (b, w) => thisSetter(oSetter(b, w as any), w) as any
-	return (b: B, w: Whole) => thisSetter(oSetter(b, thisGetter(w) as Part), w)
-}
-
 function cmpMapper<B, Part, Whole>(
 	thisMapper: Mapper<Part, Whole>,
 	oMapper: Mapper<B, Part>,
@@ -133,68 +85,26 @@ export class Optic<Part, Whole, Fail, Command>
 		this.exec = o.exec
 	}
 	_compose<Part2, F2, C2>(o: IOptic<Part2, Part, F2, C2>) {
-		const exec: Setter<C2, Whole> =
-			o.exec === inert
-				? (inert as any)
-				: (c: C2, w: Whole) => this.mapper((p) => o.exec(c, p), w)
-		if (this.isFaillure === isNever) {
-			return new Optic<Part2, Whole, Fail | F2, C2>({
-				getter: compose2(this.getter as (w: Whole) => Part, o.getter),
-				refold: compose2(o.refold, this.refold),
-				mapper: cmpMapper(this.mapper, o.mapper),
-				isFaillure: cmpFaillure(this.isFaillure, o.isFaillure),
-				setter: cmpSetter(this.getter as any, this.setter, o.setter),
-				isCommand: o.isCommand,
-				exec,
-			})
-		}
 		const isFaillure = cmpFaillure(this.isFaillure, o.isFaillure)
 		const refold = compose2(o.refold, this.refold)
-		const ns = newSetter(this.setter, o.setter)
 		return new Optic<Part2, Whole, Fail | F2, C2>({
-			getter:
-				o.getter === id
-					? (this.getter as any)
-					: (w: Whole) => {
-							const p = this.getter(w)
-							if (this.isFaillure(p)) return p
-							return o.getter(p)
-						},
+			getter: (w: Whole) => {
+				const p = this.getter(w)
+				if (this.isFaillure(p)) return p
+				return o.getter(p)
+			},
 			refold,
 			mapper: cmpMapper(this.mapper, o.mapper),
 			isFaillure,
 			setter: (b, w) => {
 				const t = this.getter(w)
 				if (this.isFaillure(t)) return w
-				return ns(b, t, w)
+				return this.setter(o.setter(b, t), w)
 			},
 			isCommand: o.isCommand,
-			exec,
+			exec: (c: C2, w: Whole) => this.mapper((p) => o.exec(c, p), w),
 		})
 	}
-	/*
-	view(a: Whole) {
-		return this.getter(a)
-	}
-	put(v: Part) {
-		return (a: Whole) => this.setter(v, a)
-	}
-	fold<Acc>(monoid: Monoid<Part, Acc>) {
-		const fold = this.refold(monoid.fold)
-		return (w: Whole) => fold(w, fromInit(monoid.init))
-	}
-	command(c: Command) {
-		return (w: Whole) => this.exec(c, w)
-	}
-	modify(f: (p: Part) => Part) {
-		return (w: Whole) => this.mapper(f, w)
-	}
-	update(arg: Command | Part | ((p: Part) => Part)) {
-		if (this.isCommand(arg)) return this.command(arg)
-		if (isFunction(arg)) return this.modify(arg)
-		return this.put(arg)
-	}
-  */
 }
 
 export function view<Part, Whole, Fail, Command>(
