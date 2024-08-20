@@ -1,5 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 import { Lens } from 'monocle-ts'
 import * as O from 'optics-ts'
@@ -22,7 +22,7 @@ describe('read', () => {
 			prop('d'),
 			prop('e'),
 		)
-		const fn = () => focus.view(data)
+		const fn = () => view(focus)(data)
 		bench('constellar', fn as () => void)
 		expect(fn()).toBe('hello')
 	})()
@@ -58,10 +58,10 @@ describe('write', () => {
 			prop('d'),
 			prop('e'),
 		)
-		const v = focus.update(str)
+		const v = update(focus, str)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(focus.view(fn())).toEqual(str)
+		expect(view(focus)(fn())).toEqual(str)
 	})()
 	;(() => {
 		const focus = O.optic<Data>().path('a', 'b', 'c', 'd', 'e')
@@ -97,10 +97,10 @@ describe('modify', () => {
 			prop('d'),
 			prop('e'),
 		)
-		const v = focus.update(cb)
+		const v = update(focus, cb)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(focus.view(fn())).toEqual(res)
+		expect(view(focus)(fn())).toEqual(res)
 	})()
 	;(() => {
 		const cb = (s: string) => s.toUpperCase()

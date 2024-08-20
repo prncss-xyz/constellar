@@ -1,4 +1,4 @@
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { filter } from '.'
@@ -11,7 +11,7 @@ describe('filter', () => {
 			eq<Source>(),
 			filter((item) => item !== 'quux'),
 		)
-		const res = focus.view(source)
+		const res = view(focus)(source)
 		expectTypeOf(res).toEqualTypeOf<string[]>()
 		expect(res).toEqual(['baz', 'xyzzy'])
 	})
@@ -23,7 +23,7 @@ describe('filter', () => {
 				eq<Source>(),
 				filter((item) => item !== 'quux'),
 			)
-			expect(focus.put(['BAZ', 'XYZZY'])(source)).toEqual([
+			expect(update(focus, ['BAZ', 'XYZZY'])(source)).toEqual([
 				'BAZ',
 				'quux',
 				'XYZZY',
@@ -35,7 +35,7 @@ describe('filter', () => {
 			const source: Source = [1, 2, 3, 5, 6]
 			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
 			const focus = flow(eq<Source>(), filter(isOdd))
-			const result = focus.put(['foo', 'bar'])(source)
+			const result = update(focus, ['foo', 'bar'])(source)
 			expect(result).toEqual(['foo', 2, 'bar', 6])
 		})
 		it('put more items', () => {
@@ -44,7 +44,9 @@ describe('filter', () => {
 			const source: Source = [1, 2, 3, 5, 6]
 			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
 			const focus = flow(eq<Source>(), filter(isOdd))
-			const result = focus.put(['foo', 'bar', 'baz', 'quux', 'xyzzy'])(source)
+			const result = update(focus, ['foo', 'bar', 'baz', 'quux', 'xyzzy'])(
+				source,
+			)
 			expect(result).toEqual(['foo', 2, 'bar', 'baz', 6, 'quux', 'xyzzy'])
 		})
 	})
@@ -59,7 +61,7 @@ describe('filter', () => {
 		)
 		const sourceDefined: Source = ['a', 3]
 		it('view', () => {
-			const res = focus.view(sourceDefined)
+			const res = view(focus)(sourceDefined)
 			expectTypeOf(res).toEqualTypeOf<string[]>()
 			expect(res).toEqual(['a'])
 		})

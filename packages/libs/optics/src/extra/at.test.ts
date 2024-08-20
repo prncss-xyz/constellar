@@ -1,4 +1,4 @@
-import { eq, REMOVE } from '@/core'
+import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { at } from '.'
@@ -11,16 +11,16 @@ describe('at', () => {
 	const focus = flow(eq<Source>(), at(1))
 
 	it('view undefined', () => {
-		expect(focus.view(sourceUndefined)).toBeUndefined()
+		expect(view(focus)(sourceUndefined)).toBeUndefined()
 	})
 	it('view defined', () => {
-		expect(focus.view(sourceDefined)).toBe('bar')
+		expect(view(focus)(sourceDefined)).toBe('bar')
 	})
 	it('put undefined', () => {
-		expect(focus.put('UPDATED')(sourceUndefined)).toEqual(sourceUndefined)
+		expect(update(focus, 'UPDATED')(sourceUndefined)).toEqual(sourceUndefined)
 	})
 	it('put defined', () => {
-		expect(focus.put('UPDATED')(sourceDefined)).toEqual([
+		expect(update(focus, 'UPDATED')(sourceDefined)).toEqual([
 			'foo',
 			'UPDATED',
 			'baz',
@@ -28,10 +28,10 @@ describe('at', () => {
 		])
 	})
 	it('modify undefined', () => {
-		expect(focus.modify(cb)(sourceUndefined)).toEqual(sourceUndefined)
+		expect(update(focus, cb)(sourceUndefined)).toEqual(sourceUndefined)
 	})
 	it('modify defined', () => {
-		expect(focus.modify(cb)(sourceDefined)).toEqual([
+		expect(update(focus, cb)(sourceDefined)).toEqual([
 			'foo',
 			'bar UPDATED',
 			'baz',
@@ -40,11 +40,11 @@ describe('at', () => {
 	})
 	test('negative index', () => {
 		const focus = flow(eq<string[]>(), at(-1))
-		const res: string | undefined = focus.view(['a', 'b'])
+		const res: string | undefined = view(focus)(['a', 'b'])
 		expect(res).toBe('b')
-		const updated = focus.put('B')(['a', 'b'])
+		const updated = update(focus, 'B')(['a', 'b'])
 		expect(updated).toEqual(['a', 'B'])
-		const removed = focus.command(REMOVE)(['a', 'b'])
+		const removed = update(focus, REMOVE)(['a', 'b'])
 		expect(removed).toEqual(['a'])
 	})
 })

@@ -1,5 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
@@ -112,10 +112,10 @@ describe('find modify array element by predicate', () => {
 			prop('names'),
 			find((name: Child) => name.id === id),
 		)
-		const v = optics.update(up)
+		const v = update(optics, up)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(optics.view(fn())).toEqual({ id, name: nameModified })
+		expect(view(optics)(fn())).toEqual({ id, name: nameModified })
 	})()
 	;(() => {
 		const optics = O.optic<Data>()
@@ -145,11 +145,11 @@ describe('find modify 2 array element by predicate', () => {
 	type Data = typeof data
 	;(() => {
 		const optics = flow(eq<Data>())
-		const v = optics.update(up)
+		const v = update(optics, up)
 		/* const v = (x: number) => optics.setter(up(optics.getter(x)), 0) */
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(optics.view(fn())).toEqual(1)
+		expect(view(optics)(fn())).toEqual(1)
 	})()
 	;(() => {
 		const optics = O.optic<Data>()
@@ -169,10 +169,10 @@ describe.only('find modify 2 array element by predicate', () => {
 			eq<Data2>(),
 			find((name: Child) => name.id === id),
 		)
-		const v = optics.update(up)
+		const v = update(optics, up)
 		const fn = () => v(data2)
 		bench('constellar', fn as () => void)
-		expect(optics.view(fn())).toEqual({ id, name: nameModified })
+		expect(view(optics)(fn())).toEqual({ id, name: nameModified })
 	})()
 	;(() => {
 		const optics = O.optic<Data2>().find((name: Child) => name.id === id)

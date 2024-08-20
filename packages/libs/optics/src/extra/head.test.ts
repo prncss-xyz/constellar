@@ -1,4 +1,4 @@
-import { eq, REMOVE } from '@/core'
+import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { head } from '.'
@@ -10,26 +10,26 @@ describe('head', () => {
 	const focus = flow(eq<string[]>(), head())
 	describe('view', () => {
 		it('defined', () => {
-			expect(focus.view(sourceDefined)).toBe('a')
+			expect(view(focus)(sourceDefined)).toBe('a')
 		})
 		it('undefined', () => {
-			expect(focus.view(sourceUndefined)).toBeUndefined()
+			expect(view(focus)(sourceUndefined)).toBeUndefined()
 		})
 	})
 	describe('put', () => {
 		it('defined', () => {
-			expect(focus.put('A')(sourceDefined)).toEqual(['A', 'a', 'b', 'c'])
+			expect(update(focus, 'A')(sourceDefined)).toEqual(['A', 'a', 'b', 'c'])
 		})
 		it('undefined', () => {
-			expect(focus.put('A')(sourceUndefined)).toEqual(['A'])
+			expect(update(focus, 'A')(sourceUndefined)).toEqual(['A'])
 		})
 	})
 	describe('remove', () => {
 		it('defined', () => {
-			expect(focus.command(REMOVE)(sourceDefined)).toEqual(['b', 'c'])
+			expect(update(focus, REMOVE)(sourceDefined)).toEqual(['b', 'c'])
 		})
 		it('undefined', () => {
-			expect(focus.command(REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
+			expect(update(focus, REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
 		})
 	})
 })

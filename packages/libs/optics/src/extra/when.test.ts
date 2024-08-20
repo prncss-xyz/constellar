@@ -1,4 +1,4 @@
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { prop, when } from '.'
@@ -15,19 +15,19 @@ describe('when', () => {
 		)
 		describe('view', () => {
 			it('defined', () => {
-				expect(focus.view(source1)).toBe(5)
+				expect(view(focus)(source1)).toBe(5)
 			})
 			it('undefined', () => {
-				expect(focus.view(source2)).toBeUndefined()
+				expect(view(focus)(source2)).toBeUndefined()
 			})
 		})
 		describe('modify', () => {
 			const opposite = (x: number) => -x
 			it('defined', () => {
-				expect(focus.modify(opposite)(source1)).toEqual({ foo: -5 })
+				expect(update(focus, opposite)(source1)).toEqual({ foo: -5 })
 			})
 			it('undefined', () => {
-				expect(focus.modify(opposite)(source2)).toEqual(source2)
+				expect(update(focus, opposite)(source2)).toEqual(source2)
 			})
 		})
 	})
@@ -44,12 +44,12 @@ describe('when', () => {
 		const sourceUndefined: Source = 5
 		describe('view', () => {
 			it('defined', () => {
-				const res = focus.view(sourceDefined)
+				const res = view(focus)(sourceDefined)
 				expectTypeOf(res).toEqualTypeOf<string | undefined>()
 				expect(res).toBe('toto')
 			})
 			it('undefined', () => {
-				const res = focus.view(sourceUndefined)
+				const res = view(focus)(sourceUndefined)
 				expectTypeOf(res).toEqualTypeOf<string | undefined>()
 				expect(res).toBeUndefined()
 			})

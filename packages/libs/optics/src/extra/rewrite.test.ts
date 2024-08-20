@@ -1,4 +1,4 @@
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { rewrite } from '.'
@@ -9,9 +9,9 @@ describe('rewrite', () => {
 		rewrite((s) => s.toUpperCase()),
 	)
 	it('view', () => {
-		expect(focus.view('foo')).toBe('foo')
+		expect(view(focus)('foo')).toBe('foo')
 	})
 	it('put', () => {
-		expect(focus.put('foo')('')).toBe('FOO')
+		expect(update(focus, 'foo')('')).toBe('FOO')
 	})
 })

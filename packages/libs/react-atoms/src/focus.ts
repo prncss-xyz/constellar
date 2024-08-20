@@ -1,4 +1,4 @@
-import { eq, Optic } from '@constellar/optics'
+import { eq, Optic, update, view } from '@constellar/optics'
 import { Modify, Updater } from '@constellar/utils'
 
 import { Atom, IRAtom, IRWAtom } from './atoms'
@@ -50,9 +50,9 @@ export class FocusAtom<Part, Whole, Fail, Command>
 	) {
 		super()
 		this.source = source
-		this.getter = focus.getter
+		this.getter = view(focus)
 		this.sender = (part: Updater<Part, Command>) =>
-			source.send(focus.update(part))
+			source.send(update(focus, part))
 	}
 	read() {
 		return this.getter(this.source.peek())

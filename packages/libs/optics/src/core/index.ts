@@ -172,6 +172,7 @@ export class Optic<Part, Whole, Fail, Command>
 			exec,
 		})
 	}
+	/*
 	view(a: Whole) {
 		return this.getter(a)
 	}
@@ -193,30 +194,38 @@ export class Optic<Part, Whole, Fail, Command>
 		if (isFunction(arg)) return this.modify(arg)
 		return this.put(arg)
 	}
+  */
 }
 
-function _eq<T, F, C>({
-	isFaillure,
-	isCommand,
-	exec,
-}: {
-	isCommand: (v: unknown) => v is C
-	isFaillure: (v: unknown) => v is F
-	exec: (c: C, t: T) => T
-}) {
+export function view<Part, Whole, Fail, Command>(
+	focus: IOptic<Part, Whole, Fail, Command>,
+) {
+	return focus.getter
+}
+
+export function fold<Acc, Part, Whole, Fail, Command>(
+	focus: IOptic<Part, Whole, Fail, Command>,
+	monoid: Monoid<Part, Acc>,
+) {
+	const fold = focus.refold(monoid.fold)
+	return (whole: Whole) => fold(whole, fromInit(monoid.init))
+}
+
+export function update<Part, Whole, Fail, Command>(
+	focus: IOptic<Part, Whole, Fail, Command>,
+	arg: Command | Part | ((p: Part) => Part),
+) {
+	if (focus.isCommand(arg)) return (whole: Whole) => focus.exec(arg, whole)
+	if (isFunction(arg)) return (whole: Whole) => focus.mapper(arg, whole)
+	return (whole: Whole) => focus.setter(arg, whole)
+}
+
+export function eq<T>() {
 	return new Optic({
 		getter: id<T>,
 		refold: id,
 		mapper: apply,
-		isFaillure,
 		setter: id,
-		isCommand,
-		exec,
-	})
-}
-
-export function eq<T>() {
-	return _eq<T, never, never>({
 		isFaillure: isNever,
 		isCommand: isNever,
 		exec: id,
@@ -393,15 +402,15 @@ export function active(areEqual: AreEqual<any> = Object.is) {
 		return function <Whole, Fail, Command>(
 			o: Optic<Part, Whole, Fail, Command>,
 		) {
-			const update = memo1((value: Part | ((p: Part) => Part)) =>
-				o.update(value),
+			const update_ = memo1((value: Part | ((p: Part) => Part)) =>
+				update(o, value),
 			)
 			const getter = (whole: Whole) => {
-				return areEqual(o.getter(update(value)(whole)), o.getter(whole))
+				return areEqual(o.getter(update_(value)(whole)), o.getter(whole))
 			}
 			const setter = (b: boolean, whole: Whole) => {
 				if (!b) return whole
-				return o.update(value)(whole)
+				return update(o, value)(whole)
 			}
 			return new Optic<boolean, Whole, never, never>({
 				getter,

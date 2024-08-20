@@ -1,4 +1,4 @@
-import { eq, REMOVE } from '@/core'
+import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { find } from '.'
@@ -21,23 +21,23 @@ describe('find', () => {
 	)
 	describe('view', () => {
 		it('defined', () => {
-			expect(focus.view(sourceDefined)).toEqual({ bar: 'quux' })
+			expect(view(focus)(sourceDefined)).toEqual({ bar: 'quux' })
 		})
 		it('undefined', () => {
-			expect(focus.view(sourceUndefined)).toBeUndefined()
+			expect(view(focus)(sourceUndefined)).toBeUndefined()
 		})
 	})
 	describe('modify', () => {
 		it('defined', () => {
 			expect(
-				focus.modify((x) => ({
+				update(focus, (x) => ({
 					bar: `${x.bar} UPDATED`,
 				}))(sourceDefined),
 			).toEqual([{ bar: 'baz' }, { bar: 'quux UPDATED' }, { bar: 'xyzzy' }])
 		})
 		it('undefined', () => {
 			expect(
-				focus.modify((x) => ({
+				update(focus, (x) => ({
 					bar: `${x.bar} UPDATED`,
 				}))(sourceUndefined),
 			).toEqual(sourceUndefined)
@@ -45,13 +45,13 @@ describe('find', () => {
 	})
 	describe('remove', () => {
 		it('defined', () => {
-			expect(focus.command(REMOVE)(sourceDefined)).toEqual([
+			expect(update(focus, REMOVE)(sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'xyzzy' },
 			])
 		})
 		it('undefined', () => {
-			expect(focus.command(REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
+			expect(update(focus, REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
 		})
 	})
 	test('refine type', () => {
@@ -61,7 +61,7 @@ describe('find', () => {
 			find((item) => typeof item === 'string'),
 		)
 		const source: T[] = []
-		const res = focus.view(source)
+		const res = view(focus)(source)
 		expectTypeOf(res).toEqualTypeOf<string | undefined>()
 	})
 })

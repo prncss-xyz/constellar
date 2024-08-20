@@ -1,4 +1,4 @@
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { includes, rewrite } from '.'
@@ -13,24 +13,24 @@ describe('strToNum', () => {
 	)
 	describe('view', () => {
 		it('defined', () => {
-			expect(focus.view(sourceDefined)).toBeTruthy()
+			expect(view(focus)(sourceDefined)).toBeTruthy()
 		})
 		it('undefined', () => {
-			expect(focus.view(sourceUndefined)).toBeFalsy()
+			expect(view(focus)(sourceUndefined)).toBeFalsy()
 		})
 	})
 	describe('put', () => {
 		it('defined, true', () => {
-			expect(focus.put(true)(sourceDefined)).toEqual(['a', 'b', 'c'])
+			expect(update(focus, true)(sourceDefined)).toEqual(['a', 'b', 'c'])
 		})
 		it('defined, false', () => {
-			expect(focus.put(false)(sourceDefined)).toEqual(['a', 'c'])
+			expect(update(focus, false)(sourceDefined)).toEqual(['a', 'c'])
 		})
 		it('undefined, true', () => {
-			expect(focus.put(true)(sourceUndefined)).toEqual(['a', 'b', 'c'])
+			expect(update(focus, true)(sourceUndefined)).toEqual(['a', 'b', 'c'])
 		})
 		it('undefined, false', () => {
-			expect(focus.put(false)(sourceUndefined)).toEqual(['a', 'c'])
+			expect(update(focus, false)(sourceUndefined)).toEqual(['a', 'c'])
 		})
 	})
 })

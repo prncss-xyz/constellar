@@ -1,4 +1,4 @@
-import { eq } from '@/core'
+import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { reread } from '.'
@@ -9,11 +9,11 @@ describe('reread', () => {
 		reread((s) => s.toUpperCase()),
 	)
 	it('view', () => {
-		expect(focus.view('foo')).toBe('FOO')
+		expect(view(focus)('foo')).toBe('FOO')
 	})
 	it('put', () => {
 		// TODO: which behavior is better?
-		expect(focus.put('')('foo')).toBe('')
-		/* expect(focus.put('', 'foo')).toBe('foo') */
+		expect(update(focus, '')('foo')).toBe('')
+		/* expect(update(focus, '')('foo')).toBe('foo') */
 	})
 })
