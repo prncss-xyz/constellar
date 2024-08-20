@@ -1,5 +1,5 @@
-import { eq, Optic, update, view } from '@constellar/optics'
-import { Modify, Updater } from '@constellar/utils'
+import { eq, IOptic, update, view } from '@constellar/optics'
+import { isFunction, Modify, Updater } from '@constellar/utils'
 
 import { Atom, IRAtom, IRWAtom } from './atoms'
 
@@ -8,7 +8,10 @@ type IStateAtom<Value, Fail> = IRWAtom<Modify<Value>, Value | Fail>
 export class ViewAtom<Part, Whole, Fail, Command> extends Atom<Part | Fail> {
 	source
 	getter
-	constructor(source: IRAtom<Whole>, focus: Optic<Part, Whole, Fail, Command>) {
+	constructor(
+		source: IRAtom<Whole>,
+		focus: IOptic<Part, Whole, Fail, Command>,
+	) {
 		super()
 		this.source = source
 		this.getter = focus.getter
@@ -26,15 +29,12 @@ export class ViewAtom<Part, Whole, Fail, Command> extends Atom<Part | Fail> {
 export function createView<Part, Whole, Fail, Command>(
 	source: IRAtom<Whole>,
 	focus:
-		| Optic<Part, Whole, Fail, Command>
+		| IOptic<Part, Whole, Fail, Command>
 		| ((
-				o: Optic<Whole, Whole, never, never>,
-		  ) => Optic<Part, Whole, Fail, Command>),
+				o: IOptic<Whole, Whole, never, never>,
+		  ) => IOptic<Part, Whole, Fail, Command>),
 ) {
-	return new ViewAtom(
-		source,
-		focus instanceof Optic ? focus : focus(eq<Whole>()),
-	)
+	return new ViewAtom(source, isFunction(focus) ? focus(eq<Whole>()) : focus)
 }
 
 export class FocusAtom<Part, Whole, Fail, Command>
@@ -46,7 +46,7 @@ export class FocusAtom<Part, Whole, Fail, Command>
 	sender
 	constructor(
 		source: IRWAtom<Modify<Whole>, Whole>,
-		focus: Optic<Part, Whole, Fail, Command>,
+		focus: IOptic<Part, Whole, Fail, Command>,
 	) {
 		super()
 		this.source = source
@@ -70,13 +70,13 @@ export class FocusAtom<Part, Whole, Fail, Command>
 export function createFocus<Part, Whole, Fail, Command>(
 	source: IRWAtom<Modify<Whole>, Whole>,
 	focus:
-		| Optic<Part, Whole, Fail, Command>
+		| IOptic<Part, Whole, Fail, Command>
 		| ((
-				o: Optic<Whole, Whole, never, never>,
-		  ) => Optic<Part, Whole, Fail, Command>),
+				o: IOptic<Whole, Whole, never, never>,
+		  ) => IOptic<Part, Whole, Fail, Command>),
 ) {
 	return new FocusAtom(
 		source,
-		focus instanceof Optic ? focus : focus(eq<Whole>()),
+		isFunction(focus) ? focus(eq<Whole>()) : focus,
 	) satisfies IStateAtom<Part, Fail>
 }

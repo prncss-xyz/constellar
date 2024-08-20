@@ -3,8 +3,8 @@ import { append, id, prepend, remove, replace } from '@constellar/utils'
 import {
 	getter,
 	getterOpt,
+	IOptic,
 	lens,
-	Optic,
 	optional,
 	removable,
 	REMOVE,
@@ -95,10 +95,10 @@ export function nth<Index extends keyof O & number, O extends unknown[]>(
 
 export function filter<X, Y extends X>(
 	p: (x: X) => x is Y,
-): <A, F, C>(o: Optic<X[], A, F, C>) => Optic<Y[], A, F, never>
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y[], A, F, never>
 export function filter<X>(
 	p: (x: X) => unknown,
-): <A, F, C>(o: Optic<X[], A, F, C>) => Optic<X[], A, F, never>
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X[], A, F, never>
 export function filter<X>(p: (x: X) => unknown) {
 	return lens({
 		getter: (xs: X[]) => xs.filter(p),
@@ -144,10 +144,10 @@ export function includes<X>(x: X) {
 
 export function when<V, W extends V>(
 	p: (v: V) => v is W,
-): <A, F, C>(o: Optic<V, A, F, C>) => Optic<W, A, F | undefined, never>
+): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<W, A, F | undefined, never>
 export function when<V>(
 	p: (v: V) => unknown,
-): <A, F, C>(o: Optic<V, A, F, C>) => Optic<V, A, F | undefined, never>
+): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<V, A, F | undefined, never>
 export function when<V>(p: (v: V) => unknown) {
 	return optional<V, V>({
 		getter: (v) => (p(v) ? v : undefined),
@@ -164,8 +164,8 @@ type OptionalKeys<T> = {
 export function prop<Key extends keyof O, O>(
 	key: Key,
 ): <A, F1, C>(
-	p: Optic<O, A, F1, C>,
-) => Optic<
+	p: IOptic<O, A, F1, C>,
+) => IOptic<
 	Exclude<O[Key], undefined>,
 	A,
 	F1 | (Key extends OptionalKeys<O> ? undefined : never),
@@ -214,10 +214,10 @@ export function at<X>(index: number) {
 // defective (when setting a value not repecting predicate)
 export function find<X, Y extends X>(
 	p: (x: X) => x is Y,
-): <A, F, C>(o: Optic<X[], A, F, C>) => Optic<Y, A, undefined, typeof REMOVE>
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y, A, undefined, typeof REMOVE>
 export function find<X>(
 	p: (x: X) => unknown,
-): <A, F, C>(o: Optic<X[], A, F, C>) => Optic<X, A, undefined, typeof REMOVE>
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X, A, undefined, typeof REMOVE>
 export function find<X>(p: (x: X) => unknown) {
 	return removable({
 		getter: (xs: X[]) => xs.find(p),
