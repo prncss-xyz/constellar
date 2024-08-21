@@ -1,8 +1,8 @@
 import { linear, prop } from '@/extra'
-import { flow } from '@constellar/utils'
+import { first, flow } from '@constellar/utils'
 import { describe, expect, it } from 'vitest'
 
-import { eq, update, valueOr, view } from '.'
+import { eq, fold, update, valueOr, view } from '.'
 
 describe('simple', () => {
 	type T = { a: string; b?: number }
@@ -26,5 +26,9 @@ describe('compose', () => {
 	it('put', () => {
 		expect(update(focus, 2)({ a: 'a' })).toEqual({ a: 'a', b: 1 })
 		expect(update(focus, 2)({ a: 'a', b: 2 })).toEqual({ a: 'a', b: 1 })
+	})
+	it('fold', () => {
+		expect(fold(focus, first())({ a: 'a' })).toEqual(6)
+		expect(fold(focus, first())({ a: 'a', b: 1 })).toEqual(2)
 	})
 })

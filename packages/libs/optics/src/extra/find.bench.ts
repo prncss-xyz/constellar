@@ -46,7 +46,7 @@ describe('find 2', () => {
 			eq<Data2>(),
 			find((name: Child) => name.id === id),
 		)
-		const v = optics.getter
+		const v = view(optics)
 		const fn = () => v(data2)
 		bench('compsoer', fn as () => void)
 		expect(fn()).toEqual({ id, name })
@@ -75,7 +75,7 @@ describe('find read array element by predicate', () => {
 			prop('names'),
 			find((name: Child) => name.id === id),
 		)
-		const v = optics.getter
+		const v = view(optics)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
 		expect(fn()).toEqual({ id, name })

@@ -16,6 +16,7 @@ module.exports = {
 		],
 		'no-console': 'warn',
 		'prefer-const': 'warn',
+    'no-constant-condition': 'warn',
 		'@typescript-eslint/no-unused-vars': [
 			'warn',
 			{

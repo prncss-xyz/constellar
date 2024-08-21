@@ -1,4 +1,4 @@
-export * from './flow'
+import { Init, isFunction } from '..'
 
 export const noop = () => {}
 
@@ -37,4 +37,12 @@ export function memo1<A, B>(f: (a: A) => B): (a: A) => B {
 		}
 		return memo
 	}
+}
+
+export function fromInit<T>(init: Init<T, void>): T {
+	return isFunction(init) ? init() : init
+}
+
+export function toInit<T, P = void>(init: Init<T, P>): (p: P) => T {
+	return isFunction(init) ? (p) => init(p) : () => init
 }

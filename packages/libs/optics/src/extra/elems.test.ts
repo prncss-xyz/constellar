@@ -10,10 +10,10 @@ describe('simple', () => {
 	const cb = (x: number) => 2 * x
 	const focus = flow(eq<Source>(), elems())
 
-	it.skip('view undefined', () => {
+	it('view undefined', () => {
 		expect(view(focus)(sourceUndefined)).toBeUndefined()
 	})
-	it.skip('view defined', () => {
+	it('view defined', () => {
 		expect(view(focus)(sourceDefined)).toBe(1)
 	})
 	it('fold undefined', () => {
@@ -22,10 +22,10 @@ describe('simple', () => {
 	it('fold defined', () => {
 		expect(fold(focus, collect())(sourceDefined)).toEqual([1, 2, 3])
 	})
-	it.skip('put undefined', () => {
+	it('put undefined', () => {
 		expect(update(focus, 9)(sourceUndefined)).toEqual(sourceUndefined)
 	})
-	it.skip('put defined', () => {
+	it('put defined', () => {
 		expect(update(focus, 8)(sourceDefined)).toEqual([8, 8, 8])
 	})
 	it('modify undefined', () => {
@@ -84,11 +84,11 @@ describe('composed', () => {
 			const focus = flow(
 				eq<Source>(),
 				elems(),
-				when((item) => item !== 'quux'),
+				when((item) => item !== 'baz'),
 			)
 			expect(update(focus, (x) => x.toUpperCase())(source)).toEqual([
-				'BAZ',
-				'quux',
+				'baz',
+				'QUUX',
 				'XYZZY',
 			])
 		})
@@ -102,7 +102,7 @@ describe('composed', () => {
 			)
 			expect(fold(focus, collect())(source)).toEqual(['quux', 'xyzzy'])
 		})
-		it.skip('view', () => {
+		it('view', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'xyzzy', 'baz']
 			const focus = flow(
@@ -112,7 +112,7 @@ describe('composed', () => {
 			)
 			expect(view(focus)(source)).toEqual('quux')
 		})
-		it.skip('put', () => {
+		it('put', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'xyzzy']
 			const focus = flow(

@@ -14,7 +14,7 @@ export class ViewAtom<Part, Whole, Fail, Command> extends Atom<Part | Fail> {
 	) {
 		super()
 		this.source = source
-		this.getter = focus.getter
+		this.getter = view(focus)
 	}
 	read() {
 		return this.getter(this.source.peek())
