@@ -1,5 +1,6 @@
 import {
 	compose2,
+	compose2varargs,
 	fromInit,
 	id,
 	Init,
@@ -101,18 +102,24 @@ export function fromState<Value>(opts?: {
 	normalize?: (next: Value) => Value
 }) {
 	return function (init: Init<Value>) {
-		const reset = compose2(toInit(init), opts?.normalize ?? id)
-		let send = (event: Updater<Value, typeof RESET>, last: Value) =>
+		const normalize = opts?.normalize
+		const areEqual = opts?.areEqual
+		const reset = compose2(toInit(init), normalize ?? id)
+		const send = (event: Updater<Value, typeof RESET>, last: Value) =>
 			isFunction(event)
 				? (event(last) as Value)
 				: event === RESET
 					? reset()
 					: event
-		const normalizer = opts?.normalize
-		if (normalizer) send = (next, last) => normalizer(send(next, last))
+		const fold = areEqual
+			? (event: Updater<Value, typeof RESET>, last: Value) => {
+					const next = send(event, last)
+					return areEqual(last, next) ? last : next
+				}
+			: send
 		return {
-			init: toInit(init),
-			fold: send,
+			init: reset,
+			fold: compose2varargs(fold, normalize ?? id),
 		}
 	}
 }

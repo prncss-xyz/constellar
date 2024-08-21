@@ -27,6 +27,23 @@ describe('find', () => {
 			expect(view(focus)(sourceUndefined)).toBeUndefined()
 		})
 	})
+	describe('put', () => {
+		it('defined', () => {
+			expect(update(focus, { bar: 'UPDATED' })(sourceDefined)).toEqual([
+				{ bar: 'baz' },
+				{ bar: 'UPDATED' },
+				{ bar: 'xyzzy' },
+			])
+		})
+		it('undefined', () => {
+			expect(update(focus, { bar: 'UPDATED' })(sourceUndefined)).toEqual([
+				{ bar: 'baz' },
+				{ bar: 'nomatch' },
+				{ bar: 'xyzzy' },
+				{ bar: 'UPDATED' },
+			])
+		})
+	})
 	describe('modify', () => {
 		it('defined', () => {
 			expect(

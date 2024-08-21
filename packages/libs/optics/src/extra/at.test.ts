@@ -47,4 +47,13 @@ describe('at', () => {
 		const removed = update(focus, REMOVE)(['a', 'b'])
 		expect(removed).toEqual(['a'])
 	})
+	test('negative out of range index', () => {
+		const focus = flow(eq<string[]>(), at(-10))
+		const res: string | undefined = view(focus)(['a', 'b'])
+		expect(res).toBeUndefined()
+		const updated = update(focus, 'B')(['a', 'b'])
+		expect(updated).toEqual(['a', 'b'])
+		const removed = update(focus, REMOVE)(['a', 'b'])
+		expect(removed).toEqual(['a', 'b'])
+	})
 })

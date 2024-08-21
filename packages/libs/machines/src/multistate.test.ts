@@ -1,6 +1,6 @@
 import { id } from '@constellar/utils'
 
-import { createObjectReducer, fromMachine } from '.'
+import { createObjectReducer, fromMachine } from '..'
 import { multistateMachine } from './multistate'
 
 describe('machine', () => {

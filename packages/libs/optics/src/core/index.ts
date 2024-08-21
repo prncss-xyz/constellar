@@ -18,25 +18,21 @@ function isRemove(v: unknown) {
 	return v === REMOVE
 }
 
-function forbidden<T, U>(_: T, _u: U): U {
-	throw new Error('this is a getter only optic, don not use a setter')
-}
-
 function notImplemented(): any {
 	throw new Error('not implemented')
 }
 
-function inert<T, U>(_: T, u: U) {
+export function inert<T, U>(_: T, u: U) {
 	return u
 }
 
 type Fold<Value, Acc> = (v: Value, acc: Acc) => Acc
 type Mapper<Part, Whole> = (f: (v: Part) => Part, b: Whole) => Whole
 type Setter<Part, Whole> = (p: Part, w: Whole) => Whole
-/* type Getter<Part, Whole, Fail> = (w: Whole) => Part | Fail */
+type Getter<Part, Whole, Fail> = (w: Whole) => Part | Fail
 
 export interface IOptic<Part, Whole, Fail, Command> {
-	getter: (a: Whole) => Part | Fail
+	getter: Getter<Part, Whole, Fail>
 	refold: <Acc>(f: Fold<Part, Acc>) => Fold<Whole, Acc>
 	mapper: Mapper<Part, Whole>
 	isFaillure: (v: unknown) => v is Fail
@@ -122,26 +118,6 @@ export function eq<T>(): IOptic<T, T, never, never> {
 		isFaillure: isNever,
 		isCommand: isNever,
 		exec: id,
-	}
-}
-
-export function withCommand<Whole, Command>({
-	isCommand,
-	exec,
-}: {
-	isCommand: (v: unknown) => v is Command
-	exec: (c: Command, w: Whole) => Whole
-}) {
-	return function <Fail, C>(o: IOptic<Whole, Whole, Fail, C>) {
-		return _compose<Whole, Whole, Fail, C, Whole, Fail, Command>(o, {
-			getter: o.getter,
-			refold: o.refold,
-			isFaillure: o.isFaillure,
-			mapper: o.mapper,
-			setter: o.setter,
-			isCommand,
-			exec,
-		})
 	}
 }
 
@@ -261,28 +237,6 @@ export function removable<Whole, Part>({
 			exec: (_, a) => remover(a),
 		})
 	}
-}
-
-export function getter<Part, Whole>({
-	getter,
-}: {
-	getter: (v: Whole) => Part
-}) {
-	return lens<Part, Whole>({
-		getter,
-		setter: forbidden,
-	})
-}
-
-export function getterOpt<Part, Whole>({
-	getter,
-}: {
-	getter: (v: Whole) => Part | undefined
-}) {
-	return optional<Part, Whole>({
-		getter,
-		setter: forbidden,
-	})
 }
 
 // optics modifiers

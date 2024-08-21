@@ -11,7 +11,7 @@ describe('reread', () => {
 	it('view', () => {
 		expect(view(focus)('foo')).toBe('FOO')
 	})
-	it('put', () => {
+	it('update', () => {
 		// TODO: which behavior is better?
 		expect(update(focus, '')('foo')).toBe('')
 		/* expect(update(focus, '')('foo')).toBe('foo') */

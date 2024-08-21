@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Init, toInit, Typed } from '@constellar/utils'
 
-import { IMachine } from '.'
+import { IMachine } from '..'
 
 // TODO: sendable for results too
 // TODO: derive: optional

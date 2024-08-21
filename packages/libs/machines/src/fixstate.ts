@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { id, Init, Prettify, toInit } from '@constellar/utils'
 
-import { IMachine } from '.'
+import { IMachine } from '..'
 
 type ExtractEvent<Transition> = Transition extends (
 	e: infer E,

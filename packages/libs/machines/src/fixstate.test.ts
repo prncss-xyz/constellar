@@ -1,6 +1,6 @@
 import { id } from '@constellar/utils'
 
-import { createObjectReducer, fromRawMachine } from '.'
+import { createObjectReducer, fromRawMachine } from '..'
 import { fixstateMachine } from './fixstate'
 
 const machine = fixstateMachine({

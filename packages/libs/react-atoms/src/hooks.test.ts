@@ -2,11 +2,9 @@ import { linear } from '@constellar/optics'
 import { flow } from '@constellar/utils'
 import { act, renderHook } from '@testing-library/react'
 
-import { createState } from './atoms'
-import { createFocus } from './focus'
-import { useAtom, useAtomValue } from './hooks'
+import { createFocus, createState, createView, useAtom, useAtomValue } from '.'
 
-test('returns logged in user', async () => {
+test('focus', async () => {
 	const num = createState(4)
 	const double = createFocus(num, (eq) => flow(eq, linear(2)))
 	const { result: r1 } = renderHook(() => useAtom(double))
@@ -15,4 +13,11 @@ test('returns logged in user', async () => {
 	expect(r1.current[0]).toEqual(10)
 	const { result: r2 } = renderHook(() => useAtomValue(num))
 	expect(r2.current).toEqual(5)
+})
+
+test('view', async () => {
+	const num = createState(4)
+	const double = createView(num, (eq) => flow(eq, linear(2)))
+	const { result: r1 } = renderHook(() => useAtomValue(double))
+	expect(r1.current).toEqual(8)
 })

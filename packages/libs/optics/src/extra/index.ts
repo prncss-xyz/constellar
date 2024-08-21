@@ -1,43 +1,27 @@
 import { append, id, prepend, remove, replace } from '@constellar/utils'
 
 import {
-	getter,
-	getterOpt,
+	inert,
 	IOptic,
 	lens,
 	optional,
 	removable,
 	REMOVE,
 	traversal,
-} from '../core'
+} from '../..'
 
 // isomorphisms
 
-export function to<B, V>(select: (v: V) => B) {
-	return getter<B, V>({
+export function to<B, V>(
+	select: (v: V) => B,
+): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<B, A, F, never>
+export function to<B, V>(
+	select: (v: V) => B | undefined,
+): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<B, A, F | undefined, never>
+export function to<B, V>(select: (v: V) => B | undefined) {
+	return optional<B, V>({
 		getter: select,
-	})
-}
-
-export function toOpt<B, V>(select: (v: V) => B | undefined) {
-	return getterOpt<B, V>({
-		getter: select,
-	})
-}
-
-// impure
-export function log<V>(message = '') {
-	return lens<V, V>({
-		getter: (v) => {
-			// eslint-disable-next-line no-console
-			console.log(message, 'reading', v)
-			return v
-		},
-		setter: (b, v) => {
-			// eslint-disable-next-line no-console
-			console.log(message, 'writing', b, v)
-			return b
-		},
+		setter: inert,
 	})
 }
 
@@ -186,16 +170,8 @@ export function prop<Key extends keyof O, O>(key: Key) {
 export function at<X>(index: number) {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(index),
-		setter: (x: X, xs) => {
-			if (index >= xs.length) return xs
-			return replace(x, index < 0 ? xs.length + index : index, xs)
-		},
-		remover: (xs) => {
-			if (index < 0) index += xs.length
-			if (index < 0) return xs
-			if (index >= xs.length) return xs
-			return remove(xs, index)
-		},
+		setter: (x: X, xs) => replace(x, index, xs),
+		remover: (xs) => remove(index, xs),
 		// replace when better browser support
 		/* setter: (x: X, xs) => {
 			if (index >= xs.length) return xs
@@ -229,7 +205,7 @@ export function find<X>(p: (x: X) => unknown) {
 		remover: (xs: X[]) => {
 			const i = xs.findIndex(p)
 			if (i < 0) return xs
-			return remove(xs, i)
+			return remove(i, xs)
 		},
 		mapper: (f, xs) => {
 			const i = xs.findIndex(p)
