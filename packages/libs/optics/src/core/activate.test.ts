@@ -1,6 +1,5 @@
 import { prop } from '@/extra'
 import { flow } from '@constellar/utils'
-import { describe, expect, it } from 'vitest'
 
 import { active, eq, REMOVE, update, view } from '.'
 
