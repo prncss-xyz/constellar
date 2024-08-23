@@ -1,7 +1,10 @@
 import { AreEqual, id } from '@constellar/utils'
 import { useMemo, useRef, useSyncExternalStore } from 'react'
+import { use } from 'react18-use'
 
 import { IRAtom, IRWAtom } from './atoms'
+
+type Depromised<T> = T extends Promise<infer U> ? U : T
 
 function useStore<Snapshot, Selected>(
 	select: (v: Snapshot) => Selected,
@@ -9,9 +12,9 @@ function useStore<Snapshot, Selected>(
 	subscribe: (onStoreChange: () => void) => () => void,
 	getSnapshot: () => Snapshot,
 	getServerSnapshot?: () => Snapshot,
-): Selected {
+): Depromised<Selected> {
 	const acc = useRef(select(getSnapshot()))
-	return useSyncExternalStore(
+	const res = useSyncExternalStore(
 		(nofity) =>
 			subscribe(() => {
 				const next = select(getSnapshot())
@@ -23,6 +26,7 @@ function useStore<Snapshot, Selected>(
 		() => acc.current,
 		getServerSnapshot ? () => select(getServerSnapshot()) : undefined,
 	)
+	return res instanceof Promise ? use(res) : res
 }
 
 export function useAtomValue<Acc, Selected = Acc>(

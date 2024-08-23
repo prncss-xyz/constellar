@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	compose2,
 	compose2varargs,
@@ -7,6 +8,7 @@ import {
 	isFunction,
 	Modify,
 	Monoid,
+	noop,
 	toInit,
 	TReducer,
 	Updater,
@@ -153,6 +155,25 @@ export class SelectAtom<Part, Whole> extends Atom<Part> {
 	}
 }
 
+export type Depromised<T> = T extends Promise<infer U> ? U : T
+
+export function createSelectAtom<Part, Whole>(
+	source: IRAtom<Promise<Whole>>,
+	select: (w: Whole) => Part,
+): SelectAtom<Promise<Part>, Promise<Whole>>
+export function createSelectAtom<Part, Whole>(
+	source: IRAtom<Whole>,
+	select: (w: Whole) => Part,
+): SelectAtom<Part, Whole>
+export function createSelectAtom<Part, Whole>(
+	source: IRAtom<Whole | Promise<Whole>>,
+	select: (w: Whole) => Part,
+) {
+	return new SelectAtom(source, (w) =>
+		w instanceof Promise ? w.then(select) : select(w),
+	)
+}
+
 export class DerivedAtom<Part, Whole, Event>
 	extends Atom<Part>
 	implements IRWAtom<Event, Part>
@@ -181,4 +202,27 @@ export class DerivedAtom<Part, Whole, Event>
 	send(event: Event) {
 		this.source.send(this.sender(event))
 	}
+}
+
+function unwrap<T, U>(cb: (t: T) => U): (w: Promise<T>) => Promise<U>
+function unwrap<T, U>(cb: (t: T) => U): (w: T) => U
+function unwrap<T, U>(cb: (t: T) => U) {
+	return (w: T | Promise<T>) => (w instanceof Promise ? w.then(cb) : cb(w))
+}
+
+export function createDerivedAtom<
+	Whole,
+	Wrapped extends Whole | Promise<Whole>,
+	Part = never,
+	Event = never,
+>(
+	source: IRWAtom<Modify<Wrapped>, Wrapped>,
+	select: ((w: Whole) => Part) | null,
+	send: (event: Event) => Modify<Whole>,
+) {
+	return new DerivedAtom<Part, Wrapped, Event>(
+		source,
+		select ? unwrap(select) : (noop as any),
+		(e: Event) => unwrap(send(e)) as any,
+	)
 }

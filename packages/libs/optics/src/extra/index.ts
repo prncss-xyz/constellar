@@ -8,7 +8,7 @@ import {
 	removable,
 	REMOVE,
 	traversal,
-} from '../..'
+} from '../core'
 
 // isomorphisms
 

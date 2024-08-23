@@ -28,7 +28,8 @@
 	"author": "Juliette Lamarche",
 	"license": "MIT",
 	"dependencies": {
-		"@constellar/optics": "workspace:^"
+		"@constellar/optics": "workspace:^",
+		"react18-use": "^0.3.0"
 	},
 	"peerDependencies": {
 		"@constellar/utils": "workspace:^",
