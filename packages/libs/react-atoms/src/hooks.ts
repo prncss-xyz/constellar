@@ -3,7 +3,7 @@ import { useMemo, useRef, useSyncExternalStore } from 'react'
 
 import { IRAtom, IRWAtom } from './atoms'
 
-function useSyncSelect<Snapshot, Selected>(
+function useStore<Snapshot, Selected>(
 	select: (v: Snapshot) => Selected,
 	areEqual: (a: Selected, b: Selected) => unknown,
 	subscribe: (onStoreChange: () => void) => () => void,
@@ -31,7 +31,7 @@ export function useAtomValue<Acc, Selected = Acc>(
 	areEqual: AreEqual<Selected> = Object.is,
 ) {
 	select = select ?? (id as (a: Acc) => Selected)
-	return useSyncSelect(
+	return useStore(
 		select,
 		areEqual,
 		store.subscribe.bind(store),

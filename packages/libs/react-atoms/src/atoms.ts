@@ -5,6 +5,7 @@ import {
 	id,
 	Init,
 	isFunction,
+	Modify,
 	Monoid,
 	toInit,
 	TReducer,
@@ -132,4 +133,52 @@ export function createState<Value>(
 	},
 ) {
 	return createReducer(fromState(opts), id)(init)
+}
+
+export class SelectAtom<Part, Whole> extends Atom<Part> {
+	source
+	select
+	constructor(source: IRAtom<Whole>, select: (w: Whole) => Part) {
+		super()
+		this.source = source
+		this.select = select
+	}
+	read() {
+		return this.select(this.source.peek())
+	}
+	onMount() {
+		return this.source.subscribe(() => {
+			this.invalidate()
+		})
+	}
+}
+
+export class DerivedAtom<Part, Whole, Event>
+	extends Atom<Part>
+	implements IRWAtom<Event, Part>
+{
+	source
+	getter
+	sender
+	constructor(
+		source: IRWAtom<Modify<Whole>, Whole>,
+		getter: (w: Whole) => Part,
+		sender: (event: Event) => Modify<Whole>,
+	) {
+		super()
+		this.source = source
+		this.getter = getter
+		this.sender = sender
+	}
+	read() {
+		return this.getter(this.source.peek())
+	}
+	onMount() {
+		return this.source.subscribe(() => {
+			this.invalidate()
+		})
+	}
+	send(event: Event) {
+		this.source.send(this.sender(event))
+	}
 }
