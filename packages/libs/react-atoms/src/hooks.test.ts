@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react'
 
 import { createFocus, createState, createView, useAtom, useAtomValue } from '.'
 
-test.skip('focus', async () => {
+test('focus', async () => {
 	const num = createState(4)
 	const double = createFocus(num, (eq) => flow(eq, linear(2)))
 	const { result: r1 } = renderHook(() => useAtom(double))
@@ -15,7 +15,7 @@ test.skip('focus', async () => {
 	expect(r2.current).toEqual(5)
 })
 
-test.skip('view', async () => {
+test('view', async () => {
 	const num = createState(4)
 	const double = createView(num, (eq) => flow(eq, linear(2)))
 	const { result: r1 } = renderHook(() => useAtomValue(double))

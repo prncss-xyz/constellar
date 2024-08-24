@@ -42,6 +42,8 @@
 		"@types/react": "^18.3.3",
 		"@vitest/coverage-v8": "^2.0.5",
 		"jsdom": "^24.1.1",
+		"react": "18",
+		"react-dom": "18",
 		"vite": "^5.4.0",
 		"vite-plugin-dts": "^4.0.2",
 		"vitest": "^2.0.5"
