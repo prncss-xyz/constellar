@@ -1,6 +1,6 @@
-import { IRAtom, useAtomValue } from '@constellar/atoms'
+import { Atom, useAtomValue } from 'jotai'
 
-export function Json({ store }: { store: IRAtom<unknown> }) {
-	const json = useAtomValue(store, JSON.stringify)
-	return <div>{json}</div>
+export function Json({ store }: { store: Atom<unknown> }) {
+	const json = useAtomValue(store)
+	return <div>{JSON.stringify(json)}</div>
 }

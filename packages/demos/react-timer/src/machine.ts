@@ -1,9 +1,6 @@
 import { fromMachine, multistateMachine } from '@constellar/machines'
 
-type Event =
-	| { type: 'toggle'; now: number }
-	| { type: 'reset'; now: number }
-	| { type: 'bye' }
+type Event = { type: 'toggle'; now: number } | { type: 'reset'; now: number }
 
 type State =
 	| { type: 'running'; since: number }
@@ -11,6 +8,7 @@ type State =
 
 type Derived = {
 	count: (now: number) => number
+	toggled: State['type']
 }
 
 export const machine = fromMachine(
@@ -31,6 +29,7 @@ export const machine = fromMachine(
 				derive: (s) => ({
 					...s,
 					count: (now: number) => now - s.since,
+					toggled: 'stopped',
 				}),
 			},
 			stopped: {
@@ -47,6 +46,7 @@ export const machine = fromMachine(
 				derive: (s) => ({
 					...s,
 					count: () => s.elapsed,
+					toggled: 'running',
 				}),
 			},
 		},

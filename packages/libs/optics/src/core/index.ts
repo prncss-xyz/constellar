@@ -2,7 +2,6 @@
 import {
 	apply,
 	AreEqual,
-	compose2,
 	fromInit,
 	id,
 	Init,
@@ -12,6 +11,7 @@ import {
 	memo1,
 	Modify,
 	Monoid,
+	pipe2,
 } from '@constellar/utils'
 
 export const REMOVE = Symbol('REMOVE')
@@ -105,7 +105,7 @@ function composeGetter<P, Q, R, F>(
 	g?: (q: Q) => R,
 ): ((p: P) => R | F) | undefined {
 	if (!f || !g) return undefined
-	if (isFaillure === isNever) return compose2(f as any, g)
+	if (isFaillure === isNever) return pipe2(f as any, g)
 	return function (p: P) {
 		const q = f(p)
 		if (isFaillure(q)) return q
@@ -199,7 +199,7 @@ function optic<Part, Whole, Command, Fail>({
 		o: IOptic<Whole, Mega, F2, C2>,
 	): IOptic<Part, Mega, F2 | Fail, Command> {
 		return {
-			refold: compose2(
+			refold: pipe2(
 				refold ??
 					(<Acc>(fold: Fold<Part, Acc>): Fold<Whole, Acc> =>
 						(v, acc) => {

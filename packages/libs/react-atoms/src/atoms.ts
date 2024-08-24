@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-	compose2,
-	compose2varargs,
 	fromInit,
 	id,
 	Init,
@@ -9,10 +7,20 @@ import {
 	Modify,
 	Monoid,
 	noop,
+	pipe2,
 	toInit,
 	TReducer,
 	Updater,
 } from '@constellar/utils'
+
+function pipe2varargs<P extends unknown[], Q, R>(
+	f: (...p: P) => Q,
+	g: (q: Q) => R,
+): (...p: P) => R {
+	if (f === (id as unknown)) return g as unknown as (...p: P) => R
+	if (g === (id as unknown)) return f as unknown as (...p: P) => R
+	return (...p: P) => g(f(...p))
+}
 
 export interface IRAtom<State> {
 	peek(): State
@@ -107,7 +115,7 @@ export function fromState<Value>(opts?: {
 	return function (init: Init<Value>) {
 		const normalize = opts?.normalize
 		const areEqual = opts?.areEqual
-		const reset = compose2(toInit(init), normalize ?? id)
+		const reset = pipe2(toInit(init), normalize ?? id)
 		const send = (event: Updater<Value, typeof RESET>, last: Value) =>
 			isFunction(event)
 				? (event(last) as Value)
@@ -122,7 +130,7 @@ export function fromState<Value>(opts?: {
 			: send
 		return {
 			init: reset,
-			fold: compose2varargs(fold, normalize ?? id),
+			fold: pipe2varargs(fold, normalize ?? id),
 		}
 	}
 }

@@ -10,14 +10,15 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@constellar/atoms": "workspace:^",
+		"@constellar/jotai": "workspace:^",
 		"@constellar/optics": "workspace:^",
 		"@constellar/utils": "workspace:^",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
 		"@vitejs/plugin-react": "^4.3.1",
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1"
+		"jotai": "^2.9.3",
+		"react": "18.3.1",
+		"react-dom": "18.3.1"
 	},
 	"devDependencies": {
 		"@types/node": "^22.2.0",

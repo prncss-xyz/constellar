@@ -1,13 +1,14 @@
-import { createState } from '@constellar/atoms'
+import { atom, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 
-export const clock = createState(0)
+export const clockAtom = atom(0)
 
 export function useSetupClock(period = 100) {
+	const setClock = useSetAtom(clockAtom)
 	useEffect(() => {
 		const timer = setInterval(() => {
-			clock.send(Date.now())
+			setClock(Date.now())
 		}, period)
 		return () => clearInterval(timer)
-	}, [period])
+	}, [period, setClock])
 }
