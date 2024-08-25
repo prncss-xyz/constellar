@@ -7,6 +7,7 @@ export interface IMachine<Event, Acc, Param> {
 	isFinal: (acc: Acc) => boolean
 }
 
+/*
 export function fromRawMachine<Event, Acc, Param>({
 	init,
 	reducer,
@@ -18,6 +19,7 @@ export function fromRawMachine<Event, Acc, Param>({
 		}
 	}
 }
+*/
 
 // when event is just { type: string }, we can use string as shorthand
 export type Sendable<T extends Typed> =

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { id, Init, Prettify, toInit } from '@constellar/utils'
+import { id, Init, isFunction, Prettify, toInit } from '@constellar/utils'
 
 import { IMachine } from '..'
 
@@ -8,7 +8,7 @@ type ExtractEvent<Transition> = Transition extends (
 	...args: any[]
 ) => any
 	? E
-	: never
+	: void
 
 type UnionValues<T> = T extends Record<string, unknown> ? T[keyof T] : never
 
@@ -19,7 +19,9 @@ type ExtractEventObject<Transitions extends Record<PropertyKey, unknown>> = {
 type ExtractEvents<Transitions extends Record<PropertyKey, unknown>> =
 	UnionValues<ExtractEventObject<Transitions>>
 
-type Transition<State, Derived> = (e: any, s: Derived) => State | undefined
+type Transition<State, Derived> =
+	| State
+	| ((e: any, s: Derived) => State | undefined)
 
 type Transitions<State, Derived> = Record<any, Transition<State, Derived>>
 
@@ -30,28 +32,27 @@ export function fixstateMachine<
 	InitialArg = void,
 >({
 	init,
-	transitions,
+	events,
 	derive,
-	isDone,
+	isFinal,
 }: {
 	init: Init<State, InitialArg>
-	transitions: T
+	events: T
 	derive?: (s: State) => Derived
-	isDone?: (s: Derived) => boolean
+	isFinal?: (s: Derived) => boolean
 }): IMachine<Prettify<ExtractEvents<T>>, Derived, InitialArg> {
 	const init0 = toInit(init)
 	derive = derive ?? (id as (s: State) => Derived)
 	return {
 		init: (initialArg) => derive(init0(initialArg)),
 		reducer: (event, derived) => {
+			if (isFinal?.(derived)) return undefined
 			// we want to pass through unknown events
-			const transition = transitions[event?.type] as
-				| Transition<any, Derived>
-				| undefined
-			const res = transition?.(event, derived)
-			if (res === undefined) return derived
+			let res = events[event?.type] as any
+			if (isFunction(res)) res = res(event, derived)
+			if (!res) return undefined
 			return derive(res)
 		},
-		isFinal: (derived) => isDone?.(derived) ?? false,
+		isFinal: isFinal ? (derived) => isFinal?.(derived) : () => false,
 	}
 }

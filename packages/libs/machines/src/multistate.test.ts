@@ -24,12 +24,13 @@ describe('machine', () => {
 				type: 'stopped'
 				elapsed: number
 		  }
+		| { type: 'final' }
 
 	type LocalDerived = {
 		count: (now: number) => number
 	}
 
-	const machine = multistateMachine<Event, State, LocalDerived>({
+	const machine = multistateMachine<Event, State, void, LocalDerived>({
 		init: { type: 'stopped', elapsed: 0 },
 		states: {
 			running: {
@@ -42,6 +43,7 @@ describe('machine', () => {
 						type: 'running',
 						since: now,
 					}),
+					bye: 'final',
 				},
 				derive: (s) => ({
 					...s,
@@ -54,15 +56,20 @@ describe('machine', () => {
 						type: 'running',
 						since: now - elapsed,
 					}),
-					reset: () => ({
+					reset: {
 						type: 'stopped',
 						elapsed: 0,
-					}),
+					},
+					bye: 'final',
 				},
 				derive: (s) => ({
 					...s,
 					count: () => s.elapsed,
 				}),
+			},
+			final: {
+				events: {},
+				derive: (s) => ({ ...s, count: () => 0 }),
 			},
 		},
 	})
@@ -83,6 +90,6 @@ describe('machine', () => {
 		send({ type: 'reset', now: 11 })
 		send({ type: 'toggle', now: 11 })
 		send('bye')
-		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 0 })
+		expect(m.state).toMatchObject({ type: 'final' })
 	})
 })
