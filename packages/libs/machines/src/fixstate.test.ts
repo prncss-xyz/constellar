@@ -11,7 +11,7 @@ const machine = fixstateMachine({
 		toto: (e: { j: string }) => e.j.length,
 		fluf: 4,
 	},
-	derive: (x) => x * 2,
+	transform: (x) => x * 2,
 	isFinal: (x) => x === 8,
 })
 

@@ -46,7 +46,6 @@ describe('machine', () => {
 					bye: 'final',
 				},
 				derive: (s) => ({
-					...s,
 					count: (now: number) => now - s.since,
 				}),
 			},
@@ -63,13 +62,12 @@ describe('machine', () => {
 					bye: 'final',
 				},
 				derive: (s) => ({
-					...s,
 					count: () => s.elapsed,
 				}),
 			},
 			final: {
 				events: {},
-				derive: (s) => ({ ...s, count: () => 0 }),
+				derive: { count: () => 0 },
 			},
 		},
 	})

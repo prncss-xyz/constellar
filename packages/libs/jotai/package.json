@@ -33,9 +33,11 @@
 	"author": "Juliette Lamarche",
 	"license": "MIT",
 	"peerDependencies": {
+		"@constellar/machines": "workspace:^",
 		"@constellar/optics": "workspace:^",
 		"@constellar/utils": "workspace:^",
-		"jotai": ">=2.0.0"
+		"jotai": ">=2.0.0",
+		"react": ">=18.0.0"
 	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.0",
@@ -46,8 +48,12 @@
 		"jsdom": "^24.1.1",
 		"react": "18",
 		"react-dom": "18",
+		"tinyspy": "^3.0.0",
 		"vite": "^5.4.0",
 		"vite-plugin-dts": "^4.0.2",
 		"vitest": "^2.0.5"
+	},
+	"dependencies": {
+		"jotai-effect": "^1.0.2"
 	}
 }

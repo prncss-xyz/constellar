@@ -31,12 +31,14 @@ type IMultistateMachine<
 		? { [StateType in State['type']]: object }
 		: {
 				[StateType in State['type']]: {
-					derive: <S extends State & { type: StateType }>(
-						state: S,
-					) => S & DerivedLocal
+					derive:
+						| DerivedLocal
+						| (<S extends State & { type: StateType }>(
+								state: S,
+						  ) => DerivedLocal)
 				}
 			})
-	derive?: (s: State & DerivedLocal) => State & DerivedLocal & Derived
+	derive?: Derived | ((s: State & DerivedLocal) => Derived)
 }
 
 export function multistateMachine<
@@ -57,11 +59,19 @@ export function multistateMachine<
 	Derived
 >): IMachine<Event, State & DerivedLocal, InitialArg> {
 	const init0 = toInit(init)
+	function derivator(s: State) {
+		// we take derive from the next state
+		const localDerive = (states as any)[s.type].derive
+		const d1 = localDerive ? join(s, localDerive) : (s as State & DerivedLocal)
+		const d2 = derive
+			? join(d1, derive)
+			: (d1 as State & DerivedLocal & Derived)
+		return d2
+	}
 	return {
 		init: (initialArg: InitialArg) => {
 			const s = fromSendable(init0(initialArg))
-			const derive = (states as any)[s.type].derive
-			return derive ? derive(s) : s
+			return derivator(s)
 		},
 		reducer: (
 			event: Event,
@@ -72,12 +82,13 @@ export function multistateMachine<
 			if (isFunction(res)) res = res(event, s)
 			if (res === undefined) return undefined
 			res = fromSendable(res)
-			const localDerive = (states as any)[res.type].derive
-			// we take derive from the next state
-			if (localDerive) res = localDerive(res)
-			if (derive) res = derive(res)
-			return res
+			return derivator(res)
 		},
 		isFinal: (s) => Object.keys((states as any)[s.type]).length === 0,
 	}
+}
+
+function join<A, B>(a: A, b: B | ((a: A) => B)): A & B {
+	const x = isFunction(b) ? b(a) : b
+	return { ...a, ...x }
 }

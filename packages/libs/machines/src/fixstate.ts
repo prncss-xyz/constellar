@@ -33,25 +33,25 @@ export function fixstateMachine<
 >({
 	init,
 	events,
-	derive,
+	transform,
 	isFinal,
 }: {
 	init: Init<State, InitialArg>
 	events: T
-	derive?: (s: State) => Derived
+	transform?: (s: State) => Derived
 	isFinal?: (s: Derived) => boolean
 }): IMachine<Prettify<ExtractEvents<T>>, Derived, InitialArg> {
 	const init0 = toInit(init)
-	derive = derive ?? (id as (s: State) => Derived)
+	transform = transform ?? (id as (s: State) => Derived)
 	return {
-		init: (initialArg) => derive(init0(initialArg)),
+		init: (initialArg) => transform(init0(initialArg)),
 		reducer: (event, derived) => {
 			if (isFinal?.(derived)) return undefined
 			// we want to pass through unknown events
 			let res = events[event?.type] as any
 			if (isFunction(res)) res = res(event, derived)
 			if (!res) return undefined
-			return derive(res)
+			return transform(res)
 		},
 		isFinal: isFinal ? (derived) => isFinal?.(derived) : () => false,
 	}

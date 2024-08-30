@@ -1,41 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { elems, linear, prop, when } from '@constellar/optics'
-import { collect, pipe } from '@constellar/utils'
+import { pipe } from '@constellar/utils'
 import { atom, createStore } from 'jotai'
 
-import { atomWithReducer, focusAtom, foldAtom, viewAtom } from '.'
-
-describe('reducer', () => {
-	test('default factory', async () => {
-		const monoid = collect()
-		const reducer = atomWithReducer(monoid)
-		const store = createStore()
-		store.set(reducer, 1)
-		store.set(reducer, 2)
-		await Promise.resolve()
-		expect(store.get(reducer)).toEqual([1, 2])
-	})
-	test('provided factory', async () => {
-		const monoid = collect()
-		let r: any
-		const reducer = atomWithReducer(monoid, (init) => {
-			const baseAtom = atom(init)
-			return atom(
-				(get) => get(baseAtom),
-				(_get, set, value: any) => {
-					r = value
-					return set(baseAtom, value)
-				},
-			)
-		})
-		const store = createStore()
-		store.set(reducer, 1)
-		store.set(reducer, 2)
-		await Promise.resolve()
-		expect(store.get(reducer)).toEqual([1, 2])
-		expect(r).toEqual([1, 2])
-	})
-})
+import { focusAtom, foldAtom, viewAtom } from '.'
 
 test('view', () => {
 	const store = createStore()

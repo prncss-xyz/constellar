@@ -12,7 +12,7 @@ type Derived = {
 }
 
 export const machine = fromMachine(
-	multistateMachine<Event, State, Derived>({
+	multistateMachine<Event, State, void, Derived>({
 		init: { type: 'stopped', elapsed: 0 },
 		states: {
 			running: {
@@ -27,7 +27,6 @@ export const machine = fromMachine(
 					}),
 				},
 				derive: (s) => ({
-					...s,
 					count: (now: number) => now - s.since,
 					toggled: 'stopped',
 				}),
@@ -44,7 +43,6 @@ export const machine = fromMachine(
 					}),
 				},
 				derive: (s) => ({
-					...s,
 					count: () => s.elapsed,
 					toggled: 'running',
 				}),

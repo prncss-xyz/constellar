@@ -3,14 +3,7 @@ import { eq, fold, IOptic, update, view } from '@constellar/optics'
 import { fromInit, id, Monoid, Updater } from '@constellar/utils'
 import { atom, Atom, WritableAtom } from 'jotai'
 
-type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
-
-function unwrap<Part, Whole>(
-	source: Whole | Promise<Whole>,
-	select: (w: Whole) => Part,
-) {
-	return source instanceof Promise ? source.then(select) : select(source)
-}
+import { NonFunction, unwrap } from './utils'
 
 export function selectAtom<Part, Whole>(
 	sourceAtom: Atom<Promise<Whole>>,
@@ -25,34 +18,6 @@ export function selectAtom<Part, Whole>(
 	select: (w: Whole) => Part,
 ) {
 	return atom((get) => unwrap(get(sourceAtom), select))
-}
-
-// see also https://jotai.org/docs/utilities/reducer
-
-export function atomWithReducer<Event, State, R = void>(
-	monoid: Monoid<Event, State>,
-	atomFactory: (
-		init: State,
-	) => WritableAtom<Promise<State>, [Promise<State>], R>,
-): WritableAtom<Promise<State>, [event: Event], R>
-export function atomWithReducer<Event, State, R = void>(
-	monoid: Monoid<Event, State>,
-	atomFactory?: (init: State) => WritableAtom<State, [NonFunction<State>], R>,
-): WritableAtom<State, [event: Event], R>
-export function atomWithReducer<Event, State, R = void>(
-	monoid: Monoid<Event, State>,
-	atomFactory?: (init: State) => WritableAtom<State, [NonFunction<State>], R>,
-) {
-	const { init, fold } = monoid
-	atomFactory ??= (init: State) => atom(init) as any
-	const stateAtom = atomFactory(fromInit(init))
-	return atom(
-		(get) => unwrap(get(stateAtom), id),
-		(get, set, event: Event) =>
-			unwrap(get(stateAtom), (state) =>
-				set(stateAtom, fold(event, state) as NonFunction<State>),
-			),
-	)
 }
 
 export function viewAtom<Part, Whole, Fail, Command>(

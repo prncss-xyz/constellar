@@ -29,7 +29,7 @@ export default defineConfig({
 			formats: ['es'],
 		},
 		rollupOptions: {
-			external: ['jotai', '@constellar/optics', '@constellar/utils'],
+			external: ['jotai', 'react', '@constellar/optics', '@constellar/utils'],
 		},
 	},
 })

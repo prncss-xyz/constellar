@@ -130,6 +130,55 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
 
+  packages/demos/jotai-machine-effects:
+    dependencies:
+      '@constellar/jotai':
+        specifier: workspace:^
+        version: link:../../libs/jotai
+      '@constellar/machines':
+        specifier: workspace:^
+        version: link:../../libs/machines
+      '@constellar/optics':
+        specifier: workspace:^
+        version: link:../../libs/optics
+      '@constellar/utils':
+        specifier: workspace:^
+        version: link:../../libs/utils
+      '@vitejs/plugin-react':
+        specifier: ^4.3.1
+        version: 4.3.1(vite@5.4.0(@types/node@22.2.0))
+      jotai:
+        specifier: ^2.9.3
+        version: 2.9.3(@types/react@18.3.3)(react@18.3.1)
+      jotai-effect:
+        specifier: ^1.0.2
+        version: 1.0.2(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.2.0
+        version: 22.2.0
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
+      '@vitest/coverage-v8':
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
+      vite:
+        specifier: ^5.4.0
+        version: 5.4.0(@types/node@22.2.0)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
+
   packages/demos/react-checkbox:
     dependencies:
       '@constellar/jotai':
@@ -221,6 +270,9 @@ importers:
 
   packages/libs/jotai:
     dependencies:
+      '@constellar/machines':
+        specifier: workspace:^
+        version: link:../machines
       '@constellar/optics':
         specifier: workspace:^
         version: link:../optics
@@ -230,6 +282,9 @@ importers:
       jotai:
         specifier: '>=2.0.0'
         version: 2.9.3(@types/react@18.3.3)(react@18.3.1)
+      jotai-effect:
+        specifier: ^1.0.2
+        version: 1.0.2(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))
     devDependencies:
       '@testing-library/dom':
         specifier: ^10.4.0
@@ -255,6 +310,9 @@ importers:
       react-dom:
         specifier: '18'
         version: 18.3.1(react@18.3.1)
+      tinyspy:
+        specifier: ^3.0.0
+        version: 3.0.0
       vite:
         specifier: ^5.4.0
         version: 5.4.0(@types/node@22.2.0)
@@ -3750,6 +3808,14 @@ packages:
       {
         integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==,
       }
+
+  jotai-effect@1.0.2:
+    resolution:
+      {
+        integrity: sha512-DWX47WVvZ2gZgzsCcc4JjhtNvCFIC1bXkOjDQZbZH875l2aIls5OKq/9H4MpFv/jwyDowES2D//zORlCM3Vyuw==,
+      }
+    peerDependencies:
+      jotai: '>=2.5.0'
 
   jotai@2.9.3:
     resolution:
@@ -8229,6 +8295,10 @@ snapshots:
   jiti@1.21.6: {}
 
   jju@1.4.0: {}
+
+  jotai-effect@1.0.2(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1)):
+    dependencies:
+      jotai: 2.9.3(@types/react@18.3.3)(react@18.3.1)
 
   jotai@2.9.3(@types/react@18.3.3)(react@18.3.1):
     optionalDependencies:
