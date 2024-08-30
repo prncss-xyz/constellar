@@ -43,7 +43,7 @@ export function atomWithReducer<Event, State>(
 	)
 }
 
-export function useMachineInterperter<State extends AnyState, Event>(
+export function useMachineEffects<State extends AnyState, Event>(
 	machineAtom:
 		| WritableAtom<State, [event: Event], void>
 		| WritableAtom<Promise<State>, [Promise<State>], void>,

@@ -4,7 +4,7 @@ import { atom, createStore, useSetAtom } from 'jotai'
 import { useState } from 'react'
 import { spy } from 'tinyspy'
 
-import { atomWithReducer, useMachineInterperter } from './machine'
+import { atomWithReducer, useMachineEffects } from './machine'
 
 describe('reducer', () => {
 	test('default factory', async () => {
@@ -50,8 +50,8 @@ describe('effects', () => {
 		const cbOut = spy(() => {})
 		function Machine() {
 			const send = useSetAtom(machineAtom)
-			useMachineInterperter(machineAtom, {
-				a: (...args) => {
+			useMachineEffects(machineAtom, {
+				a: (...args: unknown[]) => {
 					cbIn(...args)
 					return cbOut
 				},
