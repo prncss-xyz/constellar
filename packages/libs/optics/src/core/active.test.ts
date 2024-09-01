@@ -3,11 +3,9 @@ import { flow } from '@constellar/utils'
 
 import { active, eq, REMOVE, update, view } from '.'
 
-const activateIs = active()
-
 describe('activate', () => {
 	describe('simple', () => {
-		const focus = flow(eq<string>(), activateIs('titi'))
+		const focus = flow(eq<string>(), active('titi'))
 		it('view', () => {
 			expect(view(focus)('toto')).toEqual(false)
 			expect(view(focus)('titi')).toEqual(true)
@@ -18,8 +16,10 @@ describe('activate', () => {
 		})
 	})
 	describe('array', () => {
-		const actiateLength = active((a, b) => a.length === b.length)
-		const focus = flow(eq<string[]>(), actiateLength([] as string[]))
+		function sameLength(a: unknown[], b: unknown[]) {
+			return a.length === b.length
+		}
+		const focus = flow(eq<string[]>(), active([] as string[], sameLength))
 		it('view', () => {
 			expect(view(focus)(['titi'])).toEqual(false)
 			expect(view(focus)([])).toEqual(true)
@@ -31,7 +31,7 @@ describe('activate', () => {
 	})
 	describe('update', () => {
 		const double = (x: number) => x * 2
-		const focus = flow(eq<number>(), activateIs(double))
+		const focus = flow(eq<number>(), active(double))
 		it('view', () => {
 			expect(view(focus)(1)).toEqual(false)
 			expect(view(focus)(0)).toEqual(true)
@@ -44,7 +44,7 @@ describe('activate', () => {
 	describe('removable', () => {
 		type T = { a: string; b?: number }
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const focus = flow(eq<T>(), prop('b'), activateIs<any>(REMOVE))
+		const focus = flow(eq<T>(), prop('b'), active<any>(REMOVE))
 		it('view', () => {
 			expect(view(focus)({ a: 'toto', b: 1 })).toEqual(false)
 			expect(view(focus)({ a: 'toto' })).toEqual(true)
@@ -59,7 +59,7 @@ describe('activate', () => {
 	})
 	describe('compose', () => {
 		type T = { a: string }
-		const focus = flow(eq<T>(), prop('a'), activateIs('titi'))
+		const focus = flow(eq<T>(), prop('a'), active('titi'))
 		it('view', () => {
 			expect(view(focus)({ a: 'toto' })).toEqual(false)
 			expect(view(focus)({ a: 'titi' })).toEqual(true)

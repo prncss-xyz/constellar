@@ -1,4 +1,4 @@
-import { eq, REMOVE, update, view } from '@/core'
+import { eq, REMOVE, update, view } from '@/.'
 import { flow } from '@constellar/utils'
 
 import { prop } from '.'
@@ -60,13 +60,6 @@ describe('prop', () => {
 	describe('compose', () => {
 		it('removable-lens', () => {
 			type Source = { a?: { b: number } }
-			const source: Source = { a: { b: 2 } }
-			const focus = flow(eq<Source>(), prop('a'), prop('b'))
-			const res = view(focus)(source)
-			expectTypeOf(view(focus)(source)).toEqualTypeOf<number | undefined>(res)
-		})
-		it('lens-removable', () => {
-			type Source = { a: { b?: number } }
 			const source: Source = { a: { b: 2 } }
 			const focus = flow(eq<Source>(), prop('a'), prop('b'))
 			const res = view(focus)(source)

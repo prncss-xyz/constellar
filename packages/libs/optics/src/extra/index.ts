@@ -25,12 +25,11 @@ export function to<B, V>(select: (v: V) => B | undefined) {
 	})
 }
 
-export function reread<A>(f: (a: A) => A) {
+export function reread<A>(mod: (a: A) => A) {
 	return lens<A, A>({
-		getter: f,
-		// TODO: which behavior is better?
+		getter: mod,
 		setter: id,
-		/* setter: (_v, a) => a, */
+		// optics-ts setter is equivalent to: `setter: (_v, a) => a`
 	})
 }
 
@@ -45,15 +44,6 @@ export function dedupe<A>(areEqual: (a: A, b: A) => unknown = Object.is) {
 	return rewrite<A>((next, last) => {
 		if (areEqual(next, last)) return last
 		return next
-	})
-}
-
-export function split(separator = ',') {
-	return lens<string[], string>({
-		getter: (str) => str.split(separator),
-		setter: (xs) => {
-			return xs.join(separator)
-		},
 	})
 }
 
@@ -225,7 +215,7 @@ export function tail<X>() {
 
 // defective
 // aka prepend
-// can represent a stack, although foot is more efficient
+// can represent a stack, although foot is less efficient
 export function head<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(0),
@@ -254,17 +244,30 @@ export function queue<X>() {
 	})
 }
 
-// traversals
-export function elems<B>() {
-	return traversal<B, B[]>({
-		refold: (fold) => {
-			return function (bs, acc) {
-				for (const b of bs) {
-					acc = fold(b, acc)
+export function iterable<Part, Whole>({
+	iter,
+	mapper,
+}: {
+	iter: (whole: Whole) => Iterable<Part>
+	mapper: (mod: (p: Part) => Part, w: Whole) => Whole
+}) {
+	return traversal<Part, Whole>({
+		refold: <Acc>(fold: (p: Part, acc: Acc) => Acc) => {
+			return function (whole: Whole, acc: Acc) {
+				for (const part of iter(whole)) {
+					acc = fold(part, acc)
 				}
 				return acc
 			}
 		},
+		mapper,
+	})
+}
+
+// traversals
+export function elems<B>() {
+	return iterable<B, B[]>({
+		iter: id,
 		mapper: (f, bs) => {
 			const res: B[] = []
 			for (let i = 0; i < bs.length; i++) {

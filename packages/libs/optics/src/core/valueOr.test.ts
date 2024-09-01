@@ -1,7 +1,7 @@
-import { linear, prop } from '@/extra'
+import { elems, linear, prop } from '@/extra'
 import { first, flow } from '@constellar/utils'
 
-import { eq, fold, put, valueOr, view } from '.'
+import { eq, fold, modify, put, valueOr, view } from '.'
 
 describe('simple', () => {
 	type T = { a: string; b?: number }
@@ -13,6 +13,13 @@ describe('simple', () => {
 	test('put', () => {
 		expect(put(focus, 1)({ a: 'a' })).toEqual({ a: 'a', b: 1 })
 		expect(put(focus, 1)({ a: 'a', b: 2 })).toEqual({ a: 'a', b: 1 })
+	})
+	test('modify', () => {
+		expect(modify(focus, (x) => x + 1)({ a: 'a' })).toEqual({ a: 'a', b: 4 })
+		expect(modify(focus, (x) => x + 1)({ a: 'a', b: 2 })).toEqual({
+			a: 'a',
+			b: 3,
+		})
 	})
 })
 describe('compose', () => {
@@ -29,5 +36,12 @@ describe('compose', () => {
 	test('fold', () => {
 		expect(fold(focus, first())({ a: 'a' })).toEqual(6)
 		expect(fold(focus, first())({ a: 'a', b: 1 })).toEqual(2)
+	})
+})
+describe('traversal', () => {
+	it('should throw on traversals', () => {
+		expect(() => {
+			flow(eq<number[]>(), elems(), valueOr(1))
+		}).toThrow("valueOr don't work with traversals")
 	})
 })
