@@ -1,4 +1,5 @@
-import { Init, isFunction } from '..'
+import { Init } from '..'
+import { isFunction } from './guards'
 
 export const noop = () => {}
 
@@ -18,9 +19,9 @@ export function pipe2<P, Q, R>(f: (p: P) => Q, g: (q: Q) => R): (p: P) => R {
 
 const INIT = Symbol('INIT')
 
-export function memo1<A, B>(f: (a: A) => B): (a: A) => B {
+export function memo1<A, R>(f: (a: A) => R): (a: A) => R {
 	let a_: A | typeof INIT = INIT
-	let memo: B
+	let memo: R
 	return (a: A) => {
 		if (!Object.is(a_, a)) {
 			memo = f(a)
@@ -36,4 +37,12 @@ export function fromInit<T>(init: Init<T, void>): T {
 
 export function toInit<T, P = void>(init: Init<T, P>): (p: P) => T {
 	return isFunction(init) ? (p) => init(p) : () => init
+}
+
+export function isEmpty(obj?: object) {
+	if (!obj) return true
+	for (const _ of Object.keys(obj)) {
+		return false
+	}
+	return true
 }

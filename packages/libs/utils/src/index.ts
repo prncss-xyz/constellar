@@ -1,5 +1,3 @@
 export * from './arrays'
-export * from './guards'
 export * from './functions'
 export * from './types'
-export * from './monoids'

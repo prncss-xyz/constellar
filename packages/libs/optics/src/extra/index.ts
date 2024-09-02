@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { fromArray } from '@/core/collection'
 import { append, id, prepend, remove, replace } from '@constellar/utils'
 
 import {
@@ -244,30 +246,10 @@ export function queue<X>() {
 	})
 }
 
-export function iterable<Part, Whole>({
-	iter,
-	mapper,
-}: {
-	iter: (whole: Whole) => Iterable<Part>
-	mapper: (mod: (p: Part) => Part, w: Whole) => Whole
-}) {
-	return traversal<Part, Whole>({
-		refold: <Acc>(fold: (p: Part, acc: Acc) => Acc) => {
-			return function (whole: Whole, acc: Acc) {
-				for (const part of iter(whole)) {
-					acc = fold(part, acc)
-				}
-				return acc
-			}
-		},
-		mapper,
-	})
-}
-
 // traversals
 export function elems<B>() {
-	return iterable<B, B[]>({
-		iter: id,
+	return traversal<B, B[], number>({
+		coll: fromArray<B>,
 		mapper: (f, bs) => {
 			const res: B[] = []
 			for (let i = 0; i < bs.length; i++) {

@@ -1,7 +1,26 @@
+import { toArray, toFirst } from '@/core/collection.ts'
 import { eq, fold, update, view } from '@/core/index.ts'
-import { collect, flow } from '@constellar/utils'
+import { flow, pipe } from '@constellar/utils'
 
 import { elems, prop, when } from './index.ts'
+
+describe('first element', () => {
+	test('simple', () => {
+		type Source = number[]
+		const focus = flow(eq<Source>(), elems())
+		expect(fold(focus)(toFirst(undefined), [1, 2, 3])).toEqual(1)
+	})
+	test('nested', () => {
+		type Source = number[][]
+		const focus = flow(eq<Source>(), pipe(elems(), elems()))
+		expect(
+			fold(focus)(toFirst(undefined), [
+				[1, 2],
+				[3, 4],
+			]),
+		).toEqual(1)
+	})
+})
 
 describe('simple', () => {
 	type Source = number[]
@@ -17,10 +36,10 @@ describe('simple', () => {
 		expect(view(focus)(sourceDefined)).toBe(1)
 	})
 	it('fold undefined', () => {
-		expect(fold(focus, collect())(sourceUndefined)).toEqual([])
+		expect(fold(focus)(toArray(), sourceUndefined)).toEqual([])
 	})
 	it('fold defined', () => {
-		expect(fold(focus, collect())(sourceDefined)).toEqual([1, 2, 3])
+		expect(fold(focus)(toArray(), sourceDefined)).toEqual([1, 2, 3])
 	})
 	it('put undefined', () => {
 		expect(update(focus, 9)(sourceUndefined)).toEqual(sourceUndefined)
@@ -42,7 +61,7 @@ describe('composed', () => {
 		const source: Source = { a: [{ c: 1 }, { c: 2 }] }
 		const focus = flow(eq<Source>(), prop('a'), elems(), prop('c'))
 		it('fold', () => {
-			expect(fold(focus, collect())(source)).toEqual([1, 2])
+			expect(fold(focus)(toArray(), source)).toEqual([1, 2])
 		})
 		it('modify', () => {
 			expect(update(focus, (x) => x * 2)(source)).toEqual({
@@ -58,7 +77,7 @@ describe('composed', () => {
 		]
 		const focus = flow(eq<Source>(), elems(), elems())
 		it('fold', () => {
-			expect(fold(focus, collect())(source)).toEqual([1, 2, 3, 4])
+			expect(fold(focus)(toArray(), source)).toEqual([1, 2, 3, 4])
 		})
 		it('modify', () => {
 			expect(update(focus, (x) => x * 2)(source)).toEqual([
@@ -76,7 +95,7 @@ describe('composed', () => {
 				elems(),
 				when((item) => item !== 'quux'),
 			)
-			expect(fold(focus, collect())(source)).toEqual(['baz', 'xyzzy'])
+			expect(fold(focus)(toArray(), source)).toEqual(['baz', 'xyzzy'])
 		})
 		it('map', () => {
 			type Source = string[]
@@ -100,7 +119,7 @@ describe('composed', () => {
 				elems(),
 				when((item) => item !== 'baz'),
 			)
-			expect(fold(focus, collect())(source)).toEqual(['quux', 'xyzzy'])
+			expect(fold(focus)(toArray(), source)).toEqual(['quux', 'xyzzy'])
 		})
 		it('view', () => {
 			type Source = string[]

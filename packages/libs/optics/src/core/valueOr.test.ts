@@ -1,7 +1,8 @@
 import { elems, linear, prop } from '@/extra'
-import { first, flow } from '@constellar/utils'
+import { flow } from '@constellar/utils'
 
 import { eq, fold, modify, put, valueOr, view } from '.'
+import { toFirst } from './collection'
 
 describe('simple', () => {
 	type T = { a: string; b?: number }
@@ -34,8 +35,8 @@ describe('compose', () => {
 		expect(put(focus, 2)({ a: 'a', b: 2 })).toEqual({ a: 'a', b: 1 })
 	})
 	test('fold', () => {
-		expect(fold(focus, first())({ a: 'a' })).toEqual(6)
-		expect(fold(focus, first())({ a: 'a', b: 1 })).toEqual(2)
+		expect(fold(focus)(toFirst(undefined), { a: 'a' })).toEqual(6)
+		expect(fold(focus)(toFirst(undefined), { a: 'a', b: 1 })).toEqual(2)
 	})
 })
 describe('traversal', () => {

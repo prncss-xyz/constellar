@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { elems, prop } from '@/extra'
-import { collect, flow } from '@constellar/utils'
+import { flow } from '@constellar/utils'
 
 import { eq, fold, modify, put, view, whenFrom } from '.'
+import { toArray } from './collection'
 
 describe('simple', () => {
 	type T = { index: string[]; items: { id: string; name: string }[] }
@@ -33,7 +34,7 @@ describe('simple', () => {
 				{ id: 'b', name: 'name b' },
 			],
 		}
-		expect(fold(focus, collect())(source)).toEqual(['name a', 'name b'])
+		expect(fold(focus)(toArray(), source)).toEqual(['name a', 'name b'])
 	})
 	test('put', () => {
 		const source: T = {

@@ -1,4 +1,5 @@
 export * from './flow'
+export * from './guards'
 export * from './compose'
 export * from './pipe'
 export * from './misc'
