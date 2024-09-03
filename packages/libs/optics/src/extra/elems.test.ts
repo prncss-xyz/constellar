@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toArray, toFirst } from '@/core/collection.ts'
 import { eq, fold, update, view } from '@/core/index.ts'
 import { flow, pipe } from '@constellar/utils'

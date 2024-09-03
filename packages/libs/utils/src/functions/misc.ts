@@ -11,6 +11,17 @@ export function id<T>(t: T) {
 	return t
 }
 
+// mirror of flow
+export function cp2<P, Q, R>(p: P, g: (q: Q) => R, f: (p: P) => Q): R {
+	return g(f(p))
+}
+
+export function compose2<P, Q, R>(g: (q: Q) => R, f: (p: P) => Q): (p: P) => R {
+	if (f === id) return g as unknown as (p: P) => R
+	if (g === id) return f as unknown as (p: P) => R
+	return (p: P) => g(f(p))
+}
+
 export function pipe2<P, Q, R>(f: (p: P) => Q, g: (q: Q) => R): (p: P) => R {
 	if (f === id) return g as unknown as (p: P) => R
 	if (g === id) return f as unknown as (p: P) => R

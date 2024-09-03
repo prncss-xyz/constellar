@@ -12,7 +12,7 @@ export const fromArray = <T>(xs: T[]): UnfoldForm<T, number> => {
 	}
 }
 
-export function toArray<V>(): FoldForm<V, V[], unknown> {
+export function toArray<V>(): FoldForm<V, V[], Ctx> {
 	return {
 		init: [],
 		foldFn: (v, acc) => {
@@ -22,9 +22,9 @@ export function toArray<V>(): FoldForm<V, V[], unknown> {
 	}
 }
 
-export function toFirst<Part, Fail>(
+export function toFirst<Part, Fail, Ctx extends { close: () => void }>(
 	fail: Fail,
-): FoldForm<Part, Part | Fail, { close: () => void }> {
+): FoldForm<Part, Part | Fail, Ctx> {
 	return {
 		init: fail,
 		foldFn: (p, _, { close }) => (close(), p),
@@ -33,6 +33,9 @@ export function toFirst<Part, Fail>(
 
 export type Ctx = { close: () => void }
 
+export const ctxNull: Ctx = { close: () => {} }
+
+// TODO:
 export interface ICtx<Whole, Index> {
 	close: () => void
 	whole: Whole
@@ -40,9 +43,9 @@ export interface ICtx<Whole, Index> {
 }
 
 export type FoldFn<Part, Acc, Ctx> = (p: Part, acc: Acc, ctx: Ctx) => Acc
-export type Refold<P, Q, C> = <Acc>(
-	fold: FoldFn<P, Acc, C>,
-) => FoldFn<Q, Acc, C>
+export type Refold<Part, Whole, C> = <Acc>(
+	fold: FoldFn<Part, Acc, C>,
+) => FoldFn<Whole, Acc, C>
 
 export interface FoldForm<Part, Acc, C> {
 	init: Acc
@@ -53,14 +56,14 @@ export function foldWith<Part, Whole, Acc, Index>(
 	acc: Acc,
 	foldPart: (w: Part, acc: Acc, ctx: Ctx) => Acc,
 	whole: Whole,
-	collection: Unfolder<Part, Whole, Index>,
-	close?: () => void,
+	unfolder: Unfolder<Part, Whole, Index>,
+	onClose: () => void,
 ) {
-	const unfold = collection(whole)
+	const unfold = unfolder(whole)
 	let alive = true
 	const ctx: ICtx<Whole, Index> = {
 		close: () => {
-			if (close) close()
+			onClose()
 			alive = false
 		},
 		whole,

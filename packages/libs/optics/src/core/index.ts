@@ -15,6 +15,7 @@ import {
 
 import {
 	Ctx,
+	ctxNull,
 	FoldFn,
 	FoldForm,
 	foldWith,
@@ -50,16 +51,15 @@ export function view<Part, Whole, Fail, Command>(
 ) {
 	if (focus.getter) return focus.getter
 	const f = fold(focus)
-	return (whole: Whole) => f(toFirst<Part, Fail>(undefined as Fail), whole)
+	return (whole: Whole) => f(toFirst<Part, Fail, Ctx>(undefined as Fail), whole)
 }
 
+// TODO: typing
 export function fold<Part, Whole, Fail, Command>(
 	focus: IOptic<Part, Whole, Fail, Command>,
 ) {
 	return function <Acc>(form: FoldForm<Part, Acc, Ctx>, whole: Whole) {
-		return focus.refold(form.foldFn)(whole, fromInit(form.init), {
-			close: () => {},
-		})
+		return focus.refold(form.foldFn)(whole, form.init, ctxNull)
 	}
 }
 
@@ -313,11 +313,7 @@ export function traversal<Part, Whole, Index>({
 }) {
 	return optic({
 		refold: <Acc>(foldPart: (p: Part, acc: Acc, ctx: Ctx) => Acc) => {
-			return function (
-				whole: Whole,
-				acc: Acc,
-				{ close }: { close: () => void },
-			) {
+			return function (whole: Whole, acc: Acc, { close }: Ctx) {
 				return foldWith(acc, foldPart, whole, coll, close)
 			}
 		},
