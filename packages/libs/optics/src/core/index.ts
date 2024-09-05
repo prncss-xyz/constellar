@@ -10,6 +10,7 @@ import {
 	isUndefined,
 	memo1,
 	Modify,
+	noop,
 	pipe2,
 } from '@constellar/utils'
 
@@ -18,10 +19,36 @@ import {
 	ctxNull,
 	FoldFn,
 	FoldForm,
-	foldWith,
+	ICtx,
 	toFirst,
 	Unfolder,
-} from './collection'
+} from '../collections'
+
+function foldWith<Part, Whole, Acc, Index>(
+	acc: Acc,
+	foldPart: (w: Part, acc: Acc, ctx: Ctx) => Acc,
+	whole: Whole,
+	unfolder: Unfolder<Part, Whole, Index>,
+	onClose: () => void,
+) {
+	const unfold = unfolder(whole)
+	let alive = true
+	const ctx: ICtx<Whole, Index> = {
+		close: () => {
+			onClose()
+			alive = false
+		},
+		whole,
+		index: undefined as Index,
+	}
+	while (alive) {
+		const r = unfold()
+		if (r === undefined) break
+		ctx.index = r.index
+		acc = foldPart(r.part, acc, ctx)
+	}
+	return acc
+}
 
 export const REMOVE = Symbol('REMOVE')
 function isRemove(v: unknown) {
@@ -306,10 +333,10 @@ export function removable<Part, Whole>({
 
 export function traversal<Part, Whole, Index>({
 	coll,
-	mapper,
+	form,
 }: {
 	coll: Unfolder<Part, Whole, Index>
-	mapper: Mapper<Part, Whole>
+	form: () => FoldForm<Part, Whole, Ctx>
 }) {
 	return optic({
 		refold: <Acc>(foldPart: (p: Part, acc: Acc, ctx: Ctx) => Acc) => {
@@ -317,7 +344,16 @@ export function traversal<Part, Whole, Index>({
 				return foldWith(acc, foldPart, whole, coll, close)
 			}
 		},
-		mapper,
+		mapper: (mod, whole: Whole) => {
+			const { init: acc, foldFn } = form()
+			return foldWith(
+				acc,
+				(p, acc, ctx) => foldFn(mod(p), acc, ctx),
+				whole,
+				coll,
+				noop,
+			)
+		},
 		isFaillure: isUndefined,
 		isCommand: isNever,
 		command: inert,

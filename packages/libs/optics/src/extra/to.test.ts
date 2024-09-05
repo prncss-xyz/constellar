@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { to } from '.'
+import { eq, update, view } from '../core'
 
 describe('defined', () => {
 	const focus = flow(

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { append, id, prepend, remove, replace } from '@constellar/utils'
 
+import { fromArray, toArray } from '../collections'
 import {
 	inert,
 	IOptic,
@@ -10,7 +11,6 @@ import {
 	REMOVE,
 	traversal,
 } from '../core'
-import { fromArray } from '../core/collection'
 
 // isomorphisms
 
@@ -250,12 +250,6 @@ export function queue<X>() {
 export function elems<B>() {
 	return traversal<B, B[], number>({
 		coll: fromArray<B>,
-		mapper: (f, bs) => {
-			const res: B[] = []
-			for (let i = 0; i < bs.length; i++) {
-				res[i] = f(bs[i]!)
-			}
-			return res
-		},
+		form: toArray<B>,
 	})
 }

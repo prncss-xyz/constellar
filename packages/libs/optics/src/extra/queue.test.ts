@@ -1,7 +1,7 @@
-import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { queue } from '.'
+import { eq, REMOVE, update, view } from '../core'
 
 describe('queue', () => {
 	type Source = string[]

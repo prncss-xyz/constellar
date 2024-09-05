@@ -1,7 +1,7 @@
-import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { find } from '.'
+import { eq, REMOVE, update, view } from '../core'
 
 describe('find', () => {
 	type Source = { bar: string }

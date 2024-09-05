@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { includes, rewrite } from '.'
+import { eq, update, view } from '../core'
 
 describe('strToNum', () => {
 	const sourceDefined = ['a', 'b', 'c']

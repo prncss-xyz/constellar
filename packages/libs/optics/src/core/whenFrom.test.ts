@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { elems, prop } from '@/extra'
 import { flow } from '@constellar/utils'
 
 import { eq, fold, modify, put, view, whenFrom } from '.'
-import { toArray } from './collection'
+import { toArray } from '../collections'
+import { elems, prop } from '../extra'
 
 describe('simple', () => {
 	type T = { index: string[]; items: { id: string; name: string }[] }

@@ -1,3 +1,5 @@
+import { noop } from '@constellar/utils'
+
 export type UnfoldForm<Part, Index> = () =>
 	| { part: Part; index: Index }
 	| undefined
@@ -33,7 +35,7 @@ export function toFirst<Part, Fail, Ctx extends { close: () => void }>(
 
 export type Ctx = { close: () => void }
 
-export const ctxNull: Ctx = { close: () => {} }
+export const ctxNull: Ctx = { close: noop }
 
 // TODO:
 export interface ICtx<Whole, Index> {
@@ -50,30 +52,4 @@ export type Refold<Part, Whole, C> = <Acc>(
 export interface FoldForm<Part, Acc, C> {
 	init: Acc
 	foldFn: FoldFn<Part, Acc, C>
-}
-
-export function foldWith<Part, Whole, Acc, Index>(
-	acc: Acc,
-	foldPart: (w: Part, acc: Acc, ctx: Ctx) => Acc,
-	whole: Whole,
-	unfolder: Unfolder<Part, Whole, Index>,
-	onClose: () => void,
-) {
-	const unfold = unfolder(whole)
-	let alive = true
-	const ctx: ICtx<Whole, Index> = {
-		close: () => {
-			onClose()
-			alive = false
-		},
-		whole,
-		index: undefined as Index,
-	}
-	while (alive) {
-		const r = unfold()
-		if (r === undefined) break
-		ctx.index = r.index
-		acc = foldPart(r.part, acc, ctx)
-	}
-	return acc
 }

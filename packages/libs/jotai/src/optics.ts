@@ -1,6 +1,14 @@
 // based on https://github.com/jotaijs/jotai-optics/blob/main/src/focusAtom.ts
-import { active, eq, Focus, fold, put, update, view } from '@constellar/optics'
-import { toArray } from '@constellar/optics/src/core/collection'
+import {
+	active,
+	eq,
+	Focus,
+	fold,
+	put,
+	toArray,
+	update,
+	view,
+} from '@constellar/optics'
 import { AreEqual, shallowEqual, Updater } from '@constellar/utils'
 import { atom, Atom, WritableAtom } from 'jotai'
 

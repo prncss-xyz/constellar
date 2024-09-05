@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { toArray, toFirst } from '@/core/collection.ts'
-import { eq, fold, update, view } from '@/core/index.ts'
 import { flow, pipe } from '@constellar/utils'
 
-import { elems, prop, when } from './index.ts'
+import { elems, prop, when } from '.'
+import { toArray, toFirst } from '../collections'
+import { eq, fold, update, view } from '../core'
 
 describe('first element', () => {
 	test('simple', () => {
