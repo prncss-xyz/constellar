@@ -1,7 +1,7 @@
-import { prop } from '@/extra'
 import { flow } from '@constellar/utils'
 
 import { active, eq, REMOVE, update, view } from '.'
+import { prop } from '../extra'
 
 describe('activate', () => {
 	describe('simple', () => {

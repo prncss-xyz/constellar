@@ -1,5 +1,4 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
@@ -7,6 +6,7 @@ import * as L from 'partial.lenses'
 import { bench } from 'vitest'
 
 import { find, prop } from '.'
+import { eq, update, view } from '../core'
 
 const size = 5000
 const mid = Math.floor(size / 2)

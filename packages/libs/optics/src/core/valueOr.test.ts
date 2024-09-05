@@ -1,8 +1,8 @@
-import { elems, linear, prop } from '@/extra'
 import { flow } from '@constellar/utils'
 
 import { eq, fold, modify, put, valueOr, view } from '.'
-import { toFirst } from './collection'
+import { toFirst } from '../collections'
+import { elems, linear, prop } from '../extra'
 
 describe('simple', () => {
 	type T = { a: string; b?: number }

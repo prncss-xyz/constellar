@@ -40,7 +40,8 @@ type IMultistateMachine<
 				  ) => Sendable<State> | undefined)
 		}
 		// TODO: DeriveLocal can be omitted if always is alawys defined
-	} & (DerivedLocal extends { [K in keyof DerivedLocal]: never }
+	}
+  & (DerivedLocal extends { [K in keyof DerivedLocal]: never }
 		? { [StateType in State['type']]: object }
 		: {
 				[StateType in State['type']]: {

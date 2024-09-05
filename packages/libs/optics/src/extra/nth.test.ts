@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { nth } from '.'
+import { eq, update, view } from '../core'
 
 describe('nth', () => {
 	type Source = [number, string, boolean]

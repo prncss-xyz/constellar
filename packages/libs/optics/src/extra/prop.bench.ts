@@ -1,5 +1,4 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 import { Lens } from 'monocle-ts'
 import * as O from 'optics-ts'
@@ -8,6 +7,7 @@ import * as L from 'partial.lenses'
 import { bench } from 'vitest'
 
 import { prop } from '.'
+import { eq, update, view } from '../core'
 
 const data = { a: { b: { c: { d: { e: 'hello' } } } } }
 type Data = typeof data

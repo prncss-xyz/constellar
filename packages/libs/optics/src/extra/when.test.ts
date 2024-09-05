@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { prop, when } from '.'
+import { eq, update, view } from '../core'
 
 describe('when', () => {
 	describe('filter elements', () => {

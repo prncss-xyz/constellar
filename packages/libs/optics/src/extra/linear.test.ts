@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { linear } from '.'
+import { eq, update, view } from '../core'
 
 describe('linear', () => {
 	const focus = flow(eq<number>(), linear(1.8, 32))

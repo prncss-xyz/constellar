@@ -1,7 +1,7 @@
-import { eq, REMOVE, update, view } from '@/.'
 import { flow } from '@constellar/utils'
 
 import { prop } from '.'
+import { eq, REMOVE, update, view } from '../core'
 
 describe('prop', () => {
 	type Source = {

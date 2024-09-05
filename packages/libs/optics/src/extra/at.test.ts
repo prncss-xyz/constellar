@@ -1,7 +1,7 @@
-import { eq, REMOVE, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { at } from '.'
+import { eq, REMOVE, update, view } from '../core'
 
 describe('at', () => {
 	type Source = string[]

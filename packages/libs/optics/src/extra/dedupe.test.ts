@@ -1,7 +1,7 @@
-import { eq, update, view } from '@/core'
 import { flow } from '@constellar/utils'
 
 import { dedupe } from '.'
+import { eq, update, view } from '../core'
 
 describe('dedupe', () => {
 	const equal = (a: string, b: string) => a.toUpperCase() === b.toUpperCase()
