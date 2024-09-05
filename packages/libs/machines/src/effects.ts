@@ -1,17 +1,19 @@
+import { shallowEqual } from '@constellar/utils'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type AnyState = { effects?: Partial<Record<string, any>> }
 
 export type Effects<State extends AnyState> = Required<
 	Exclude<State['effects'], undefined>
 >
-export type Interpreter<State extends AnyState, Event> = {
+export type Interpreter<Event, State extends AnyState> = {
 	[Key in keyof Effects<State>]: (
 		effect: Exclude<Effects<State>[Key], undefined>,
 		send: (event: Event) => void,
 	) => void | (() => void)
 }
 
-export class ManchineEffects<State extends AnyState, Event> {
+export class ManchineEffects<Event, State extends AnyState> {
 	lastArgs = new Map<keyof Effects<State>, any>()
 	unmount = new Map<keyof Effects<State>, void | (() => void)>()
 	lastCb = new Map<keyof Effects<State>, unknown>()
@@ -20,14 +22,13 @@ export class ManchineEffects<State extends AnyState, Event> {
 	update(
 		state: State,
 		send: (event: Event) => void,
-		interpreter: Interpreter<State, Event>,
+		interpreter: Interpreter<Event, State>,
 	) {
 		for (const entry of Object.entries(interpreter)) {
-			const k = entry[0] as keyof Effects<State>
-			const cb = entry[1] as any
+			const [k, cb] = entry as [keyof Effects<State>, any]
 			const args = (state.effects as any)?.[k]
 			if (
-				this.lastArgs.get(k) === args &&
+				shallowEqual(this.lastArgs.get(k), args) &&
 				this.lastSend === send &&
 				this.lastCb.get(k) === cb
 			)

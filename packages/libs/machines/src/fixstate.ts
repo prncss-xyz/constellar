@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { id, Init, isFunction, Prettify, toInit } from '@constellar/utils'
+import {
+	id,
+	Init,
+	isFunction,
+	Prettify,
+	toInit,
+	Typed,
+} from '@constellar/utils'
 
-import { IMachine } from '..'
+import { fromSendable, IMachine, Sendable } from '.'
 
 type ExtractEvent<Transition> = Transition extends (
 	e: infer E,
@@ -19,16 +26,19 @@ type ExtractEventObject<Transitions extends Record<PropertyKey, unknown>> = {
 type ExtractEvents<Transitions extends Record<PropertyKey, unknown>> =
 	UnionValues<ExtractEventObject<Transitions>>
 
-type Transition<State, Derived> =
+type Transition<State, Transformed> =
 	| State
-	| ((e: any, s: Derived) => State | undefined)
+	| ((e: any, s: Transformed) => State | undefined)
 
-type Transitions<State, Derived> = Record<any, Transition<State, Derived>>
+type Transitions<State, Transformed> = Record<
+	any,
+	Transition<State, Transformed>
+>
 
 export function fixstateMachine<
 	State,
-	T extends Transitions<State, Derived>,
-	Derived = State,
+	T extends Transitions<State, Transformed>,
+	Transformed = State,
 	InitialArg = void,
 >({
 	init,
@@ -38,21 +48,29 @@ export function fixstateMachine<
 }: {
 	init: Init<State, InitialArg>
 	events: T
-	transform?: (s: State) => Derived
-	isFinal?: (s: Derived) => boolean
-}): IMachine<Prettify<ExtractEvents<T>>, Derived, InitialArg> {
-	const init0 = toInit(init)
-	transform = transform ?? (id as (s: State) => Derived)
-	return {
-		init: (initialArg) => transform(init0(initialArg)),
-		reducer: (event, derived) => {
-			if (isFinal?.(derived)) return undefined
-			// we want to pass through unknown events
-			let res = events[event?.type] as any
-			if (isFunction(res)) res = res(event, derived)
-			if (!res) return undefined
-			return transform(res)
-		},
-		isFinal: isFinal ? (derived) => isFinal?.(derived) : () => false,
+	transform?: (s: State) => Transformed
+	isFinal?: (s: Transformed) => boolean
+}) {
+	return (
+		initialArg: InitialArg,
+	): IMachine<
+		Sendable<Prettify<ExtractEvents<T>> & Typed>,
+		State,
+		Transformed
+	> => {
+		return {
+			init: toInit(init)(initialArg),
+			reducer: (event, transformed) => {
+				const e = fromSendable(event as any)
+				if (isFinal?.(transformed)) return undefined
+				// we want to pass through unknown events
+				let res = events[e?.type] as any
+				if (isFunction(res)) res = res(e, transformed)
+				if (!res) return undefined
+				return res
+			},
+			transform: transform ?? (id as (s: State) => Transformed),
+			isFinal: isFinal ? (transformed) => isFinal?.(transformed) : () => false,
+		}
 	}
 }

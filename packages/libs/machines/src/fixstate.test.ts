@@ -1,7 +1,5 @@
-import { id } from '@constellar/utils'
-
-import { createObjectReducer, fromMachine } from '..'
 import { fixstateMachine } from './fixstate'
+import { objectMachineFactory } from './object'
 
 const machine = fixstateMachine({
 	init: (a: string) => a.length,
@@ -15,20 +13,21 @@ const machine = fixstateMachine({
 	isFinal: (x) => x === 8,
 })
 
-test('fixstateMachine', () => {
-	const m = createObjectReducer(fromMachine(machine), id)('hello')
-	const send = m.send.bind(m)
-	expect(m.state).toBe(10)
-	send({ type: 'next', u: 2 })
-	expect(m.state).toBe(24)
-	send({ type: 'toto', j: 'oo' })
-	expect(m.state).toBe(4)
-	send({ type: 'jazz', j: false })
-	expect(m.state).toBe(4)
-	send({ type: 'jazz', j: true })
-	expect(m.state).toBe(40)
-	send('fluf')
-	expect(m.state).toBe(8)
-	send({ type: 'next', u: 2 })
-	expect(m.state).toBe(8)
+describe('fixstateMachine', () => {
+	test('with transform and isFinal', () => {
+		const m = objectMachineFactory(machine('hello'))
+		expect(m.peek()).toBe(10)
+		m.send({ type: 'next', u: 2 })
+		expect(m.peek()).toBe(24)
+		m.send({ type: 'toto', j: 'oo' })
+		expect(m.peek()).toBe(4)
+		m.send({ type: 'jazz', j: false })
+		expect(m.peek()).toBe(4)
+		m.send({ type: 'jazz', j: true })
+		expect(m.peek()).toBe(40)
+		m.send('fluf')
+		expect(m.peek()).toBe(8)
+		m.send({ type: 'next', u: 2 })
+		expect(m.peek()).toBe(8)
+	})
 })

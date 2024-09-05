@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Init, isFunction, toInit, Typed } from '@constellar/utils'
+import { Init, isEmpty, isFunction, toInit, Typed } from '@constellar/utils'
 
-import { fromSendable, IMachine, Sendable } from '..'
-
-// TODO: derive: optional
+import { fromSendable, IMachine, Sendable } from '.'
 
 type IMultistateMachine<
 	Event extends Typed,
@@ -15,7 +13,12 @@ type IMultistateMachine<
 	init: Init<Sendable<State>, InitialArg>
 	states: {
 		[StateType in State['type']]: {
-			events: Partial<{
+			always?:
+				| Sendable<State>
+				| (<S extends State & { type: StateType } & DerivedLocal & Derived>(
+						state: S,
+				  ) => Sendable<State> | undefined)
+			events?: Partial<{
 				[EventType in Event['type']]:
 					| Sendable<State>
 					| (<
@@ -26,7 +29,17 @@ type IMultistateMachine<
 							state: S,
 					  ) => Sendable<State> | undefined)
 			}>
+			wildcard?:
+				| Sendable<State>
+				| (<
+						E extends Event & { type: Event },
+						S extends State & { type: StateType } & DerivedLocal & Derived,
+				  >(
+						event: E,
+						state: S,
+				  ) => Sendable<State> | undefined)
 		}
+		// TODO: DeriveLocal can be omitted if always is alawys defined
 	} & (DerivedLocal extends { [K in keyof DerivedLocal]: never }
 		? { [StateType in State['type']]: object }
 		: {
@@ -51,40 +64,52 @@ export function multistateMachine<
 	init,
 	states,
 	derive,
-}: IMultistateMachine<
-	Event,
-	State,
-	InitialArg,
-	DerivedLocal,
-	Derived
->): IMachine<Event, State & DerivedLocal, InitialArg> {
+}: IMultistateMachine<Event, State, InitialArg, DerivedLocal, Derived>) {
 	const init0 = toInit(init)
-	function derivator(s: State) {
-		// we take derive from the next state
-		const localDerive = (states as any)[s.type].derive
-		const d1 = localDerive ? join(s, localDerive) : (s as State & DerivedLocal)
-		const d2 = derive
-			? join(d1, derive)
-			: (d1 as State & DerivedLocal & Derived)
-		return d2
+	function fromAlways(s: State) {
+		while (true) {
+			let s_ = (states as any)[s.type].always
+			if (isFunction(s_)) s_ = s_(s)
+			if (s_ === undefined) break
+			s = s_
+		}
+		return s
 	}
-	return {
-		init: (initialArg: InitialArg) => {
-			const s = fromSendable(init0(initialArg))
-			return derivator(s)
-		},
-		reducer: (
-			event: Event,
-			s: State & DerivedLocal,
-		): (State & DerivedLocal) | undefined => {
-			const state = (states as any)[s.type]
-			let res = state?.events[event.type]
-			if (isFunction(res)) res = res(event, s)
-			if (res === undefined) return undefined
-			res = fromSendable(res)
-			return derivator(res)
-		},
-		isFinal: (s) => Object.keys((states as any)[s.type]).length === 0,
+	return function (
+		initialArg: InitialArg,
+	): IMachine<Sendable<Event>, State, State & DerivedLocal & Derived> {
+		return {
+			init: fromAlways(fromSendable(init0(initialArg))),
+			reducer: (event: Sendable<Event>, s: State & DerivedLocal & Derived) => {
+				const e = fromSendable(event)
+				const state = (states as any)[s.type]
+				let res = state?.events?.[e.type]
+				if (isFunction(res)) res = res(e, s)
+				if (res === undefined) {
+					res = state?.wildcard
+					if (isFunction(res)) res = res(e, s)
+					if (res === undefined) return undefined
+				}
+				return fromAlways(fromSendable(res))
+			},
+			transform: (s: State) => {
+				const localDerive = (states as any)[s.type].derive
+				const d1 = localDerive
+					? join(s, localDerive)
+					: (s as State & DerivedLocal)
+				const d2 = derive
+					? join(d1, derive)
+					: (d1 as State & DerivedLocal & Derived)
+				return d2
+			},
+			isFinal: (s) => {
+				const state = (states as any)[s.type]
+				if (state.always) return false
+				if (state.wildcard) return false
+				if (!isEmpty(state.events)) return false
+				return true
+			},
+		}
 	}
 }
 

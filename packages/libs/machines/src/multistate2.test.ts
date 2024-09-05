@@ -1,7 +1,7 @@
 import { id } from '@constellar/utils'
 
-import { createObjectReducer, fromMachine } from '..'
 import { multistateMachine } from './multistate'
+import { objectMachineFactory } from './object'
 
 describe('machine', () => {
 	type Event = {
@@ -40,11 +40,12 @@ describe('machine', () => {
 		derive: (s) => ({ ...s, len: s.type.length }),
 	})
 
-	it('should start running', () => {
-		const m = createObjectReducer(fromMachine(machine), id)()
-		const send = m.send.bind(m)
-		expect(m.state).toMatchObject({ type: 'green' })
-		send('next')
-		expect(m.state).toMatchObject({ type: 'yellow' })
+	it('simple finte state machine', () => {
+		const m = objectMachineFactory(machine())
+		expect(m.peek()).toEqual({ type: 'green', len: 5 })
+		expect(m.isFinal()).toBeFalsy()
+		m.send('next')
+		expect(m.peek()).toEqual({ type: 'yellow', len: 6 })
+		expect(m.isFinal()).toBeFalsy()
 	})
 })

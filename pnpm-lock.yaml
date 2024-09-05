@@ -53,83 +53,6 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
 
-  packages/demos/_template-react:
-    dependencies:
-      '@constellar/atoms':
-        specifier: workspace:^
-        version: link:../../libs/react-atoms
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../../libs/utils
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
-      '@vitejs/plugin-react':
-        specifier: ^4.3.1
-        version: 4.3.1(vite@5.4.0(@types/node@22.2.0))
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
-  packages/demos/atoms-async:
-    dependencies:
-      '@constellar/atoms':
-        specifier: workspace:^
-        version: link:../../libs/react-atoms
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../../libs/optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../../libs/utils
-      '@vitejs/plugin-react':
-        specifier: ^4.3.1
-        version: 4.3.1(vite@5.4.0(@types/node@22.2.0))
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
   packages/demos/jotai-machine-effects:
     dependencies:
       '@constellar/jotai':
@@ -369,52 +292,6 @@ importers:
       partial.lenses:
         specifier: ^14.17.0
         version: 14.17.0
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vite-plugin-dts:
-        specifier: ^4.0.2
-        version: 4.0.2(@types/node@22.2.0)(rollup@4.20.0)(typescript@5.5.4)(vite@5.4.0(@types/node@22.2.0))
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
-  packages/libs/react-atoms:
-    dependencies:
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../utils
-      react18-use:
-        specifier: ^0.3.0
-        version: 0.3.0(react@18.3.1)
-    devDependencies:
-      '@testing-library/dom':
-        specifier: ^10.4.0
-        version: 10.4.0
-      '@testing-library/react':
-        specifier: ^16.0.0
-        version: 16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
-      jsdom:
-        specifier: ^24.1.1
-        version: 24.1.1
-      react:
-        specifier: '18'
-        version: 18.3.1
-      react-dom:
-        specifier: '18'
-        version: 18.3.1(react@18.3.1)
       vite:
         specifier: ^5.4.0
         version: 5.4.0(@types/node@22.2.0)
@@ -4968,14 +4845,6 @@ packages:
       }
     engines: { node: '>=0.10.0' }
 
-  react18-use@0.3.0:
-    resolution:
-      {
-        integrity: sha512-h/s6y9CRE/LV3QZvEtS4iBg5UThXTyHCjbfxzHEHEoRISaQa9SVQ7pdTnUt7M83URP1QRJ2bVSDwMpBIvmi50w==,
-      }
-    peerDependencies:
-      react: '>=18.0.0'
-
   react@18.3.1:
     resolution:
       {
@@ -8938,10 +8807,6 @@ snapshots:
   react-is@17.0.2: {}
 
   react-refresh@0.14.2: {}
-
-  react18-use@0.3.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   react@18.3.1:
     dependencies:

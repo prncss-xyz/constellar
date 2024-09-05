@@ -1,37 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ManchineEffects } from './effects'
 
-type State = { effects: { a: number } }
+type State = { effects: Partial<{ a: number; b: number }> }
 type Event = number
 const monoid = {
-	init: { effects: { a: 0 } },
-	fold: (n: number, s: State) => (n ? { effects: { a: n } } : s),
+	init: { effects: { a: 0, b: 0 } } as State,
+	fold: (n: number, s: State) =>
+		n ? { effects: { a: n, b: n ? undefined : 1 } } : s,
 }
 
 test('effects', () => {
-	const eff = new ManchineEffects<State, Event>()
-	const cbIn = vi.fn()
-	const cbOut = vi.fn()
+	const eff = new ManchineEffects<Event, State>()
+	const cbInA = vi.fn()
+	const cbOutA = vi.fn()
+	const cbInB = vi.fn()
 	const interpreter = {
-		a: (...args: any[]) => {
-			cbIn(...args)
-			return cbOut
+		a: (...args: unknown[]) => {
+			cbInA(...args)
+			return cbOutA
+		},
+		b: (...args: unknown[]) => {
+			cbInB(...args)
 		},
 	}
 	let state = monoid.init
 	const send = (n: number) => (state = monoid.fold(n, state))
 	eff.update(state, send, interpreter)
-	expect(cbIn).toHaveBeenCalledWith(0, send)
-	expect(cbOut).toHaveBeenCalledTimes(0)
+	expect(cbInA).toHaveBeenCalledWith(0, send)
+	expect(cbInB).toHaveBeenCalledTimes(1)
+	expect(cbOutA).toHaveBeenCalledTimes(0)
 	send(1)
 	eff.update(state, send, interpreter)
-	expect(cbIn).toHaveBeenCalledWith(1, send)
-	expect(cbOut).toHaveBeenCalledTimes(1)
+	expect(cbInA).toHaveBeenCalledWith(1, send)
+	expect(cbInB).toHaveBeenCalledTimes(1)
+	expect(cbOutA).toHaveBeenCalledTimes(1)
 	const s1 = state
 	send(0)
 	eff.update(state, send, interpreter)
 	expect(state.effects?.a).toBe(s1.effects?.a)
-	expect(cbOut).toHaveBeenCalledTimes(1)
+	expect(cbOutA).toHaveBeenCalledTimes(1)
 	eff.flush()
-	expect(cbOut).toHaveBeenCalledTimes(2)
+	expect(cbOutA).toHaveBeenCalledTimes(2)
 })

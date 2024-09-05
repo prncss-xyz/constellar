@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fromArray } from '@/core/collection'
 import { append, id, prepend, remove, replace } from '@constellar/utils'
 
 import {
@@ -11,6 +10,7 @@ import {
 	REMOVE,
 	traversal,
 } from '../core'
+import { fromArray } from '../core/collection'
 
 // isomorphisms
 

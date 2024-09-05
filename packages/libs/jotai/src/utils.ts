@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
 
 export function unwrap<Part, Whole>(

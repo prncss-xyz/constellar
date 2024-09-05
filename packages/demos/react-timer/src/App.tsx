@@ -1,13 +1,13 @@
 import { Json } from '@/json'
-import { atomWithReducer, selectAtom } from '@constellar/jotai'
+import { machineAtom, selectAtom } from '@constellar/jotai'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
 import { useAtomCallback } from 'jotai/utils'
 import { useCallback } from 'react'
 
 import { clockAtom, useSetupClock } from './clock'
-import { machine } from './machine'
+import { timerMachine } from './machine'
 
-const timerAtom = atomWithReducer(machine())
+const timerAtom = machineAtom(timerMachine())
 
 const toggledAtom = selectAtom(timerAtom, ({ toggled }) => toggled)
 const toStateNames = {

@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Json } from '@/json'
-import {
-	atomWithReducer,
-	selectAtom,
-	useMachineInterperter,
-} from '@constellar/jotai'
+import { machineAtom, selectAtom, useMachineEffects } from '@constellar/jotai'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { machine } from './machine'
+import { lightsMachine } from './machine'
 
-const machineAtom = atomWithReducer(machine())
-const typeAtom = selectAtom(machineAtom, (s) => s?.type)
+const lightsAtom = machineAtom(lightsMachine())
+const typeAtom = selectAtom(lightsAtom, (s) => s?.type)
 
 function Effects() {
-	useMachineInterperter(machineAtom, {
-		timeout: ({ delay, event }, send) => {
-			const t = setTimeout(() => send({ type: event }), delay)
-			return () => clearTimeout(t)
-		},
-	})
+	useMachineEffects(
+		lightsAtom,
+		useMemo(
+			() => ({
+				timeout: ({ delay, event }, send) => {
+					const t = setTimeout(() => send({ type: event }), delay)
+					return () => clearTimeout(t)
+				},
+			}),
+			[],
+		),
+	)
 	return null
 }
 
@@ -29,7 +31,7 @@ function Light() {
 }
 
 function Next() {
-	const send = useSetAtom(machineAtom)
+	const send = useSetAtom(lightsAtom)
 	const next = useCallback(() => send('next'), [send])
 	return <button onClick={next}>Next</button>
 }
@@ -39,7 +41,7 @@ function Main() {
 			<Effects />
 			<Light />
 			<Next />
-			<Json store={machineAtom} />
+			<Json store={lightsAtom} />
 		</div>
 	)
 }

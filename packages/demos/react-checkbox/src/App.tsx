@@ -1,6 +1,6 @@
 import { Json } from '@/json'
-import { focusAtom } from '@constellar/jotai'
-import { active, filter, includes, prop } from '@constellar/optics'
+import { activeFocusAtom, focusAtom } from '@constellar/jotai'
+import { filter, includes, prop } from '@constellar/optics'
 import { pipe } from '@constellar/utils'
 import { atom, useAtom } from 'jotai'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
@@ -15,7 +15,6 @@ type State = {
 	}
 }
 const stateAtom = atom<State>({ fields: { contents: [] } })
-const activateLength = active((a, b) => a.length === b.length)
 
 const toggle = (v: boolean) => !v
 function Checkbox({
@@ -49,20 +48,16 @@ function ItemCheckbox({ name }: { name: string }) {
 	return <Checkbox name={name} value={value} setValue={setValue} />
 }
 
-const clearVoyelsAtom = focusAtom(
+const clearVoyelsAtom = activeFocusAtom(
 	stateAtom,
-	pipe(
-		prop('fields'),
-		prop('contents'),
-		filter(isVoyel),
-		activateLength([] as string[]),
-	),
+	pipe(prop('fields'), prop('contents'), filter(isVoyel)),
+	[],
 )
 
 function ClearVoyels() {
 	const [disabled, clear] = useAtom(clearVoyelsAtom)
 	return (
-		<button disabled={disabled} onClick={() => clear(true)}>
+		<button disabled={disabled} onClick={() => clear()}>
 			Clear voyels
 		</button>
 	)
