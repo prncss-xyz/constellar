@@ -1,4 +1,4 @@
-import { noop } from '@constellar/utils'
+import { id, Init, noop } from '@constellar/utils'
 
 export type UnfoldForm<Part, Index> = () =>
 	| { part: Part; index: Index }
@@ -16,11 +16,18 @@ export const fromArray = <T>(xs: T[]): UnfoldForm<T, number> => {
 
 export function toArray<V>(): FoldForm<V, V[], Ctx> {
 	return {
-		init: [],
+		init: () => [],
 		foldFn: (v, acc) => {
 			acc.push(v)
 			return acc
 		},
+	}
+}
+
+export function toValue<V>(init: Init<V>): FoldForm<V, V, Ctx> {
+	return {
+		init,
+		foldFn: id,
 	}
 }
 
@@ -50,6 +57,6 @@ export type Refold<Part, Whole, C> = <Acc>(
 ) => FoldFn<Whole, Acc, C>
 
 export interface FoldForm<Part, Acc, C> {
-	init: Acc
+	init: Init<Acc>
 	foldFn: FoldFn<Part, Acc, C>
 }

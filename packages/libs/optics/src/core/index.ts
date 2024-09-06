@@ -20,11 +20,12 @@ import {
 	FoldFn,
 	FoldForm,
 	ICtx,
+	Refold,
 	toFirst,
 	Unfolder,
 } from '../collections'
 
-function foldWith<Part, Whole, Acc, Index>(
+function foldFrom<Part, Whole, Acc, Index>(
 	acc: Acc,
 	foldPart: (w: Part, acc: Acc, ctx: Ctx) => Acc,
 	whole: Whole,
@@ -81,12 +82,11 @@ export function view<Part, Whole, Fail, Command>(
 	return (whole: Whole) => f(toFirst<Part, Fail, Ctx>(undefined as Fail), whole)
 }
 
-// TODO: typing
 export function fold<Part, Whole, Fail, Command>(
 	focus: IOptic<Part, Whole, Fail, Command>,
 ) {
 	return function <Acc>(form: FoldForm<Part, Acc, Ctx>, whole: Whole) {
-		return focus.refold(form.foldFn)(whole, form.init, ctxNull)
+		return focus.refold(form.foldFn)(whole, fromInit(form.init), ctxNull)
 	}
 }
 
@@ -225,7 +225,7 @@ type IOpticArgs<Part, Whole, Fail, Command> =
 	| IOptional<Part, Whole, Fail, Command>
 	| ITraversal<Part, Whole, Fail, Command>
 
-function optic<Part, Whole, Command, Fail>({
+export function optic<Part, Whole, Fail, Command>({
 	getter,
 	setter,
 	mapper,
@@ -263,6 +263,14 @@ function optic<Part, Whole, Command, Fail>({
 			getter: composeGetter(o.isFaillure, o.getter, getter),
 			setter: composeSetter(o.getter, o.setter, o.isFaillure, setter),
 		}
+	}
+}
+
+export function focused<Whole>() {
+	return function <Part, Fail, Command>(
+		focus: Focus<Part, Whole, Fail, Command>,
+	) {
+		return focus(eq<Whole>())
 	}
 }
 
@@ -341,12 +349,13 @@ export function traversal<Part, Whole, Index>({
 	return optic({
 		refold: <Acc>(foldPart: (p: Part, acc: Acc, ctx: Ctx) => Acc) => {
 			return function (whole: Whole, acc: Acc, { close }: Ctx) {
-				return foldWith(acc, foldPart, whole, coll, close)
+				return foldFrom(acc, foldPart, whole, coll, close)
 			}
 		},
 		mapper: (mod, whole: Whole) => {
-			const { init: acc, foldFn } = form()
-			return foldWith(
+			const { init, foldFn } = form()
+			const acc = fromInit(init)
+			return foldFrom(
 				acc,
 				(p, acc, ctx) => foldFn(mod(p), acc, ctx),
 				whole,
@@ -401,7 +410,8 @@ export function valueOr<Part>(value: Init<Part>) {
 	return function <Whole, Fail, Command>(
 		o: IOptic<Part, Whole, Fail, Command>,
 	): IOptic<Part, Whole, never, Command> {
-		if (!(o.getter && o.setter)) throw "valueOr don't work with traversals"
+		if (!(o.getter && o.setter))
+			throw new Error("valueOr don't work with traversals")
 		const getter = (whole: Whole) => {
 			const part = o.getter!(whole)
 			if (o.isFaillure(part)) return fromInit(value)

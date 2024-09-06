@@ -1,6 +1,6 @@
 import { flow } from '@constellar/utils'
 
-import { find } from '.'
+import { findOne } from '.'
 import { eq, REMOVE, update, view } from '../core'
 
 describe('find', () => {
@@ -17,7 +17,7 @@ describe('find', () => {
 	]
 	const focus = flow(
 		eq<Source[]>(),
-		find((item) => item.bar === 'quux'),
+		findOne((item) => item.bar === 'quux'),
 	)
 	describe('view', () => {
 		it('defined', () => {
@@ -75,7 +75,7 @@ describe('find', () => {
 		type T = string | number
 		const focus = flow(
 			eq<T[]>(),
-			find((item) => typeof item === 'string'),
+			findOne((item) => typeof item === 'string'),
 		)
 		const source: T[] = []
 		const res = view(focus)(source)
