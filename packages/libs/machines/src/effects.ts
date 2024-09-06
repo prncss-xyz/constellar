@@ -14,9 +14,10 @@ export type Interpreter<Event, State extends AnyState> = {
 }
 
 export class ManchineEffects<Event, State extends AnyState> {
-	lastArgs = new Map<keyof Effects<State>, any>()
-	unmount = new Map<keyof Effects<State>, void | (() => void)>()
-	lastCb = new Map<keyof Effects<State>, unknown>()
+	last = new Map<
+		keyof Effects<State>,
+		{ args: any; unmount: void | (() => void); cb: unknown }
+	>()
 	lastSend: unknown
 	constructor() {}
 	update(
@@ -25,28 +26,29 @@ export class ManchineEffects<Event, State extends AnyState> {
 		interpreter: Interpreter<Event, State>,
 	) {
 		for (const entry of Object.entries(interpreter)) {
-			const [k, cb] = entry as [keyof Effects<State>, any]
-			const args = (state.effects as any)?.[k]
+			const [effect, cb] = entry as [keyof Effects<State>, any]
+			const args = (state.effects as any)?.[effect]
+			const last = this.last.get(effect)
 			if (
-				shallowEqual(this.lastArgs.get(k), args) &&
+				shallowEqual(last?.args, args) &&
 				this.lastSend === send &&
-				this.lastCb.get(k) === cb
+				last?.cb === cb
 			)
 				continue
-			this.lastArgs.set(k, args)
-			this.lastCb.set(k, cb)
-			this.unmount.get(k)?.()
-			this.unmount.set(k, args === undefined ? undefined : cb(args, send))
+			last?.unmount?.()
+			this.last.set(effect, {
+				args,
+				cb,
+				unmount: args === undefined ? undefined : cb(args, send),
+			})
 		}
 		this.lastSend = send
 	}
 	flush() {
-		for (const [, v] of this.unmount) {
-			v?.()
+		for (const [, last] of this.last) {
+			last.unmount?.()
 		}
-		this.unmount.clear()
-		this.lastArgs.clear()
-		this.lastCb.clear()
+		this.last.clear()
 		this.lastSend = undefined
 	}
 }

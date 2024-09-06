@@ -80,6 +80,7 @@ export function multistateMachine<
 	): IMachine<Sendable<Event>, State, State & DerivedLocal & Derived> {
 		return {
 			init: fromAlways(fromSendable(init0(initialArg))),
+			visit: (acc, fold, state) => fold(state, acc, state.type),
 			reducer: (event: Sendable<Event>, s: State & DerivedLocal & Derived) => {
 				const e = fromSendable(event)
 				const state = (states as any)[s.type]

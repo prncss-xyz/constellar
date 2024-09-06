@@ -60,6 +60,7 @@ export function fixstateMachine<
 	> => {
 		return {
 			init: toInit(init)(initialArg),
+			visit: (acc, fold, state) => fold(state, acc, ''),
 			reducer: (event, transformed) => {
 				const e = fromSendable(event as any)
 				if (isFinal?.(transformed)) return undefined

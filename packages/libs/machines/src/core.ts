@@ -2,6 +2,11 @@ import { Typed } from '@constellar/utils'
 
 export interface IMachine<Event, State, Transformed = State> {
 	init: State
+	visit: <T>(
+		acc: T,
+		fold: (state: State, acc: T, index: string) => T,
+		state: State,
+	) => T
 	reducer: (event: Event, transformed: Transformed) => State | undefined
 	transform: (state: State) => Transformed
 	// TODO: type narrowing
