@@ -1,5 +1,3 @@
-import { id } from '@constellar/utils'
-
 import { multistateMachine } from './multistate'
 import { objectMachineFactory } from './object'
 
@@ -12,13 +10,7 @@ describe('machine', () => {
 		type: 'green' | 'yellow' | 'red'
 	}
 
-	const machine = multistateMachine<
-		Event,
-		State,
-		void,
-		object,
-		{ len: number }
-	>({
+	const machine = multistateMachine<Event, State, object, { len: number }>()({
 		init: 'green',
 		states: {
 			green: {
@@ -43,9 +35,9 @@ describe('machine', () => {
 	it('simple finte state machine', () => {
 		const m = objectMachineFactory(machine())
 		expect(m.peek()).toEqual({ type: 'green', len: 5 })
-		expect(m.isFinal()).toBeFalsy()
+		expect(m.getFinal()).toBeUndefined()
 		m.send('next')
 		expect(m.peek()).toEqual({ type: 'yellow', len: 6 })
-		expect(m.isFinal()).toBeFalsy()
+		expect(m.getFinal()).toBeUndefined()
 	})
 })

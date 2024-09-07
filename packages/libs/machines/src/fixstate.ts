@@ -19,7 +19,7 @@ type ExtractEvent<Transition> = Transition extends (
 
 type UnionValues<T> = T extends Record<string, unknown> ? T[keyof T] : never
 
-type ExtractEventObject<Transitions extends Record<PropertyKey, unknown>> = {
+type ExtractEventObject<Transitions extends Record<string, unknown>> = {
 	[K in keyof Transitions]: { type: K } & ExtractEvent<Transitions[K]>
 }
 
@@ -40,30 +40,32 @@ export function fixstateMachine<
 	T extends Transitions<State, Transformed>,
 	Transformed = State,
 	InitialArg = void,
+	Final = never,
 >({
 	init,
 	events,
 	transform,
-	isFinal,
+	getFinal,
 }: {
 	init: Init<State, InitialArg>
 	events: T
 	transform?: (s: State) => Transformed
-	isFinal?: (s: Transformed) => boolean
+	getFinal?: (s: Transformed) => Final | undefined
 }) {
 	return (
 		initialArg: InitialArg,
 	): IMachine<
 		Sendable<Prettify<ExtractEvents<T>> & Typed>,
 		State,
-		Transformed
+		Transformed,
+		Final
 	> => {
 		return {
 			init: toInit(init)(initialArg),
 			visit: (acc, fold, state) => fold(state, acc, ''),
 			reducer: (event, transformed) => {
 				const e = fromSendable(event as any)
-				if (isFinal?.(transformed)) return undefined
+				if (getFinal?.(transformed) !== undefined) return undefined
 				// we want to pass through unknown events
 				let res = events[e?.type] as any
 				if (isFunction(res)) res = res(e, transformed)
@@ -71,7 +73,7 @@ export function fixstateMachine<
 				return res
 			},
 			transform: transform ?? (id as (s: State) => Transformed),
-			isFinal: isFinal ? (transformed) => isFinal?.(transformed) : () => false,
+			getFinal: getFinal ?? (() => undefined),
 		}
 	}
 }

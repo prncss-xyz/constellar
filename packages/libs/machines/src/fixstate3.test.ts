@@ -12,6 +12,6 @@ describe('fixstateMachine', () => {
 	test('default isFinal', () => {
 		const m = objectMachineFactory(machine())
 		expect(m.peek()).toMatchObject({ n: 0 })
-		expect(m.isFinal()).toBeFalsy()
+		expect(m.getFinal()).toBeUndefined()
 	})
 })

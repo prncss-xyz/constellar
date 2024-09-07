@@ -28,7 +28,7 @@ describe('machine', () => {
 		count: (now: number) => number
 	}
 
-	const machine = multistateMachine<Event, State, void, LocalDerived>({
+	const machine = multistateMachine<Event, State, LocalDerived>()({
 		init: { type: 'stopped', elapsed: 0 },
 		states: {
 			running: {
@@ -68,6 +68,7 @@ describe('machine', () => {
 				derive: { count: () => 0 },
 			},
 		},
+		derive: (s) => s,
 	})
 
 	it('should start running', () => {

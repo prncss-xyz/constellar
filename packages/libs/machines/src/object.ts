@@ -1,7 +1,7 @@
 import { IMachine } from './core'
 
-export function objectMachineFactory<Event, State, Transformed>(
-	machine: IMachine<Event, State, Transformed>,
+export function objectMachineFactory<Event, State, Transformed, Final>(
+	machine: IMachine<Event, State, Transformed, Final>,
 ) {
 	let transformed = machine.transform(machine.init)
 	const send = (event: Event) => {
@@ -11,7 +11,7 @@ export function objectMachineFactory<Event, State, Transformed>(
 	return {
 		send,
 		peek: () => transformed,
-		isFinal: () => machine.isFinal(transformed),
+		getFinal: () => machine.getFinal(transformed),
 		getState: (event: Event) => {
 			const nextState = machine.reducer(event, transformed)
 			if (nextState === undefined) return transformed

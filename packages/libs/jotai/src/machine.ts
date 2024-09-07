@@ -1,5 +1,5 @@
 import {
-	AnyState,
+	EffectState,
 	IMachine,
 	Interpreter,
 	ManchineEffects,
@@ -11,24 +11,46 @@ import { useEffect, useRef } from 'react'
 
 import { unwrap } from './utils'
 
-type Spiced<Event extends Typed, Transformed> = {
-	isFinal: () => boolean
+type Spiced<Event extends Typed, Transformed, Final> = {
+	getFinal: () => Final | undefined
 	getState: (event: Sendable<Event>) => Transformed
 	isDisabled: (event: Sendable<Event>) => boolean
 } & Transformed
 
-export function machineAtom<Event extends Typed, State, Transformed, R>(
-	machine: IMachine<Sendable<Event>, State, Transformed>,
+export function machineAtom<
+	Event extends Typed,
+	State,
+	Final extends Transformed,
+	Transformed,
+	R,
+>(
+	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
 	atomFactory: (
 		init: State,
 	) => WritableAtom<Promise<State>, [Promise<State>], R>,
-): WritableAtom<Promise<Spiced<Event, Transformed>>, [Sendable<Event>], R>
-export function machineAtom<Event extends Typed, State, Transformed, R>(
-	machine: IMachine<Sendable<Event>, State, Transformed>,
+): WritableAtom<
+	Promise<Spiced<Event, Transformed, Final>>,
+	[Sendable<Event>],
+	R
+>
+export function machineAtom<
+	Event extends Typed,
+	State,
+	Transformed,
+	Final extends Transformed,
+	R,
+>(
+	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
 	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
-): WritableAtom<Spiced<Event, Transformed>, [Sendable<Event>], R>
-export function machineAtom<Event extends Typed, State, Transformed, R>(
-	machine: IMachine<Sendable<Event>, State, Transformed>,
+): WritableAtom<Spiced<Event, Transformed, Final>, [Sendable<Event>], R>
+export function machineAtom<
+	Event extends Typed,
+	State,
+	Transformed,
+	Final extends Transformed,
+	R,
+>(
+	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
 	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
 ) {
 	const stateAtom = (
@@ -42,7 +64,7 @@ export function machineAtom<Event extends Typed, State, Transformed, R>(
 				(state) =>
 					({
 						...transform(state),
-						isFinal: () => machine.isFinal(transform(state)),
+						getFinal: () => machine.getFinal(transform(state)),
 						isDisabled: (event: Sendable<Event>) =>
 							machine.reducer(event, transform(state)) === undefined,
 						getState: (event: Sendable<Event>) => {
@@ -50,7 +72,7 @@ export function machineAtom<Event extends Typed, State, Transformed, R>(
 							if (nextState === undefined) return transform(state)
 							return machine.transform(nextState)
 						},
-					}) satisfies Spiced<Event, Transformed>,
+					}) satisfies Spiced<Event, Transformed, Final>,
 			),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
@@ -61,7 +83,7 @@ export function machineAtom<Event extends Typed, State, Transformed, R>(
 	)
 }
 
-export function useMachineEffects<State extends AnyState, Event>(
+export function useMachineEffects<Event, State extends EffectState>(
 	machineAtom:
 		| WritableAtom<State, [Event], void>
 		| WritableAtom<Promise<State>, [Promise<State>], void>,
