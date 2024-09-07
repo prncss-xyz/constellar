@@ -10,7 +10,7 @@ const machine = fixstateMachine({
 		fluf: 4,
 	},
 	transform: (x) => x * 2,
-	isFinal: (x) => x === 8,
+	getFinal: (x) => (x === 8 ? x : undefined),
 })
 
 describe('fixstateMachine', () => {

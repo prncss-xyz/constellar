@@ -11,8 +11,8 @@ describe('machine', () => {
 		count: number
 	}
 
-	const machine = multistateMachine<Event, State>({
-		init: { type: 'a', count: 0 },
+	const machine = multistateMachine<Event, State>()({
+		init: (n: number) => ({ type: 'a' as const, count: n }),
 		states: {
 			a: {
 				always: (s) => (s.count > 3 ? { ...s, count: 3 } : undefined),
@@ -33,10 +33,10 @@ describe('machine', () => {
 	})
 
 	it('with wildcard', () => {
-		const m = objectMachineFactory(machine())
+		const m = objectMachineFactory(machine(0))
 		expect(m.peek()).toMatchObject({ count: 0, type: 'a' })
 		expect(m.isDisabled('next')).toBeTruthy()
-		expect(m.isFinal()).toBe(false)
+		expect(m.getFinal()).toBeUndefined()
 		m.send('next')
 		expect(m.peek()).toMatchObject({ type: 'a' })
 		m.send('inc')
@@ -51,8 +51,11 @@ describe('machine', () => {
 		m.send('inc')
 		expect(m.peek()).toMatchObject({ count: 3 })
 		m.send('next')
-		expect(m.isFinal()).toBe(false)
+		expect(m.getFinal()).toBeUndefined()
 		m.send('zz')
-		expect(m.isFinal()).toBe(true)
+		expect(m.getFinal()).toEqual({ count: 3, type: 'c' })
+		expectTypeOf(m.getFinal()).toEqualTypeOf<
+			{ type: 'c'; count: number } | undefined
+		>()
 	})
 })

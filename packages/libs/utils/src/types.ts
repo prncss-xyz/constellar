@@ -3,6 +3,7 @@ export type Prettify<Type> = {
 } & {}
 
 export type Init<T, P = void> = T | ((p: P) => T)
+
 export type Reducer<Event, Acc> = (t: Event, acc: Acc) => Acc
 export type Updater<Value, Command> =
 	| Command

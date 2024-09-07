@@ -1,11 +1,15 @@
 import { Typed } from '@constellar/utils'
 
-export interface IMachine<Event, State, Transformed = State> {
+export interface IMachine<Event, State, Transformed, Final> {
 	init: State
+	visit: <T>(
+		acc: T,
+		fold: (state: Transformed, acc: T, index: string) => T,
+		transformed: Transformed,
+	) => T
 	reducer: (event: Event, transformed: Transformed) => State | undefined
 	transform: (state: State) => Transformed
-	// TODO: type narrowing
-	isFinal: (transformed: Transformed) => boolean
+	getFinal: (transformed: Transformed) => Final | undefined
 }
 
 // when event is just { type: string }, we can use string as shorthand

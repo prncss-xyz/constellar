@@ -1,15 +1,15 @@
 import { flow } from '@constellar/utils'
 
-import { filter } from '.'
+import { findMany } from '.'
 import { eq, update, view } from '../core'
 
-describe('filter', () => {
+describe('findMany', () => {
 	it('view', () => {
 		type Source = string[]
 		const source: Source = ['baz', 'quux', 'xyzzy']
 		const focus = flow(
 			eq<Source>(),
-			filter((item) => item !== 'quux'),
+			findMany((item) => item !== 'quux'),
 		)
 		const res = view(focus)(source)
 		expectTypeOf(res).toEqualTypeOf<string[]>()
@@ -21,7 +21,7 @@ describe('filter', () => {
 			const source: Source = ['baz', 'quux', 'xyzzy']
 			const focus = flow(
 				eq<Source>(),
-				filter((item) => item !== 'quux'),
+				findMany((item) => item !== 'quux'),
 			)
 			expect(update(focus, ['BAZ', 'XYZZY'])(source)).toEqual([
 				'BAZ',
@@ -34,7 +34,7 @@ describe('filter', () => {
 			type Source = Item[]
 			const source: Source = [1, 2, 3, 5, 6]
 			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
-			const focus = flow(eq<Source>(), filter(isOdd))
+			const focus = flow(eq<Source>(), findMany(isOdd))
 			const result = update(focus, ['foo', 'bar'])(source)
 			expect(result).toEqual(['foo', 2, 'bar', 6])
 		})
@@ -43,7 +43,7 @@ describe('filter', () => {
 			type Source = Item[]
 			const source: Source = [1, 2, 3, 5, 6]
 			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
-			const focus = flow(eq<Source>(), filter(isOdd))
+			const focus = flow(eq<Source>(), findMany(isOdd))
 			const result = update(focus, ['foo', 'bar', 'baz', 'quux', 'xyzzy'])(
 				source,
 			)
@@ -57,7 +57,7 @@ describe('filter', () => {
 		}
 		const focus = flow(
 			eq<Source>(),
-			filter((x) => isString(x)),
+			findMany((x) => isString(x)),
 		)
 		const sourceDefined: Source = ['a', 3]
 		it('view', () => {

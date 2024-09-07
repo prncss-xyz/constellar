@@ -5,7 +5,7 @@ import * as O from 'optics-ts'
 import * as L from 'partial.lenses'
 import { bench } from 'vitest'
 
-import { find, prop } from '.'
+import { findOne, prop } from '.'
 import { eq, update, view } from '../core'
 
 const size = 5000
@@ -44,7 +44,7 @@ describe('find 2', () => {
 	;(() => {
 		const optics = flow(
 			eq<Data2>(),
-			find((name: Child) => name.id === id),
+			findOne((name: Child) => name.id === id),
 		)
 		const v = view(optics)
 		const fn = () => v(data2)
@@ -73,7 +73,7 @@ describe('find read array element by predicate', () => {
 			prop('m'),
 			prop('n'),
 			prop('names'),
-			find((name: Child) => name.id === id),
+			findOne((name: Child) => name.id === id),
 		)
 		const v = view(optics)
 		const fn = () => v(data)
@@ -110,7 +110,7 @@ describe('find modify array element by predicate', () => {
 			prop('m'),
 			prop('n'),
 			prop('names'),
-			find((name: Child) => name.id === id),
+			findOne((name: Child) => name.id === id),
 		)
 		const v = update(optics, up)
 		const fn = () => v(data)
@@ -167,7 +167,7 @@ describe.only('find modify 2 array element by predicate', () => {
 	;(() => {
 		const optics = flow(
 			eq<Data2>(),
-			find((name: Child) => name.id === id),
+			findOne((name: Child) => name.id === id),
 		)
 		const v = update(optics, up)
 		const fn = () => v(data2)

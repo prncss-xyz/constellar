@@ -12,38 +12,42 @@ import {
 	traversal,
 } from '../core'
 
-// isomorphisms
+// getters
 
-export function to<B, V>(
-	select: (v: V) => B,
-): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<B, A, F, never>
-export function to<B, V>(
-	select: (v: V) => B | undefined,
-): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<B, A, F | undefined, never>
-export function to<B, V>(select: (v: V) => B | undefined) {
-	return optional<B, V>({
+export function to<Micro, Part>(
+	select: (v: Part) => Micro,
+): <Whole, F, C>(o: IOptic<Part, Whole, F, C>) => IOptic<Micro, Whole, F, never>
+export function to<Micro, Part>(
+	select: (v: Part) => Micro | undefined,
+): <A, F, C>(o: IOptic<Part, A, F, C>) => IOptic<Micro, A, F | undefined, never>
+export function to<Micro, Part>(select: (v: Part) => Micro | undefined) {
+	return optional<Micro, Part>({
 		getter: select,
 		setter: inert,
 	})
 }
 
-export function reread<A>(mod: (a: A) => A) {
-	return lens<A, A>({
+// isomorphisms
+
+export function reread<Whole>(mod: (a: Whole) => Whole) {
+	return lens<Whole, Whole>({
 		getter: mod,
 		setter: id,
 		// optics-ts setter is equivalent to: `setter: (_v, a) => a`
 	})
 }
 
-export function rewrite<A>(f: (next: A, last: A) => A) {
-	return lens<A, A>({
+export function rewrite<Whole>(f: (next: Whole, last: Whole) => Whole) {
+	return lens<Whole, Whole>({
 		getter: id,
 		setter: f,
 	})
 }
 
-export function dedupe<A>(areEqual: (a: A, b: A) => unknown = Object.is) {
-	return rewrite<A>((next, last) => {
+export function dedupe<Whole>(
+	areEqual: (a: Whole, b: Whole) => unknown = Object.is,
+) {
+	return rewrite<Whole>((next, last) => {
 		if (areEqual(next, last)) return last
 		return next
 	})
@@ -69,39 +73,6 @@ export function nth<Index extends keyof O & number, O extends unknown[]>(
 	})
 }
 
-export function filter<X, Y extends X>(
-	p: (x: X) => x is Y,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y[], A, F, never>
-export function filter<X>(
-	p: (x: X) => unknown,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X[], A, F, never>
-export function filter<X>(p: (x: X) => unknown) {
-	return lens({
-		getter: (xs: X[]) => xs.filter(p),
-		setter: (fs: X[], xs: X[]) => {
-			const rs = []
-			let i = 0
-			let j = 0
-			let k = 0
-			for (i = 0; i < xs.length; i++) {
-				const x = xs[i]!
-				if (p(x)) {
-					if (j < fs.length) {
-						rs[k++] = fs[j++]!
-					}
-				} else {
-					rs[k++] = x
-				}
-			}
-			for (; j < fs.length; j++, i++) {
-				rs[k++] = fs[j]!
-			}
-			return rs
-		},
-		// if needed, implementing a custom mapper could greatly improve speed
-	})
-}
-
 // equivalence relation
 export function includes<X>(x: X) {
 	return lens<boolean, X[]>({
@@ -118,12 +89,16 @@ export function includes<X>(x: X) {
 
 // prisms
 
-export function when<V, W extends V>(
-	p: (v: V) => v is W,
-): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<W, A, F | undefined, never>
-export function when<V>(
-	p: (v: V) => unknown,
-): <A, F, C>(o: IOptic<V, A, F, C>) => IOptic<V, A, F | undefined, never>
+export function when<Part, Micro extends Part>(
+	p: (v: Part) => v is Micro,
+): <Whole, F, C>(
+	o: IOptic<Part, Whole, F, C>,
+) => IOptic<Micro, Whole, F | undefined, never>
+export function when<Part>(
+	p: (v: Part) => unknown,
+): <Whole, F, C>(
+	o: IOptic<Part, Whole, F, C>,
+) => IOptic<Part, Whole, F | undefined, never>
 export function when<V>(p: (v: V) => unknown) {
 	return optional<V, V>({
 		getter: (v) => (p(v) ? v : undefined),
@@ -179,31 +154,69 @@ export function at<X>(index: number) {
 	})
 }
 
-// defective (when setting a value not repecting predicate)
-export function find<X, Y extends X>(
+export function findOne<X, Y extends X>(
 	p: (x: X) => x is Y,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y, A, undefined, typeof REMOVE>
-export function find<X>(
+): <Mega, F2, C2>(
+	o: IOptic<X[], Mega, F2, C2>,
+) => IOptic<Y, Mega, F2 | undefined, typeof REMOVE>
+export function findOne<X>(
 	p: (x: X) => unknown,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X, A, undefined, typeof REMOVE>
-export function find<X>(p: (x: X) => unknown) {
-	return removable({
-		getter: (xs: X[]) => xs.find(p),
-		setter: (x: X, xs: X[]) => {
-			const i = xs.findIndex(p)
-			if (i < 0) return [...xs, x]
-			return replace(x, i, xs)
-		},
-		remover: (xs: X[]) => {
-			const i = xs.findIndex(p)
-			if (i < 0) return xs
-			return remove(i, xs)
+): <Mega, F2, C2>(
+	o: IOptic<X[], Mega, F2, C2>,
+) => IOptic<X, Mega, F2 | undefined, typeof REMOVE>
+export function findOne<X>(p: (x: X) => unknown) {
+	return removable<X, X[]>({
+		getter: (xs) => xs.find(p),
+		setter: (x, xs) => {
+			const index = xs.findIndex(p)
+			if (index < 0) return append(x, xs)
+			return [...xs.slice(0, index), x, ...xs.slice(index + 1)]
 		},
 		mapper: (f, xs) => {
-			const i = xs.findIndex(p)
-			if (i < 0) return xs
-			return replace(f(xs[i]!), i, xs)
+			const index = xs.findIndex(p)
+			if (index < 0) return xs
+			const x = f(xs[index]!)
+			return [...xs.slice(0, index), x, ...xs.slice(index + 1)]
 		},
+		remover: (xs) => {
+			const index = xs.findIndex(p)
+			if (index < 0) return xs
+			return [...xs.slice(0, index), ...xs.slice(index + 1)]
+		},
+	})
+}
+
+// defective (when setting a value not repecting predicate)
+export function findMany<X, Y extends X>(
+	p: (x: X) => x is Y,
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y[], A, F, never>
+export function findMany<X>(
+	p: (x: X) => unknown,
+): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X[], A, F, never>
+export function findMany<X>(p: (x: X) => unknown) {
+	return lens<X[], X[]>({
+		getter: (xs) => xs.filter(p),
+		setter: (fs, xs) => {
+			const rs = []
+			let i = 0
+			let j = 0
+			let k = 0
+			for (i = 0; i < xs.length; i++) {
+				const x = xs[i]!
+				if (p(x)) {
+					if (j < fs.length) {
+						rs[k++] = fs[j++]!
+					}
+				} else {
+					rs[k++] = x
+				}
+			}
+			for (; j < fs.length; j++, i++) {
+				rs[k++] = fs[j]!
+			}
+			return rs
+		},
+		// if needed, implementing a custom mapper could greatly improve speed
 	})
 }
 
@@ -247,9 +260,9 @@ export function queue<X>() {
 }
 
 // traversals
-export function elems<B>() {
-	return traversal<B, B[], number>({
-		coll: fromArray<B>,
-		form: toArray<B>,
+export function elems<X>() {
+	return traversal<X, X[], number>({
+		coll: fromArray<X>,
+		form: toArray<X>,
 	})
 }

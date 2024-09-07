@@ -20,7 +20,7 @@ describe('machineAtom', () => {
 				n: n + e.n,
 			}),
 		},
-		isFinal: ({ n }) => n === 2,
+		getFinal: (s) => (s.n === 2 ? s : undefined),
 	})
 	test('default factory', async () => {
 		const someAtom = machineAtom(someMachine())
@@ -77,7 +77,7 @@ describe('effects', () => {
 			}),
 		},
 		transform: (s) => ({ ...s, effects: s.n < 0 ? {} : { a: s.n } }),
-		isFinal: ({ n }) => n === 2,
+		getFinal: (s) => (s.n === 2 ? s : undefined),
 	})
 	test('effects', async () => {
 		const someAtom = machineAtom(someMachine())

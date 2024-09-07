@@ -1,11 +1,12 @@
 // based on https://github.com/jotaijs/jotai-optics/blob/main/src/focusAtom.ts
 import {
 	active,
+	Ctx,
 	eq,
 	Focus,
 	fold,
+	FoldForm,
 	put,
-	toArray,
 	update,
 	view,
 } from '@constellar/optics'
@@ -30,21 +31,23 @@ export function viewAtom<Part, Whole, Fail, Command>(
 	return selectAtom(wholeAtom, (whole) => view(focus(eq<Whole>()))(whole))
 }
 
-export function collectAtom<Part, Whole, Fail, Command>(
+export function foldAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Promise<Whole>>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): Atom<Promise<Part[]>>
-export function collectAtom<Part, Whole, Fail, Command>(
+): <Acc>(form: FoldForm<Part, Acc, Ctx>) => Atom<Promise<Acc>>
+export function foldAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): Atom<Part[]>
-export function collectAtom<Part, Whole, Fail, Command>(
+): <Acc>(form: FoldForm<Part, Acc, Ctx>) => Atom<Acc>
+export function foldAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command>,
 ) {
-	return selectAtom(wholeAtom, (whole) =>
-		fold(focus(eq<Whole>()))(toArray(), whole),
-	) as Atom<Part[] | Promise<Part[]>>
+	return function <Acc>(form: FoldForm<Part, Acc, Ctx>) {
+		return selectAtom(wholeAtom, (whole) =>
+			fold(focus(eq<Whole>()))(form, whole),
+		) as Atom<Acc | Promise<Acc>>
+	}
 }
 
 export function focusAtom<Part, Whole, Fail, Command, R>(
@@ -74,25 +77,25 @@ export function focusAtom<Part, Whole, Fail, Command, R>(
 	)
 }
 
-export function activeFocusAtom<Part, Whole, Fail, Command, R>(
+export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Promise<Whole>, [Promise<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
 	part: Part,
 	areEqual?: AreEqual<unknown>,
 ): WritableAtom<Promise<boolean>, [], R>
-export function activeFocusAtom<Part, Whole, Fail, Command, R>(
+export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Promise<Whole>, [Whole], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
 	part: Part,
 	areEqual?: AreEqual<unknown>,
 ): WritableAtom<Promise<boolean>, [], R>
-export function activeFocusAtom<Part, Whole, Fail, Command, R>(
+export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
 	part: Part,
 	areEqual?: AreEqual<unknown>,
 ): WritableAtom<boolean, [], R>
-export function activeFocusAtom<Part, Whole, Fail, Command, R>(
+export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
 	part: Part,
