@@ -3,8 +3,8 @@ import {
 	Interpreter,
 	ManchineEffects,
 	Sendable,
-} from '@constellar/machines'
-import { isFunction, Typed, Updater } from '@constellar/utils'
+} from '@constellar/core/machines'
+import { isFunction, Typed, Updater } from '@constellar/core/utils'
 import { atom, WritableAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 

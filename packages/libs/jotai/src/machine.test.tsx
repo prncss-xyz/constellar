@@ -1,4 +1,4 @@
-import { fixstateMachine } from '@constellar/machines'
+import { fixstateMachine } from '@constellar/core/machines'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'

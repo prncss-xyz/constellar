@@ -9,8 +9,8 @@ import {
 	put,
 	update,
 	view,
-} from '@constellar/optics'
-import { AreEqual, shallowEqual, Updater } from '@constellar/utils'
+} from '@constellar/core/optics'
+import { AreEqual, shallowEqual, Updater } from '@constellar/core/utils'
 import { atom, Atom, WritableAtom } from 'jotai'
 
 import { selectAtom } from './shared'

@@ -1,7 +1,7 @@
 import { Json } from '@/json'
+import { findMany, includes, prop } from '@constellar/core/optics'
+import { pipe } from '@constellar/core/utils'
 import { disabledFocusAtom, focusAtom } from '@constellar/jotai'
-import { findMany, includes, prop } from '@constellar/optics'
-import { pipe } from '@constellar/utils'
 import { atom, useAtom } from 'jotai'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
 

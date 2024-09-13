@@ -55,18 +55,12 @@ importers:
 
   packages/demos/jotai-machine-effects:
     dependencies:
+      '@constellar/core':
+        specifier: workspace:^
+        version: link:../../libs/core
       '@constellar/jotai':
         specifier: workspace:^
         version: link:../../libs/jotai
-      '@constellar/machines':
-        specifier: workspace:^
-        version: link:../../libs/machines
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../../libs/optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../../libs/utils
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0))
@@ -104,15 +98,12 @@ importers:
 
   packages/demos/react-checkbox:
     dependencies:
+      '@constellar/core':
+        specifier: workspace:^
+        version: link:../../libs/core
       '@constellar/jotai':
         specifier: workspace:^
         version: link:../../libs/jotai
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../../libs/optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../../libs/utils
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -147,18 +138,12 @@ importers:
 
   packages/demos/react-timer:
     dependencies:
+      '@constellar/core':
+        specifier: workspace:^
+        version: link:../../libs/core
       '@constellar/jotai':
         specifier: workspace:^
         version: link:../../libs/jotai
-      '@constellar/machines':
-        specifier: workspace:^
-        version: link:../../libs/machines
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../../libs/optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../../libs/utils
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0))
@@ -191,23 +176,60 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
 
+  packages/libs/bench:
+    dependencies:
+      '@constellar/core':
+        specifier: workspace:^
+        version: link:../core
+      monocle-ts:
+        specifier: ^2.3.13
+        version: 2.3.13(fp-ts@2.16.9)
+      optics-ts:
+        specifier: ^2.4.1
+        version: 2.4.1
+      partial.lenses:
+        specifier: ^14.17.0
+        version: 14.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.2.0
+        version: 22.2.0
+      vite:
+        specifier: ^5.4.0
+        version: 5.4.0(@types/node@22.2.0)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
+
+  packages/libs/core:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.2.0
+        version: 22.2.0
+      '@vitest/coverage-v8':
+        specifier: ^2.0.5
+        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
+      tinyspy:
+        specifier: ^3.0.0
+        version: 3.0.0
+      vite:
+        specifier: ^5.4.0
+        version: 5.4.0(@types/node@22.2.0)
+      vite-plugin-dts:
+        specifier: ^4.0.2
+        version: 4.0.2(@types/node@22.2.0)(rollup@4.20.0)(typescript@5.5.4)(vite@5.4.0(@types/node@22.2.0))
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
+
   packages/libs/jotai:
     dependencies:
-      '@constellar/machines':
+      '@constellar/core':
         specifier: workspace:^
-        version: link:../machines
-      '@constellar/optics':
-        specifier: workspace:^
-        version: link:../optics
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../utils
+        version: link:../core
       jotai:
         specifier: '>=2.0.0'
         version: 2.9.3(@types/react@18.3.3)(react@18.3.1)
-      jotai-effect:
-        specifier: ^1.0.2
-        version: 1.0.2(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))
     devDependencies:
       '@testing-library/dom':
         specifier: ^10.4.0
@@ -236,83 +258,6 @@ importers:
       tinyspy:
         specifier: ^3.0.0
         version: 3.0.0
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vite-plugin-dts:
-        specifier: ^4.0.2
-        version: 4.0.2(@types/node@22.2.0)(rollup@4.20.0)(typescript@5.5.4)(vite@5.4.0(@types/node@22.2.0))
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
-  packages/libs/machines:
-    dependencies:
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../utils
-    devDependencies:
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
-      tinyspy:
-        specifier: ^3.0.0
-        version: 3.0.0
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vite-plugin-dts:
-        specifier: ^4.0.2
-        version: 4.0.2(@types/node@22.2.0)(rollup@4.20.0)(typescript@5.5.4)(vite@5.4.0(@types/node@22.2.0))
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
-  packages/libs/optics:
-    dependencies:
-      '@constellar/utils':
-        specifier: workspace:^
-        version: link:../utils
-    devDependencies:
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
-      fp-ts:
-        specifier: ^2.16.9
-        version: 2.16.9
-      monocle-ts:
-        specifier: ^2.3.13
-        version: 2.3.13(fp-ts@2.16.9)
-      optics-ts:
-        specifier: ^2.4.1
-        version: 2.4.1
-      partial.lenses:
-        specifier: ^14.17.0
-        version: 14.17.0
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.2.0)
-      vite-plugin-dts:
-        specifier: ^4.0.2
-        version: 4.0.2(@types/node@22.2.0)(rollup@4.20.0)(typescript@5.5.4)(vite@5.4.0(@types/node@22.2.0))
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.2.0)(jsdom@24.1.1)
-
-  packages/libs/utils:
-    devDependencies:
-      '@types/node':
-        specifier: ^22.2.0
-        version: 22.2.0
-      '@vitest/coverage-v8':
-        specifier: ^2.0.5
-        version: 2.0.5(vitest@2.0.5(@types/node@22.2.0)(jsdom@24.1.1))
       vite:
         specifier: ^5.4.0
         version: 5.4.0(@types/node@22.2.0)

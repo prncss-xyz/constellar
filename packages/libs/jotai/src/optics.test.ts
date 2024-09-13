@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { elems, linear, prop, toArray, when } from '@constellar/optics'
-import { pipe } from '@constellar/utils'
+import { elems, linear, prop, toArray, when } from '@constellar/core/optics'
+import { pipe } from '@constellar/core/utils'
 import { atom, createStore } from 'jotai'
 
 import { disabledFocusAtom, focusAtom, foldAtom, viewAtom } from '.'

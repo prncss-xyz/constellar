@@ -14,11 +14,6 @@ export default defineConfig({
 			reporter: ['text', 'json', 'clover', 'lcov'],
 		},
 	},
-	resolve: {
-		alias: {
-			'@': resolve(__dirname, './src'),
-		},
-	},
 	build: {
 		copyPublicDir: false,
 		sourcemap: true,
@@ -29,7 +24,13 @@ export default defineConfig({
 			formats: ['es'],
 		},
 		rollupOptions: {
-			external: ['jotai', 'react', '@constellar/optics', '@constellar/utils'],
+			external: [
+				'jotai',
+				'react',
+				'@constellar/core/machines',
+				'@constellar/core/optics',
+				'@constellar/core/utils',
+			],
 		},
 	},
 })

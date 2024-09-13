@@ -11,9 +11,7 @@
 	},
 	"dependencies": {
 		"@constellar/jotai": "workspace:^",
-		"@constellar/machines": "workspace:^",
-		"@constellar/optics": "workspace:^",
-		"@constellar/utils": "workspace:^",
+		"@constellar/core": "workspace:^",
 		"@vitejs/plugin-react": "^4.3.1",
 		"jotai": "^2.9.3",
 		"jotai-effect": "^1.0.2",
