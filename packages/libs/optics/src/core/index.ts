@@ -20,7 +20,6 @@ import {
 	FoldFn,
 	FoldForm,
 	ICtx,
-	Refold,
 	toFirst,
 	Unfolder,
 } from '../collections'
@@ -375,7 +374,7 @@ export function traversal<Part, Whole, Index>({
 // FIXME: type inference is problematic when value can be command
 // we need to cast is as any
 
-export function active<Part>(
+export function enabled<Part>(
 	value: Part | ((p: Part) => Part),
 	areEqual: AreEqual<any> = Object.is,
 ) {
@@ -429,28 +428,6 @@ export function valueOr<Part>(value: Init<Part>) {
 						: lastFold(whole, acc, ctx)
 			},
 			isFaillure: isNever,
-			isCommand: o.isCommand,
-			command: o.command,
-		}
-	}
-}
-
-export function whenFrom<Whole, Part>(
-	p: (whole: Whole, part: Part) => unknown,
-) {
-	return function <Fail, Command>(
-		o: IOptic<Part, Whole, Fail, Command>,
-	): IOptic<Part, Whole, Fail | undefined, Command> {
-		return {
-			refold:
-				<Acc>(foldPart: FoldFn<Part, Acc, Ctx>) =>
-				(whole, acc: Acc, ctx) =>
-					o.refold((part, acc: Acc, ctx) =>
-						p(whole, part) ? foldPart(part, acc, ctx) : acc,
-					)(whole, acc, ctx),
-			mapper: (mod, whole) =>
-				o.mapper((part) => (p(whole, part) ? mod(part) : part), whole),
-			isFaillure: composeFaillure(o.isFaillure, isUndefined),
 			isCommand: o.isCommand,
 			command: o.command,
 		}

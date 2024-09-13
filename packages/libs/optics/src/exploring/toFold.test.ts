@@ -1,8 +1,8 @@
 import { Ctx, FoldForm } from '@/collections'
+import { IOptic, fold, inert, eq, view } from '@/core'
 import { elems, linear } from '@/extra'
 import { flow, isNever } from '@constellar/utils'
 
-import { eq, fold, inert, IOptic, view } from '.'
 
 function toFold<Part, Acc>(form: FoldForm<Part, Acc, Ctx>) {
 	return function <Whole, Fail, Command>(

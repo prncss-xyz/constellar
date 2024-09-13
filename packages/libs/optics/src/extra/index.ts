@@ -15,14 +15,14 @@ import {
 // getters
 
 export function to<Micro, Part>(
-	select: (v: Part) => Micro,
+	getter: (v: Part) => Micro,
 ): <Whole, F, C>(o: IOptic<Part, Whole, F, C>) => IOptic<Micro, Whole, F, never>
 export function to<Micro, Part>(
-	select: (v: Part) => Micro | undefined,
+	getter: (v: Part) => Micro | undefined,
 ): <A, F, C>(o: IOptic<Part, A, F, C>) => IOptic<Micro, A, F | undefined, never>
-export function to<Micro, Part>(select: (v: Part) => Micro | undefined) {
+export function to<Micro, Part>(getter: (v: Part) => Micro | undefined) {
 	return optional<Micro, Part>({
-		getter: select,
+		getter,
 		setter: inert,
 	})
 }
@@ -37,10 +37,10 @@ export function reread<Whole>(mod: (a: Whole) => Whole) {
 	})
 }
 
-export function rewrite<Whole>(f: (next: Whole, last: Whole) => Whole) {
+export function rewrite<Whole>(setter: (next: Whole, last: Whole) => Whole) {
 	return lens<Whole, Whole>({
 		getter: id,
-		setter: f,
+		setter,
 	})
 }
 
