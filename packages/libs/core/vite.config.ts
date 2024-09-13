@@ -17,6 +17,7 @@ export default defineConfig({
 		emptyOutDir: true,
 		lib: {
 			entry: {
+				index: 'src/index.ts',
 				machines: 'src/machines/index.ts',
 				optics: 'src/optics/index.ts',
 				utils: 'src/utils/index.ts',
