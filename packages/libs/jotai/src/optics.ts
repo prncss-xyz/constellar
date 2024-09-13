@@ -1,5 +1,6 @@
 // based on https://github.com/jotaijs/jotai-optics/blob/main/src/focusAtom.ts
 import {
+	AreEqual,
 	Ctx,
 	enabled,
 	eq,
@@ -7,10 +8,11 @@ import {
 	fold,
 	FoldForm,
 	put,
+	shallowEqual,
 	update,
+	Updater,
 	view,
-} from '@constellar/core/optics'
-import { AreEqual, shallowEqual, Updater } from '@constellar/core/utils'
+} from '@constellar/core'
 import { atom, Atom, WritableAtom } from 'jotai'
 
 import { selectAtom } from './shared'
