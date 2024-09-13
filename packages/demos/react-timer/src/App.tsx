@@ -9,7 +9,14 @@ import { timerMachine } from './machine'
 
 const timerAtom = machineAtom(timerMachine())
 
-const toggledAtom = selectAtom(timerAtom, ({ toggled }) => toggled)
+const toggledAtom = selectAtom(
+	timerAtom,
+	({ next }) =>
+		next({
+			type: 'toggle',
+			now: 0,
+		}).type,
+)
 const toStateNames = {
 	stopped: 'Stop',
 	running: 'Start',

@@ -1,35 +1,39 @@
 import {
-	EffectState,
 	IMachine,
 	Interpreter,
 	ManchineEffects,
 	Sendable,
 } from '@constellar/machines'
-import { isFunction, memo1, Typed, Updater } from '@constellar/utils'
-import { atom, useAtom, WritableAtom } from 'jotai'
+import { isFunction, Typed, Updater } from '@constellar/utils'
+import { atom, WritableAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
 import { unwrap } from './utils'
 
-type Spiced<Event extends Typed, Transformed, Final> = {
-	getFinal: () => Final | undefined
-	getState: (event: Sendable<Event>) => Transformed
+type Spiced<Event extends Typed, Transformed, Substate, Final> = {
+	final: Final | undefined
+	next: (event: Sendable<Event>) => Transformed
 	isDisabled: (event: Sendable<Event>) => boolean
+	visit: <Acc>(
+		fold: (substate: Substate, acc: Acc, index: string) => Acc,
+		acc: Acc,
+	) => Acc
 } & Transformed
 
 export function machineAtom<
 	Event extends Typed,
 	State,
-	Final extends Transformed,
 	Transformed,
+	Substate,
+	Final,
 	R,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
+	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
 	atomFactory: (
 		init: State,
 	) => WritableAtom<Promise<State>, [Promise<State>], R>,
 ): WritableAtom<
-	Promise<Spiced<Event, Transformed, Final>>,
+	Promise<Spiced<Event, Transformed, Substate, Final>>,
 	[Sendable<Event>],
 	R
 >
@@ -37,64 +41,80 @@ export function machineAtom<
 	Event extends Typed,
 	State,
 	Transformed,
-	Final extends Transformed,
-	R,
+	Substate,
+	Final,
+	R = void,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
+	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
 	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
-): WritableAtom<Spiced<Event, Transformed, Final>, [Sendable<Event>], R>
+): WritableAtom<
+	Spiced<Event, Transformed, Substate, Final>,
+	[Sendable<Event>],
+	R
+>
 export function machineAtom<
 	Event extends Typed,
 	State,
 	Transformed,
-	Final extends Transformed,
+	Substate,
+	Final,
 	R,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Final>,
+	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
 	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
 ) {
 	const stateAtom = (
 		atomFactory ? atomFactory(machine.init) : atom(machine.init)
 	) as WritableAtom<State, [State], R>
-	const transform = memo1(machine.transform)
 	return atom(
 		(get) =>
-			unwrap(
-				get(stateAtom),
-				(state) =>
-					({
-						...transform(state),
-						getFinal: () => machine.getFinal(transform(state)),
-						isDisabled: (event: Sendable<Event>) =>
-							machine.reducer(event, transform(state)) === undefined,
-						getState: (event: Sendable<Event>) => {
-							const nextState = machine.reducer(event, transform(state))
-							if (nextState === undefined) return transform(state)
-							return machine.transform(nextState)
-						},
-					}) satisfies Spiced<Event, Transformed, Final>,
-			),
+			unwrap(get(stateAtom), (state) => {
+				const transformed = machine.transform(state)
+				return {
+					...transformed,
+					final: machine.getFinal(transformed),
+					next: (event: Sendable<Event>) => {
+						const nextState = machine.reducer(event, transformed)
+						if (nextState === undefined) return transformed
+						return machine.transform(nextState)
+					},
+					isDisabled: (event: Sendable<Event>) =>
+						machine.reducer(event, transformed) === undefined,
+					visit: <Acc>(
+						fold: (substate: Substate, acc: Acc, index: string) => Acc,
+						acc: Acc,
+					) => machine.visit(acc, fold, transformed),
+				} satisfies Spiced<Event, Transformed, Substate, Final>
+			}),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
-				const nextState = machine.reducer(event, transform(state))
+				const nextState = machine.reducer(event, machine.transform(state))
 				if (nextState === undefined) return
 				set(stateAtom, nextState)
 			}),
 	)
 }
 
-export function useMachineEffects<Event, State extends EffectState>(
-	machineAtom:
-		| WritableAtom<State, [Event], void>
-		| WritableAtom<Promise<State>, [Promise<State>], void>,
-	interpreter: Interpreter<Event, State>,
+export function useMachineEffects<
+	Event extends Typed,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	Transformed extends Spiced<Event, unknown, any, unknown>,
+>(
+	transformed: Transformed,
+	send: (event: Sendable<Event>) => void,
+	interpreter: Interpreter<Event, Transformed>,
 ) {
-	const [state, send] = useAtom(machineAtom)
-	const machineEffects = useRef(new ManchineEffects<Event, State>())
-	useEffect(() => () => machineEffects.current.flush(), [])
+	const machineEffects = useRef<ManchineEffects<Event, Transformed>>()
+	useEffect(() => {
+		machineEffects.current = new ManchineEffects<Event, Transformed>(
+			send,
+			interpreter,
+		)
+		return () => machineEffects.current!.flush()
+	}, [interpreter, send])
 	useEffect(
-		() => machineEffects.current.update(state, send, interpreter),
-		[state, send, interpreter],
+		() => machineEffects.current!.update(transformed.visit),
+		[transformed, send, interpreter],
 	)
 }
 

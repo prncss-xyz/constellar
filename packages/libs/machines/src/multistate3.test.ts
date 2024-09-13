@@ -1,5 +1,5 @@
 import { multistateMachine } from './multistate'
-import { objectMachineFactory } from './object'
+import { objectMachine } from './object'
 
 describe('machine', () => {
 	type Event = {
@@ -33,28 +33,28 @@ describe('machine', () => {
 	})
 
 	it('with wildcard', () => {
-		const m = objectMachineFactory(machine(0))
-		expect(m.peek()).toMatchObject({ count: 0, type: 'a' })
+		const m = objectMachine(machine(0))
+		expect(m.state).toMatchObject({ count: 0, type: 'a' })
 		expect(m.isDisabled('next')).toBeTruthy()
-		expect(m.getFinal()).toBeUndefined()
+		expect(m.final).toBeUndefined()
 		m.send('next')
-		expect(m.peek()).toMatchObject({ type: 'a' })
+		expect(m.state).toMatchObject({ type: 'a' })
 		m.send('inc')
 		expect(m.isDisabled('next')).toBeFalsy()
 		m.send('next')
-		expect(m.peek()).toMatchObject({ type: 'b' })
+		expect(m.state).toMatchObject({ type: 'b' })
 		m.send('next')
-		expect(m.peek()).toMatchObject({ type: 'a' })
+		expect(m.state).toMatchObject({ type: 'a' })
 		m.send('inc')
 		m.send('inc')
 		m.send('inc')
 		m.send('inc')
-		expect(m.peek()).toMatchObject({ count: 3 })
+		expect(m.state).toMatchObject({ count: 3 })
 		m.send('next')
-		expect(m.getFinal()).toBeUndefined()
+		expect(m.final).toBeUndefined()
 		m.send('zz')
-		expect(m.getFinal()).toEqual({ count: 3, type: 'c' })
-		expectTypeOf(m.getFinal()).toEqualTypeOf<
+		expect(m.final).toEqual({ count: 3, type: 'c' })
+		expectTypeOf(m.final).toEqualTypeOf<
 			{ type: 'c'; count: number } | undefined
 		>()
 	})

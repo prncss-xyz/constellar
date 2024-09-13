@@ -118,11 +118,13 @@ export function multistateMachine<
 			Sendable<Event>,
 			State,
 			Transformed,
+			Transformed,
 			Prettify<Final<State, Machine['states']>>
 		> {
 			return {
 				init: fromAlways(fromSendable(init0(initialArg))),
-				visit: (acc, fold, state) => fold(state, acc, state.type),
+				visit: (acc, fold, state, ...args) =>
+					fold(state, acc, state.type, ...args),
 				reducer: (
 					event: Sendable<Event>,
 					s: State & DerivedLocal & Derived,

@@ -1,5 +1,5 @@
 import { multistateMachine } from './multistate'
-import { objectMachineFactory } from './object'
+import { objectMachine } from './object'
 
 describe('machine', () => {
 	type Event = {
@@ -33,11 +33,11 @@ describe('machine', () => {
 	})
 
 	it('simple finte state machine', () => {
-		const m = objectMachineFactory(machine())
-		expect(m.peek()).toEqual({ type: 'green', len: 5 })
-		expect(m.getFinal()).toBeUndefined()
+		const m = objectMachine(machine())
+		expect(m.state).toEqual({ type: 'green', len: 5 })
+		expect(m.final).toBeUndefined()
 		m.send('next')
-		expect(m.peek()).toEqual({ type: 'yellow', len: 6 })
-		expect(m.getFinal()).toBeUndefined()
+		expect(m.state).toEqual({ type: 'yellow', len: 6 })
+		expect(m.final).toBeUndefined()
 	})
 })

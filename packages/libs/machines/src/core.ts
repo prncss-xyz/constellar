@@ -1,12 +1,12 @@
 import { Typed } from '@constellar/utils'
 
-export interface IMachine<Event, State, Transformed, Final> {
+export interface IMachine<Event, State, Transformed, Substate, Final> {
 	init: State
-	visit: <T>(
-		acc: T,
-		fold: (state: Transformed, acc: T, index: string) => T,
+	visit: <Acc>(
+		acc: Acc,
+		fold: (substate: Substate, acc: Acc, index: string) => Acc,
 		transformed: Transformed,
-	) => T
+	) => Acc
 	reducer: (event: Event, transformed: Transformed) => State | undefined
 	transform: (state: State) => Transformed
 	getFinal: (transformed: Transformed) => Final | undefined

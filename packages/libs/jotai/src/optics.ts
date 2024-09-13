@@ -1,7 +1,7 @@
 // based on https://github.com/jotaijs/jotai-optics/blob/main/src/focusAtom.ts
 import {
-	active,
 	Ctx,
+	enabled,
 	eq,
 	Focus,
 	fold,
@@ -101,7 +101,7 @@ export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	part: Part,
 	areEqual: AreEqual<unknown> = shallowEqual,
 ) {
-	const optic = active(part, areEqual)(focus(eq<Whole>()))
+	const optic = enabled(part, areEqual)(focus(eq<Whole>()))
 	return atom(
 		(get) => unwrap(get(wholeAtom), view(optic)),
 		(get, set) =>

@@ -58,11 +58,12 @@ export function fixstateMachine<
 		Sendable<Prettify<ExtractEvents<T>> & Typed>,
 		State,
 		Transformed,
+		Transformed,
 		Final
 	> => {
 		return {
 			init: toInit(init)(initialArg),
-			visit: (acc, fold, state) => fold(state, acc, ''),
+			visit: (acc, fold, state, ...args) => fold(state, acc, '', ...args),
 			reducer: (event, transformed) => {
 				const e = fromSendable(event as any)
 				if (getFinal?.(transformed) !== undefined) return undefined

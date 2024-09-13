@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Json } from '@/json'
 import { machineAtom, selectAtom, useMachineEffects } from '@constellar/jotai'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useMemo } from 'react'
 
 import { lightsMachine } from './machine'
@@ -10,8 +10,10 @@ const lightsAtom = machineAtom(lightsMachine())
 const typeAtom = selectAtom(lightsAtom, (s) => s?.type)
 
 function Effects() {
+	const [state, send] = useAtom(lightsAtom)
 	useMachineEffects(
-		lightsAtom,
+		state,
+		send,
 		useMemo(
 			() => ({
 				timeout: ({ delay, event }, send) => {

@@ -1,6 +1,6 @@
 import { Json } from '@/json'
-import { activeFocusAtom, focusAtom } from '@constellar/jotai'
-import { filter, includes, prop } from '@constellar/optics'
+import { disabledFocusAtom, focusAtom } from '@constellar/jotai'
+import { findMany, includes, prop } from '@constellar/optics'
 import { pipe } from '@constellar/utils'
 import { atom, useAtom } from 'jotai'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
@@ -48,9 +48,9 @@ function ItemCheckbox({ name }: { name: string }) {
 	return <Checkbox name={name} value={value} setValue={setValue} />
 }
 
-const clearVoyelsAtom = activeFocusAtom(
+const clearVoyelsAtom = disabledFocusAtom(
 	stateAtom,
-	pipe(prop('fields'), prop('contents'), filter(isVoyel)),
+	pipe(prop('fields'), prop('contents'), findMany(isVoyel)),
 	[],
 )
 

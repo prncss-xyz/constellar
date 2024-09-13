@@ -1,5 +1,5 @@
 import { multistateMachine } from './multistate'
-import { objectMachineFactory } from './object'
+import { objectMachine } from './object'
 
 describe('machine', () => {
 	type Event =
@@ -72,21 +72,21 @@ describe('machine', () => {
 	})
 
 	it('should start running', () => {
-		const m = objectMachineFactory(machine())
+		const m = objectMachine(machine())
 
-		expect(m.peek()).toMatchObject({ type: 'stopped', elapsed: 0 })
+		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 0 })
 		m.send({ type: 'toggle', now: 1 })
-		expect(m.peek()).toMatchObject({ type: 'running', since: 1 })
-		expect(m.peek().count(3)).toBe(2)
+		expect(m.state).toMatchObject({ type: 'running', since: 1 })
+		expect(m.state.count(3)).toBe(2)
 		m.send({ type: 'toggle', now: 3 })
-		expect(m.peek().count(3)).toBe(2)
-		expect(m.peek()).toMatchObject({ type: 'stopped', elapsed: 2 })
+		expect(m.state.count(3)).toBe(2)
+		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 2 })
 		m.send({ type: 'reset', now: 6 })
-		expect(m.peek()).toMatchObject({ type: 'stopped', elapsed: 0 })
+		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 0 })
 		m.send({ type: 'toggle', now: 9 })
 		m.send({ type: 'reset', now: 11 })
 		m.send({ type: 'toggle', now: 11 })
 		m.send('bye')
-		expect(m.peek()).toMatchObject({ type: 'final' })
+		expect(m.state).toMatchObject({ type: 'final' })
 	})
 })

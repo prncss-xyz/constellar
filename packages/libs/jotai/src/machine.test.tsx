@@ -1,6 +1,6 @@
 import { fixstateMachine } from '@constellar/machines'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { atom, createStore, useSetAtom } from 'jotai'
+import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'
 import { spy } from 'tinyspy'
 
@@ -84,8 +84,8 @@ describe('effects', () => {
 		const cbIn = spy((..._: unknown[]) => {})
 		const cbOut = spy(() => {})
 		function Machine() {
-			const send = useSetAtom(someAtom)
-			useMachineEffects(someAtom, {
+			const [state, send] = useAtom(someAtom)
+			useMachineEffects(state, send, {
 				a: (...args: unknown[]) => {
 					cbIn(...args)
 					return cbOut

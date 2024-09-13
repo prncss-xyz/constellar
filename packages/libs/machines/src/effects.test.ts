@@ -1,18 +1,20 @@
-import { ManchineEffects } from './effects'
+import { spy } from 'tinyspy'
 
-type State = { effects: Partial<{ a: number; b: number }> }
-type Event = number
-const monoid = {
-	init: { effects: { a: 0, b: 0 } } as State,
-	fold: (n: number, s: State) =>
-		n ? { effects: { a: n, b: n ? undefined : 1 } } : s,
-}
+import { fixstateMachine } from '.'
+import { objectMachine } from './object'
+
+const machine = fixstateMachine({
+	init: { n: 0 },
+	events: {
+		e: ({ n }: { n: number }) => ({ n }),
+	},
+	transform: ({ n }) => ({ n, effects: { a: n, b: n === 0 ? 1 : undefined } }),
+})
 
 test('effects', () => {
-	const eff = new ManchineEffects<Event, State>()
-	const cbInA = vi.fn()
-	const cbOutA = vi.fn()
-	const cbInB = vi.fn()
+	const cbInA = spy()
+	const cbOutA = spy()
+	const cbInB = spy()
 	const interpreter = {
 		a: (...args: unknown[]) => {
 			cbInA(...args)
@@ -22,22 +24,17 @@ test('effects', () => {
 			cbInB(...args)
 		},
 	}
-	let state = monoid.init
-	const send = (n: number) => (state = monoid.fold(n, state))
-	eff.update(state, send, interpreter)
-	expect(cbInA).toHaveBeenCalledWith(0, send)
-	expect(cbInB).toHaveBeenCalledTimes(1)
-	expect(cbOutA).toHaveBeenCalledTimes(0)
-	send(1)
-	eff.update(state, send, interpreter)
-	expect(cbInA).toHaveBeenCalledWith(1, send)
-	expect(cbInB).toHaveBeenCalledTimes(1)
-	expect(cbOutA).toHaveBeenCalledTimes(1)
-	const s1 = state
-	send(0)
-	eff.update(state, send, interpreter)
-	expect(state.effects?.a).toBe(s1.effects?.a)
-	expect(cbOutA).toHaveBeenCalledTimes(1)
-	eff.flush()
-	expect(cbOutA).toHaveBeenCalledTimes(2)
+
+	const m = objectMachine(machine(), { interpreter })
+
+	expect(cbInA.calls[0]?.[0]).toBe(0)
+	expect(cbInB.calls).toHaveLength(1)
+	expect(cbOutA.calls).toHaveLength(0)
+	m.send({ type: 'e', n: 1 })
+	expect(cbInA.calls[1]?.[0]).toBe(1)
+	expect(cbInB.calls).toHaveLength(1)
+	expect(cbOutA.calls).toHaveLength(1)
+	expect(cbOutA.calls).toHaveLength(1)
+	m.flush()
+	expect(cbOutA.calls).toHaveLength(2)
 })

@@ -1,5 +1,5 @@
 import { fixstateMachine } from './fixstate'
-import { objectMachineFactory } from './object'
+import { objectMachine } from './object'
 
 const machine = fixstateMachine({
 	init: { n: 0 },
@@ -11,11 +11,11 @@ const machine = fixstateMachine({
 
 describe('description', () => {
 	test('without transform', () => {
-		const m = objectMachineFactory(machine())
-		expect(m.peek()).toMatchObject({ n: 0 })
-		expect(m.getFinal()).toBeUndefined()
+		const m = objectMachine(machine())
+		expect(m.state).toMatchObject({ n: 0 })
+		expect(m.final).toBeUndefined()
 		m.send({ type: 'next', u: 1 })
-		expect(m.peek()).toMatchObject({ n: 1 })
-		expect(m.getFinal()).toEqual({ n: 1 })
+		expect(m.state).toMatchObject({ n: 1 })
+		expect(m.final).toEqual({ n: 1 })
 	})
 })

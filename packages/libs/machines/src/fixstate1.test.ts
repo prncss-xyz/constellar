@@ -1,5 +1,5 @@
 import { fixstateMachine } from './fixstate'
-import { objectMachineFactory } from './object'
+import { objectMachine } from './object'
 
 const machine = fixstateMachine({
 	init: (a: string) => a.length,
@@ -15,19 +15,19 @@ const machine = fixstateMachine({
 
 describe('fixstateMachine', () => {
 	test('with transform and isFinal', () => {
-		const m = objectMachineFactory(machine('hello'))
-		expect(m.peek()).toBe(10)
+		const m = objectMachine(machine('hello'))
+		expect(m.state).toBe(10)
 		m.send({ type: 'next', u: 2 })
-		expect(m.peek()).toBe(24)
+		expect(m.state).toBe(24)
 		m.send({ type: 'toto', j: 'oo' })
-		expect(m.peek()).toBe(4)
+		expect(m.state).toBe(4)
 		m.send({ type: 'jazz', j: false })
-		expect(m.peek()).toBe(4)
+		expect(m.state).toBe(4)
 		m.send({ type: 'jazz', j: true })
-		expect(m.peek()).toBe(40)
+		expect(m.state).toBe(40)
 		m.send('fluf')
-		expect(m.peek()).toBe(8)
+		expect(m.state).toBe(8)
 		m.send({ type: 'next', u: 2 })
-		expect(m.peek()).toBe(8)
+		expect(m.state).toBe(8)
 	})
 })
