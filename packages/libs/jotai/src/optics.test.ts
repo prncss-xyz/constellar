@@ -1,6 +1,4 @@
- 
-import { elems, linear, prop, toArray, when } from '@constellar/core/optics'
-import { pipe } from '@constellar/core/utils'
+import { elems, linear, pipe, prop, toArray, when } from '@constellar/core'
 import { atom, createStore } from 'jotai'
 
 import { disabledFocusAtom, focusAtom, foldAtom, viewAtom } from '.'

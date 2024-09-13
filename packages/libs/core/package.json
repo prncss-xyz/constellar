@@ -19,6 +19,9 @@
 	],
 	"typesVersions": {
 		"*": {
+			".": [
+				"dist/index.d.ts"
+			],
 			"utils": [
 				"dist/utils.d.ts"
 			],
@@ -30,6 +33,7 @@
 			]
 		}
 	},
+	"main": "src/index.ts",
 	"exports": {
 		".": {
 			"import": "./dist/index.js",

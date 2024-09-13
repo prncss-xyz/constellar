@@ -1,10 +1,12 @@
 import {
 	IMachine,
 	Interpreter,
+	isFunction,
 	ManchineEffects,
 	Sendable,
-} from '@constellar/core/machines'
-import { isFunction, Typed, Updater } from '@constellar/core/utils'
+	Typed,
+	Updater,
+} from '@constellar/core'
 import { atom, WritableAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
