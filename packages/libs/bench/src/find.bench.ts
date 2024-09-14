@@ -1,6 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, findOne, prop, update, view } from '@constellar/core/optics'
-import { flow } from '@constellar/core/utils'
+import { eq, findOne, flow, prop, update, view } from '@constellar/core'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
 import * as L from 'partial.lenses'

@@ -1,6 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, prop, update, view } from '@constellar/core/optics'
-import { flow } from '@constellar/core/utils'
+import { eq, flow, prop, update, view } from '@constellar/core'
 import { Lens } from 'monocle-ts'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
