@@ -7,9 +7,9 @@
 	"scripts": {
 		"release": "release-it",
 		"format": "prettier --write packages/*/*/src",
-		"test:types": "pnpm --stream -r run test:types",
-		"test:unit": "pnpm --stream -r run test:unit --passWithNoTests",
-		"build": "pnpm --stream -r run build",
+		"test:types": "pnpm --stream --filter '@constellar/*' run test:types",
+		"test:unit": "pnpm --stream --filter '@constellar/*' run test:unit --passWithNoTests",
+		"build": "pnpm --stream --filter '@constellar/*' run build",
 		"test:lint": "eslint packages/** --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
 		"test:knip": "knip",
 		"prepare": "husky"
