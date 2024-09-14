@@ -1,10 +1,9 @@
-import { resolve } from 'node:path'
 import dts from 'vite-plugin-dts'
 import { defineConfig } from 'vitest/config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [dts({ include: ['src'] })],
+	plugins: [dts({ include: ['src'], rollupTypes: true })],
 	test: {
 		environment: 'jsdom',
 		globals: true,
@@ -19,9 +18,9 @@ export default defineConfig({
 		sourcemap: true,
 		emptyOutDir: true,
 		lib: {
-			entry: resolve(__dirname, 'src/index.ts'),
+			entry: 'src/index.ts',
+			formats: ['es', 'cjs'],
 			fileName: 'index',
-			formats: ['es'],
 		},
 		rollupOptions: {
 			external: ['jotai', 'react', '@constellar/core'],
