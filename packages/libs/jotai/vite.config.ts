@@ -24,13 +24,7 @@ export default defineConfig({
 			formats: ['es'],
 		},
 		rollupOptions: {
-			external: [
-				'jotai',
-				'react',
-				'@constellar/core/machines',
-				'@constellar/core/optics',
-				'@constellar/core/utils',
-			],
+			external: ['jotai', 'react', '@constellar/core'],
 		},
 	},
 })

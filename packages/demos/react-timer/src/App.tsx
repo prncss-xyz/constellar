@@ -8,7 +8,9 @@ import { clockAtom, useSetupClock } from './clock'
 import { timerMachine } from './machine'
 
 const timerAtom = machineAtom(timerMachine())
-
+const toggleAtom = atom(null, (get, set) =>
+	set(timerAtom, { type: 'toggle', now: get(clockAtom) }),
+)
 const toggledAtom = selectAtom(
 	timerAtom,
 	({ next }) =>
@@ -22,18 +24,7 @@ const toStateNames = {
 	running: 'Start',
 }
 function Toggle() {
-	const send = useSetAtom(timerAtom)
-	const toggle = useAtomCallback(
-		useCallback(
-			(get) => {
-				send({
-					type: 'toggle',
-					now: get(clockAtom),
-				})
-			},
-			[send],
-		),
-	)
+	const toggle = useSetAtom(toggleAtom)
 	const toggled = useAtomValue(toggledAtom)
 	return <button onClick={toggle}>{toStateNames[toggled]}</button>
 }
