@@ -17,39 +17,10 @@
 	"files": [
 		"dist"
 	],
-	"typesVersions": {
-		"*": {
-			".": [
-				"dist/index.d.ts"
-			],
-			"utils": [
-				"dist/utils.d.ts"
-			],
-			"optics": [
-				"dist/optics.d.ts"
-			],
-			"machines": [
-				"dist/machines.d.ts"
-			]
-		}
-	},
-	"main": "src/index.ts",
 	"exports": {
 		".": {
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
-		},
-		"./utils": {
-			"import": "./dist/utils.js",
-			"types": "./dist/utils.d.ts"
-		},
-		"./optics": {
-			"import": "./dist/optics.js",
-			"types": "./dist/optics.d.ts"
-		},
-		"./machines": {
-			"import": "./dist/machines.js",
-			"types": "./dist/machines.d.ts"
 		}
 	},
 	"publishConfig": {

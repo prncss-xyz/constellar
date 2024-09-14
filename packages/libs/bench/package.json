@@ -22,6 +22,7 @@
 	"scripts": {
 		"test:bench": "vitest bench",
 		"test:lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
+		"test:types": "tsc --noEmit",
 		"format": "prettier --write ./src"
 	},
 	"author": "Juliette Lamarche",

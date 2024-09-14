@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import dts from 'vite-plugin-dts'
 import { defineConfig } from 'vitest/config'
 
@@ -16,12 +17,8 @@ export default defineConfig({
 		sourcemap: true,
 		emptyOutDir: true,
 		lib: {
-			entry: {
-				index: 'src/index.ts',
-				machines: 'src/machines/index.ts',
-				optics: 'src/optics/index.ts',
-				utils: 'src/utils/index.ts',
-			},
+			entry: resolve(__dirname, 'src/index.ts'),
+			fileName: 'index',
 			formats: ['es'],
 		},
 	},

@@ -1,4 +1,4 @@
-import { multistateMachine } from '@constellar/core/machines'
+import { multistateMachine } from '@constellar/core'
 
 export type Event = { type: 'next' }
 

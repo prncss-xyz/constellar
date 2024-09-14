@@ -1,4 +1,4 @@
-import { multistateMachine } from '@constellar/core/machines'
+import { multistateMachine } from '@constellar/core'
 
 type Event = { type: 'toggle'; now: number } | { type: 'reset'; now: number }
 
