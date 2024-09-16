@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.4
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- **jotai/machine**: Improve API &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(8ee34)</samp>](https://github.com/prncss-xyz/constellar/commit/8ee34d2)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.0.3...2.0.4)
+
 ## 2.0.3
 
 *No significant changes*
