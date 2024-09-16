@@ -7,7 +7,7 @@ module.exports = {
 		'plugin:react-hooks/recommended',
 	],
 	plugins: ['react-refresh'],
-	ignorePatterns: ['dist', '.eslintrc.cjs'],
+	ignorePatterns: ['dist', '.eslintrc.cjs', 'babel.config.js'],
 	parser: '@typescript-eslint/parser',
 	rules: {
 		'react-refresh/only-export-components': [
