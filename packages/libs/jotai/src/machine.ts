@@ -31,9 +31,11 @@ export function machineAtom<
 	R,
 >(
 	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
-	atomFactory: (
-		init: State,
-	) => WritableAtom<Promise<State>, [Promise<State>], R>,
+	opts?: {
+		atomFactory: (
+			init: State,
+		) => WritableAtom<Promise<State>, [Promise<State>], R>
+	},
 ): WritableAtom<
 	Promise<Spiced<Event, Transformed, Substate, Final>>,
 	[Sendable<Event>],
@@ -48,7 +50,9 @@ export function machineAtom<
 	R = void,
 >(
 	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
-	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
+	opts?: {
+		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+	},
 ): WritableAtom<
 	Spiced<Event, Transformed, Substate, Final>,
 	[Sendable<Event>],
@@ -63,10 +67,12 @@ export function machineAtom<
 	R,
 >(
 	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
-	atomFactory?: (init: State) => WritableAtom<State, [State], R>,
+	opts?: {
+		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+	},
 ) {
 	const stateAtom = (
-		atomFactory ? atomFactory(machine.init) : atom(machine.init)
+		opts?.atomFactory ? opts.atomFactory(machine.init) : atom(machine.init)
 	) as WritableAtom<State, [State], R>
 	return atom(
 		(get) =>
@@ -149,19 +155,19 @@ export function disabledEventAtom<Event, R>(
 export function valueEventAtom<State, Event, Value, R>(
 	machineAtom: WritableAtom<Promise<State>, [Event], R>,
 	select: (state: State) => Value,
-	put: (value: Value) => Event,
-): WritableAtom<Promise<Value>, [Updater<Value, never>], Promise<R>>
+	put: (value: Value, send: (event: Event) => Promise<void>) => Promise<void>,
+): WritableAtom<Promise<Value>, [Updater<Value, never>], Promise<void>>
 export function valueEventAtom<State, Event, Value, R>(
 	machineAtom: WritableAtom<State, [Event], R>,
 	select: (state: State) => Value,
-	put: (value: Value) => Event,
-): WritableAtom<Value, [Updater<Value, never>], R>
+	put: (value: Value, send: (event: Event) => void) => void,
+): WritableAtom<Value, [Updater<Value, never>], void>
 export function valueEventAtom<State, Event, Value, R>(
 	machineAtom: WritableAtom<State, [Event], R>,
 	select: (state: State) => Value,
-	put: (value: Value) => Event,
+	put: (value: Value, send: (event: Event) => R) => R,
 ) {
-	function update(arg: Updater<Value, never>, state: State) {
+	function update(arg: Updater<Value, never>, state: State): Value {
 		if (isFunction(arg)) return arg(select(state))
 		return arg
 	}
@@ -169,7 +175,7 @@ export function valueEventAtom<State, Event, Value, R>(
 		(get) => unwrap(get(machineAtom), select),
 		(get, set, arg: Updater<Value, never>) =>
 			unwrap(get(machineAtom), (state) =>
-				set(machineAtom, put(update(arg, state))),
+				put(update(arg, state), (event: Event) => set(machineAtom, event)),
 			),
 	)
 }
