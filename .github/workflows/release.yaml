@@ -1,11 +1,10 @@
-name: Page
+name: Release
 
 env:
   HUSKY: 0
 
 permissions:
   contents: write
-  pages: write
   id-token: write
 
 on:
@@ -13,7 +12,8 @@ on:
     branches:
       - main
     paths:
-      - 'packages/docs/website/**'
+      - 'packages/libs/core/**'
+      - 'packages/libs/jotai/**'
   workflow_dispatch:
 
 jobs:
@@ -22,15 +22,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
-      - name: Build
-        working-directory: packages/docs/website
-        run: pnpm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './packages/docs/website/build'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Run tests
+        run: pnpm --filter "@constellar/core" run test:unit
+      - name: Publish
+        run: pnpm --filter "@constellar/core" publish --no-git-checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NPM_CONFIG_PROVENANCE: true
+      - name: Run tests
+        run: pnpm --filter "@constellar/jotai" run test:unit
+      - name: Publish
+        run: pnpm --filter "@constellar/jotai" publish --no-git-checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NPM_CONFIG_PROVENANCE: true
