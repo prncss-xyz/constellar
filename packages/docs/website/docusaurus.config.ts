@@ -6,12 +6,8 @@ const config: Config = {
 	title: 'Constellar',
 	tagline: 'State Manipulation Primitives as Pure Functions',
 	favicon: 'img/favicon.ico',
-
-	// Set the production url of your site here
-	url: 'https://your-docusaurus-site.example.com',
-	// Set the /<baseUrl>/ pathname under which your site is served
-	// For GitHub pages deployment, it is often '/<projectName>/'
-	baseUrl: '/',
+	url: 'https://prncss-xyz.github.io',
+	baseUrl: '/constellar/',
 
 	// GitHub pages deployment config.
 	// If you aren't using GitHub pages, you don't need these.
