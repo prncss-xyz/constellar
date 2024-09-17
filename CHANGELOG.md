@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.5
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Typing &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(274a0)</samp>](https://github.com/prncss-xyz/constellar/commit/274a05d)
+- **docs**:
+  - BaseUrl &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(c344d)</samp>](https://github.com/prncss-xyz/constellar/commit/c344dc9)
+  - BaseUrl &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(3d6c4)</samp>](https://github.com/prncss-xyz/constellar/commit/3d6c44a)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.0.4...2.0.5)
+
 ## 2.0.4
 
 ### &nbsp;&nbsp;&nbsp;Features
