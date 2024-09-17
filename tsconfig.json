@@ -28,11 +28,5 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": false,
 		"noImplicitOverride": true
-	},
-	"references": [
-		{ "path": "./packages/libs/utils" },
-		{ "path": "./packages/libs/machines" },
-		{ "path": "./packages/libs/optics" },
-		{ "path": "./packages/libs/react-atoms" }
-	]
+	}
 }

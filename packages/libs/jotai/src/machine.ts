@@ -31,7 +31,7 @@ export function machineAtom<
 	R,
 >(
 	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
-	opts?: {
+	opts: {
 		atomFactory: (
 			init: State,
 		) => WritableAtom<Promise<State>, [Promise<State>], R>
