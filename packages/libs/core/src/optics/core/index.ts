@@ -264,14 +264,6 @@ export function optic<Part, Whole, Fail, Command>({
 	}
 }
 
-export function focused<Whole>() {
-	return function <Part, Fail, Command>(
-		focus: Focus<Part, Whole, Fail, Command>,
-	) {
-		return focus(eq<Whole>())
-	}
-}
-
 export function lens<Part, Whole>({
 	getter,
 	setter,

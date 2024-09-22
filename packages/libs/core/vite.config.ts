@@ -5,11 +5,13 @@ export default defineConfig({
 	plugins: [dts({ include: ['src'], rollupTypes: true })],
 	test: {
 		include: ['src/**/*.test.{js,ts,jsx,tsx}'],
+		globals: true,
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'clover', 'lcov'],
+			include: ['src/**/*.{js,ts,jsx,tsx}'],
+			exclude: ['src/index.ts', 'src/**/*.test.{js,ts,jsx,tsx}'],
 		},
-		globals: true,
 	},
 	build: {
 		copyPublicDir: false,

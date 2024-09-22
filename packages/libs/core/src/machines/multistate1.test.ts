@@ -88,5 +88,7 @@ describe('machine', () => {
 		m.send({ type: 'toggle', now: 11 })
 		m.send('bye')
 		expect(m.state).toMatchObject({ type: 'final' })
+		const acc = m.visit((_, acc, index) => acc + index, '')
+		expect(acc).toBe('final')
 	})
 })

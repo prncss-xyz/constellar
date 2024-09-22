@@ -141,7 +141,7 @@ describe('find modify 2 array element by predicate', () => {
 	const data = 0 as number
 	type Data = typeof data
 	;(() => {
-		const optics = flow(eq<Data>())
+		const optics = eq<Data>()
 		const v = update(optics, up)
 		/* const v = (x: number) => optics.setter(up(optics.getter(x)), 0) */
 		const fn = () => v(data)

@@ -2,7 +2,6 @@ import { fixstateMachine } from '@constellar/core'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'
-import { spy } from 'tinyspy'
 
 import {
 	disabledEventAtom,
@@ -19,6 +18,7 @@ describe('machineAtom', () => {
 			add: (e: { n: number }, { n }) => ({
 				n: n + e.n,
 			}),
+			noop: () => undefined,
 		},
 		getFinal: (s) => (s.n === 2 ? s : undefined),
 	})
@@ -37,6 +37,15 @@ describe('machineAtom', () => {
 		store.set(someAtom, { type: 'add', n: 1 })
 		await Promise.resolve()
 		expect(await store.get(someAtom)).toMatchObject({ n: 2 })
+	})
+	test('async factory, noop', async () => {
+		const someAtom = machineAtom(someMachine(), {
+			atomFactory: (init) => atom(Promise.resolve(init)),
+		})
+		const store = createStore()
+		store.set(someAtom, 'noop')
+		await Promise.resolve()
+		expect(await store.get(someAtom)).toMatchObject({ n: 1 })
 	})
 	test('provided factory', async () => {
 		const someAtom = machineAtom(someMachine(), {
@@ -83,8 +92,8 @@ describe('effects', () => {
 	})
 	test('effects', async () => {
 		const someAtom = machineAtom(someMachine())
-		const cbIn = spy((..._: unknown[]) => {})
-		const cbOut = spy(() => {})
+		const cbIn = vi.fn((..._: unknown[]) => {})
+		const cbOut = vi.fn(() => {})
 		function Machine() {
 			const [state, send] = useAtom(someAtom)
 			useMachineEffects(state, send, {
@@ -105,21 +114,21 @@ describe('effects', () => {
 			)
 		}
 		render(<App />)
-		expect(cbIn.calls[0]?.[0]).toBe(0)
-		expect(typeof cbIn.calls[0]?.[1]).toEqual('function')
-		expect(cbIn.calls).toHaveLength(1)
-		expect(cbOut.calls).toHaveLength(0)
+		expect(cbIn.mock.calls[0]?.[0]).toBe(0)
+		expect(typeof cbIn.mock.calls[0]?.[1]).toEqual('function')
+		expect(cbIn).toHaveBeenCalledTimes(1)
+		expect(cbOut).toHaveBeenCalledTimes(0)
 
 		fireEvent.click(screen.getByText('send'))
-		expect(cbIn.calls[1]?.[0]).toBe(2)
-		expect(typeof cbIn.calls[1]?.[1]).toEqual('function')
-		expect(cbIn.calls).toHaveLength(2)
-		expect(cbOut.calls).toHaveLength(1)
+		expect(cbIn.mock.calls[1]?.[0]).toBe(2)
+		expect(typeof cbIn.mock.calls[1]?.[1]).toEqual('function')
+		expect(cbIn).toHaveBeenCalledTimes(2)
+		expect(cbOut).toHaveBeenCalledTimes(1)
 
 		// unmount th ecomponent
 		fireEvent.click(screen.getByText('toggle'))
-		expect(cbIn.calls).toHaveLength(2)
-		expect(cbOut.calls).toHaveLength(2)
+		expect(cbIn).toHaveBeenCalledTimes(2)
+		expect(cbOut).toHaveBeenCalledTimes(2)
 	})
 })
 

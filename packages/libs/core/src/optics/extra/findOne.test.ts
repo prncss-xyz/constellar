@@ -1,6 +1,6 @@
 import { findOne } from '.'
 import { flow } from '../../utils'
-import { eq, REMOVE, update, view } from '../core'
+import { command, eq, put, REMOVE, update, view } from '../core'
 
 describe('find', () => {
 	type Source = { bar: string }
@@ -28,7 +28,7 @@ describe('find', () => {
 	})
 	describe('put', () => {
 		it('defined', () => {
-			expect(update(focus, { bar: 'UPDATED' })(sourceDefined)).toEqual([
+			expect(put(focus, { bar: 'UPDATED' })(sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'UPDATED' },
 				{ bar: 'xyzzy' },
@@ -61,7 +61,7 @@ describe('find', () => {
 	})
 	describe('remove', () => {
 		it('defined', () => {
-			expect(update(focus, REMOVE)(sourceDefined)).toEqual([
+			expect(command(focus, REMOVE)(sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'xyzzy' },
 			])

@@ -24,13 +24,6 @@ export function toArray<V>(): FoldForm<V, V[], Ctx> {
 	}
 }
 
-export function toValue<V>(init: Init<V>): FoldForm<V, V, Ctx> {
-	return {
-		init,
-		foldFn: id,
-	}
-}
-
 export function toFirst<Part, Fail, Ctx extends { close: () => void }>(
 	fail: Fail,
 ): FoldForm<Part, Part | Fail, Ctx> {

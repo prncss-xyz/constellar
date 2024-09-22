@@ -1,17 +1,6 @@
 import { shallowEqual } from '../utils'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/*
-export type EffectSubstate = { effects?: Partial<Record<string, any>> }
-
-export type Effects<Substate extends EffectSubstate> = Required<
-	Exclude<Substate['effects'], undefined>
->
-
-type EffectKeys<Substate> = Substate extends { effects?: infer Effects }
-	? keyof Effects
-	: never
-*/
 
 export type Interpreter<Event, Substate> = Substate extends {
 	effects?: infer Effects

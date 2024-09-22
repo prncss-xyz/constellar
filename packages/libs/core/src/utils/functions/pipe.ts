@@ -53,6 +53,9 @@ export function pipe<TArgs extends any[], R1, R2>(
 	f1: (...args: TArgs) => R1,
 	f2: (a: R1) => R2,
 ): (...args: TArgs) => R2
+export function pipe<TArgs extends any[], R1>(
+	f1: (...args: TArgs) => R1,
+): (...args: TArgs) => R1
 
 // definition here: https://blog.logrocket.com/how-to-create-compose-function-typescript
 export function pipe<T>(fn1: (a: T) => T, ...fns: Array<(a: T) => T>) {

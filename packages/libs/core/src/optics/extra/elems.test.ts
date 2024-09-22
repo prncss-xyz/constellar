@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { elems, prop, when } from '.'
-import { flow, pipe } from '../../utils'
+import { flow } from '../../utils'
 import { toArray, toFirst } from '../collections'
 import { eq, fold, update, view } from '../core'
 
@@ -12,7 +12,7 @@ describe('first element', () => {
 	})
 	test('nested', () => {
 		type Source = number[][]
-		const focus = flow(eq<Source>(), pipe(elems(), elems()))
+		const focus = flow(eq<Source>(), elems(), elems())
 		expect(
 			fold(focus)(toFirst(undefined), [
 				[1, 2],

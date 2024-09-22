@@ -2,8 +2,10 @@ import {
 	IMachine,
 	Interpreter,
 	isFunction,
+	machineCb,
 	ManchineEffects,
 	Sendable,
+	Spiced,
 	Typed,
 	Updater,
 } from '@constellar/core'
@@ -11,16 +13,6 @@ import { atom, WritableAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
 import { unwrap } from './utils'
-
-type Spiced<Event extends Typed, Transformed, Substate, Final> = {
-	final: Final | undefined
-	next: (event: Sendable<Event>) => Transformed
-	isDisabled: (event: Sendable<Event>) => boolean
-	visit: <Acc>(
-		fold: (substate: Substate, acc: Acc, index: string) => Acc,
-		acc: Acc,
-	) => Acc
-} & Transformed
 
 export function machineAtom<
 	Event extends Typed,
@@ -74,29 +66,13 @@ export function machineAtom<
 	const stateAtom = (
 		opts?.atomFactory ? opts.atomFactory(machine.init) : atom(machine.init)
 	) as WritableAtom<State, [State], R>
+	const reducer = machine.reducer
+	const cb = machineCb(machine)
 	return atom(
-		(get) =>
-			unwrap(get(stateAtom), (state) => {
-				const transformed = machine.transform(state)
-				return {
-					...transformed,
-					final: machine.getFinal(transformed),
-					next: (event: Sendable<Event>) => {
-						const nextState = machine.reducer(event, transformed)
-						if (nextState === undefined) return transformed
-						return machine.transform(nextState)
-					},
-					isDisabled: (event: Sendable<Event>) =>
-						machine.reducer(event, transformed) === undefined,
-					visit: <Acc>(
-						fold: (substate: Substate, acc: Acc, index: string) => Acc,
-						acc: Acc,
-					) => machine.visit(acc, fold, transformed),
-				} satisfies Spiced<Event, Transformed, Substate, Final>
-			}),
+		(get) => unwrap(get(stateAtom), cb),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
-				const nextState = machine.reducer(event, machine.transform(state))
+				const nextState = reducer(event, machine.transform(state))
 				if (nextState === undefined) return
 				set(stateAtom, nextState)
 			}),
