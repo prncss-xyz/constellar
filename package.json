@@ -10,7 +10,7 @@
 		"test:types": "pnpm --parallel --filter '@constellar/*' run test:types",
 		"test:unit": "pnpm --parallel --filter '@constellar/*' run test:unit --passWithNoTests",
 		"test:coverage": "pnpm --parallel --filter '@constellar/*' run test:coverage",
-		"build": "pnpm --parallel --filter '@constellar/*' run build",
+		"build": "pnpm --filter '@constellar/core' run build; pnpm --filter '@constellar/jotai' run build",
 		"test:lint": "eslint packages/** --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
 		"test:knip": "knip",
 		"prepare": "husky"
