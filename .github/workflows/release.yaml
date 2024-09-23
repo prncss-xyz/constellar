@@ -22,25 +22,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
+      - name: Build
+        run: pnpm run build
       - name: Check types
         run: pnpm run test:types
-      - name: Test @constellar/core
-        run: pnpm --filter "@constellar/core" test:coverage
+      - name: Unit tests
+        run: pnpm run test:coverage
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Publish @constellar/core
         run: pnpm --filter "@constellar/core" publish --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NPM_CONFIG_PROVENANCE: true
-      - name: Test @constellar/jotai
-        run: pnpm --filter "@constellar/jotai" test:coverage
       - name: Publish @constellar/jotai
         run: pnpm --filter "@constellar/jotai" publish --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NPM_CONFIG_PROVENANCE: true
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}

@@ -27,7 +27,6 @@
 		"test:coverage": "vitest run --coverage",
 		"test:lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
 		"test:types": "tsc --noEmit",
-		"prepublishOnly": "pnpm run build",
 		"format": "prettier --write ./src"
 	},
 	"author": "Juliette Lamarche",
