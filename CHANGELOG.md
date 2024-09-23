@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.1
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Github action &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(db952)</samp>](https://github.com/prncss-xyz/constellar/commit/db952f2)
+- Github action &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(19c73)</samp>](https://github.com/prncss-xyz/constellar/commit/19c73af)
+- Github action &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(4ffb7)</samp>](https://github.com/prncss-xyz/constellar/commit/4ffb7fe)
+- Github action &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(9366a)</samp>](https://github.com/prncss-xyz/constellar/commit/9366aff)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.1.0...2.1.1)
+
 ## 2.1.0
 
 ### &nbsp;&nbsp;&nbsp;Features
