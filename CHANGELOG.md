@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.3
+
+*No significant changes*
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.1.2...2.1.3)
+
 ## 2.1.2
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
