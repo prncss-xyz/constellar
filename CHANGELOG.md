@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- **jotai**: Resolved utility &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(849ff)</samp>](https://github.com/prncss-xyz/constellar/commit/849ff5c)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.0.5...2.1.0)
+
 ## 2.0.5
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
