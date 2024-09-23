@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.2
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Github action &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(a124b)</samp>](https://github.com/prncss-xyz/constellar/commit/a124b79)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.1.1...2.1.2)
+
 ## 2.1.1
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
