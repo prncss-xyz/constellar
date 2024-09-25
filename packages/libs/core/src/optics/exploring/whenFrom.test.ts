@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { flow, id, isNever, isUndefined } from '../../utils'
 import { Ctx, FoldFn, toArray } from '../collections'
 import { eq, fold, inert, IOptic, modify, put, view } from '../core'
 import { elems, prop } from '../extra'
 
-function composeFaillure<F1, F2>(
+function composeFailure<F1, F2>(
 	f1: (v: unknown) => v is F1,
 	f2: (v: unknown) => v is F2,
 ): (v: unknown) => v is F1 | F2 {
@@ -12,54 +11,54 @@ function composeFaillure<F1, F2>(
 	if (f2 === isNever) return f1
 	if ((f1 as unknown) === f2) return f1
 	/* c8 ignore start */
-	throw new Error('unexpected faillure value')
+	throw new Error('unexpected failure value')
 }
 /* c8 ignore stop */
 
 function opticFrom<Micro, Part, Whole, Fail>({
 	getter,
+	isFailure,
 	setter,
-	isFaillure,
 }: {
-	getter: (p: Part, w: Whole) => Micro | Fail
+	getter: (p: Part, w: Whole) => Fail | Micro
+	isFailure: (v: unknown) => v is Fail
 	setter: (m: Micro, p: Part, w: Whole) => Part
-	isFaillure: (v: unknown) => v is Fail
 }) {
 	return function <F2, C>(
 		o: IOptic<Part, Whole, F2, C>,
 	): IOptic<Micro, Whole, F2 | Fail, never> {
 		return {
+			command: inert,
 			getter: o.getter
 				? (w) => {
 						const part = o.getter!(w)
-						if (o.isFaillure(part)) return part
+						if (o.isFailure(part)) return part
 						return getter(part, w)
 					}
 				: undefined,
-			setter: o.setter
-				? (m, w) => {
-						const part = o.getter!(w)
-						if (o.isFaillure(part)) return w
-						return o.setter!(setter(m, part, w), w)
-					}
-				: undefined,
+			isCommand: isNever,
+			isFailure: composeFailure(o.isFailure, isFailure),
+			mapper: (mod, whole) =>
+				o.mapper((part) => {
+					const micro = getter(part, whole)
+					if (isFailure(micro)) return part
+					return setter(mod(micro), part, whole)
+				}, whole),
 			refold:
 				<Acc>(foldPart: FoldFn<Micro, Acc, Ctx>) =>
 				(whole, acc: Acc, ctx) =>
 					o.refold((part, acc: Acc, ctx) => {
 						const micro = getter(part, whole)
-						if (isFaillure(micro)) return acc
+						if (isFailure(micro)) return acc
 						return foldPart(micro, acc, ctx)
 					})(whole, acc, ctx),
-			mapper: (mod, whole) =>
-				o.mapper((part) => {
-					const micro = getter(part, whole)
-					if (isFaillure(micro)) return part
-					return setter(mod(micro), part, whole)
-				}, whole),
-			isFaillure: composeFaillure(o.isFaillure, isFaillure),
-			isCommand: isNever,
-			command: inert,
+			setter: o.setter
+				? (m, w) => {
+						const part = o.getter!(w)
+						if (o.isFailure(part)) return w
+						return o.setter!(setter(m, part, w), w)
+					}
+				: undefined,
 		}
 	}
 }
@@ -73,8 +72,8 @@ export function optionalFrom<Micro, Part, Whole>({
 }) {
 	return opticFrom({
 		getter,
+		isFailure: isUndefined,
 		setter,
-		isFaillure: isUndefined,
 	})
 }
 

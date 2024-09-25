@@ -7,10 +7,11 @@ describe('machine', () => {
 	}
 
 	type State = {
-		type: 'green' | 'yellow' | 'red'
+		type: 'green' | 'red' | 'yellow'
 	}
 
 	const machine = multistateMachine<Event, State, object, { len: number }>()({
+		derive: (s) => ({ ...s, len: s.type.length }),
 		init: 'green',
 		states: {
 			green: {
@@ -18,26 +19,25 @@ describe('machine', () => {
 					next: 'yellow',
 				},
 			},
-			yellow: {
-				events: {
-					next: 'red',
-				},
-			},
 			red: {
 				events: {
 					next: 'green',
 				},
 			},
+			yellow: {
+				events: {
+					next: 'red',
+				},
+			},
 		},
-		derive: (s) => ({ ...s, len: s.type.length }),
 	})
 
-	it('simple finte state machine', () => {
+	it('simple finite state machine', () => {
 		const m = objectMachine(machine())
-		expect(m.state).toEqual({ type: 'green', len: 5 })
+		expect(m.state).toEqual({ len: 5, type: 'green' })
 		expect(m.final).toBeUndefined()
 		m.send('next')
-		expect(m.state).toEqual({ type: 'yellow', len: 6 })
+		expect(m.state).toEqual({ len: 6, type: 'yellow' })
 		expect(m.final).toBeUndefined()
 	})
 })

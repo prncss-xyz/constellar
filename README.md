@@ -9,4 +9,4 @@ State manipulation primitives as pure functions.
 - state machines
 - jotai integration
 
-[Official website](https://prncss-xyz.github.io/constellar/)
+[Documentation website](https://prncss-xyz.github.io/constellar/)

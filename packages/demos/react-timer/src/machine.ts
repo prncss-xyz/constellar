@@ -1,47 +1,47 @@
 import { multistateMachine } from '@constellar/core'
 
-type Event = { type: 'toggle'; now: number } | { type: 'reset'; now: number }
+type Event = { now: number; type: 'reset' } | { now: number; type: 'toggle' }
 
 type State =
-	| { type: 'running'; since: number }
-	| { type: 'stopped'; elapsed: number }
+	| { elapsed: number; type: 'stopped' }
+	| { since: number; type: 'running' }
 
 type Derived = {
 	count: (now: number) => number
 }
 
 export const timerMachine = multistateMachine<Event, State, Derived>()({
-	init: { type: 'stopped', elapsed: 0 },
+	init: { elapsed: 0, type: 'stopped' },
 	states: {
 		running: {
-			events: {
-				toggle: ({ now }, { since }) => ({
-					type: 'stopped',
-					elapsed: now - since,
-				}),
-				reset: ({ now }) => ({
-					type: 'running',
-					since: now,
-				}),
-			},
 			derive: (s) => ({
 				count: (now: number) => now - s.since,
 			}),
-		},
-		stopped: {
 			events: {
-				toggle: ({ now }, { elapsed }) => ({
+				reset: ({ now }) => ({
+					since: now,
 					type: 'running',
-					since: now - elapsed,
 				}),
-				reset: () => ({
+				toggle: ({ now }, { since }) => ({
+					elapsed: now - since,
 					type: 'stopped',
-					elapsed: 0,
 				}),
 			},
+		},
+		stopped: {
 			derive: (s) => ({
 				count: () => s.elapsed,
 			}),
+			events: {
+				reset: () => ({
+					elapsed: 0,
+					type: 'stopped',
+				}),
+				toggle: ({ now }, { elapsed }) => ({
+					since: now - elapsed,
+					type: 'running',
+				}),
+			},
 		},
 	},
 })

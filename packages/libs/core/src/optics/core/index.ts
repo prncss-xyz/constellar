@@ -37,8 +37,8 @@ function foldFrom<Part, Whole, Acc, Index>(
 			onClose()
 			alive = false
 		},
-		whole,
 		index: undefined as Index,
+		whole,
 	}
 	while (alive) {
 		const r = unfold()
@@ -60,15 +60,15 @@ export function inert<Part, Whole>(_: Part, whole: Whole) {
 
 type Mapper<Part, Whole> = (mod: (p: Part) => Part, w: Whole) => Whole
 type Setter<Part, Whole> = (p: Part, w: Whole) => Whole
-type Getter<Part, Whole, Fail> = (w: Whole) => Part | Fail
+type Getter<Part, Whole, Fail> = (w: Whole) => Fail | Part
 
 export interface IOptic<Part, Whole, Fail, Command> {
-	refold: <Acc>(fold: FoldFn<Part, Acc, Ctx>) => FoldFn<Whole, Acc, Ctx>
-	mapper: Mapper<Part, Whole>
-	isFaillure: (v: unknown) => v is Fail
-	isCommand: (v: unknown) => v is Command
 	command: Setter<Command, Whole>
 	getter?: Getter<Part, Whole, Fail>
+	isCommand: (v: unknown) => v is Command
+	isFailure: (v: unknown) => v is Fail
+	mapper: Mapper<Part, Whole>
+	refold: <Acc>(fold: FoldFn<Part, Acc, Ctx>) => FoldFn<Whole, Acc, Ctx>
 	setter?: Setter<Part, Whole>
 }
 
@@ -112,7 +112,7 @@ export function command<Part, Whole, Fail, Command>(
 
 export function update<Part, Whole, Fail, Command>(
 	focus: IOptic<Part, Whole, Fail, Command>,
-	arg: Command | Part | ((p: Part) => Part),
+	arg: ((p: Part) => Part) | Command | Part,
 ) {
 	if (focus.isCommand(arg)) return command(focus, arg)
 	if (isFunction(arg)) return modify(focus, arg)
@@ -124,31 +124,31 @@ export type Focus<Part, Whole, Fail, Command> = (
 ) => IOptic<Part, Whole, Fail, Command>
 export function eq<T>(): IOptic<T, T, never, never> {
 	return {
-		getter: id<T>,
-		refold: id,
-		mapper: apply,
-		setter: id,
-		isFaillure: isNever,
-		isCommand: isNever,
 		command: id,
+		getter: id<T>,
+		isCommand: isNever,
+		isFailure: isNever,
+		mapper: apply,
+		refold: id,
+		setter: id,
 	}
 }
 
 function composeGetter<P, Q, R, F>(
-	isFaillure: (v: unknown) => v is F,
-	f?: (p: P) => Q | F,
+	isFailure: (v: unknown) => v is F,
+	f?: (p: P) => F | Q,
 	g?: (q: Q) => R,
-): ((p: P) => R | F) | undefined {
+): ((p: P) => F | R) | undefined {
 	if (!f || !g) return undefined
-	if (isFaillure === isNever) return pipe2(f as any, g)
+	if (isFailure === isNever) return pipe2(f as any, g)
 	return function (p: P) {
 		const q = f(p)
-		if (isFaillure(q)) return q
+		if (isFailure(q)) return q
 		return g(q)
 	}
 }
 
-function composeFaillure<F1, F2>(
+function composeFailure<F1, F2>(
 	f1: (v: unknown) => v is F1,
 	f2: (v: unknown) => v is F2,
 ): (v: unknown) => v is F1 | F2 {
@@ -156,7 +156,7 @@ function composeFaillure<F1, F2>(
 	if (f2 === isNever) return f1
 	if ((f1 as unknown) === f2) return f1
 	/* c8 ignore start */
-	throw new Error('unexpected faillure value')
+	throw new Error('unexpected failure value')
 }
 /* c8 ignore stop */
 
@@ -183,7 +183,7 @@ function makeMapper<Part, Whole>(
 function composeSetter<Whole, Mega, Fail, Part>(
 	oGetter: Getter<Whole, Mega, Fail> | undefined,
 	oSetter: Setter<Whole, Mega> | undefined,
-	isFaillure: (v: unknown) => v is Fail,
+	isFailure: (v: unknown) => v is Fail,
 	setter: Setter<Part, Whole> | undefined,
 ): Setter<Part, Mega> | undefined {
 	if (!oGetter || !oSetter || !setter) return undefined
@@ -193,18 +193,18 @@ function composeSetter<Whole, Mega, Fail, Part>(
 			: (b, t, w) => oSetter(setter(b, t), w)
 	return (b, w) => {
 		const t = oGetter(w)
-		if (isFaillure(t)) return w
+		if (isFailure(t)) return w
 		return set(b, t, w)
 	}
 }
 
 interface IOpticBase<Part, Whole, Fail, Command> {
-	isFaillure: (v: unknown) => v is Fail
-	isCommand: (v: unknown) => v is Command
 	command: Setter<Command, Whole>
+	getter?: Getter<Part, Whole, Fail>
+	isCommand: (v: unknown) => v is Command
+	isFailure: (v: unknown) => v is Fail
 	mapper?: Mapper<Part, Whole>
 	refold?: <Acc>(mod: FoldFn<Part, Acc, Ctx>) => FoldFn<Whole, Acc, Ctx>
-	getter?: Getter<Part, Whole, Fail>
 	setter?: Setter<Part, Whole>
 }
 
@@ -224,108 +224,108 @@ type IOpticArgs<Part, Whole, Fail, Command> =
 	| ITraversal<Part, Whole, Fail, Command>
 
 export function optic<Part, Whole, Fail, Command>({
+	command,
 	getter,
-	setter,
+	isCommand,
+	isFailure,
 	mapper,
 	refold,
-	isCommand,
-	command,
-	isFaillure,
+	setter,
 }: IOpticArgs<Part, Whole, Fail, Command>) {
 	return function <Mega, F2, C2>(
 		o: IOptic<Whole, Mega, F2, C2>,
 	): IOptic<Part, Mega, F2 | Fail, Command> {
 		return {
-			refold: pipe2(
-				refold ??
-					(<Acc>(foldPart: FoldFn<Part, Acc, Ctx>): FoldFn<Whole, Acc, Ctx> =>
-						(v, acc, ctx) => {
-							const b = getter!(v)
-							if (isFaillure(b)) return acc
-							return foldPart(b, acc, ctx)
-						}),
-				o.refold,
-			),
+			command: (c, a) => o.mapper((p) => command(c, p), a),
+			getter: composeGetter(o.isFailure, o.getter, getter),
+			isCommand: isCommand,
+			isFailure: composeFailure(o.isFailure, isFailure),
 			mapper: composeMapper(
 				o.mapper,
 				mapper ??
 					((mod: Modify<Part>, v) => {
 						const b = getter!(v)
-						if (isFaillure(b)) return v
+						if (isFailure(b)) return v
 						return setter!(mod(b), v)
 					}),
 			),
-			isFaillure: composeFaillure(o.isFaillure, isFaillure),
-			isCommand: isCommand,
-			command: (c, a) => o.mapper((p) => command(c, p), a),
-			getter: composeGetter(o.isFaillure, o.getter, getter),
-			setter: composeSetter(o.getter, o.setter, o.isFaillure, setter),
+			refold: pipe2(
+				refold ??
+					(<Acc>(foldPart: FoldFn<Part, Acc, Ctx>): FoldFn<Whole, Acc, Ctx> =>
+						(v, acc, ctx) => {
+							const b = getter!(v)
+							if (isFailure(b)) return acc
+							return foldPart(b, acc, ctx)
+						}),
+				o.refold,
+			),
+			setter: composeSetter(o.getter, o.setter, o.isFailure, setter),
 		}
 	}
 }
 
 export function lens<Part, Whole>({
 	getter,
-	setter,
 	mapper,
+	setter,
 }: {
 	getter: (whole: Whole) => Part
-	setter: (part: Part, whole: Whole) => Whole
 	mapper?: Mapper<Part, Whole>
+	setter: (part: Part, whole: Whole) => Whole
 }) {
 	return optic({
+		command: inert,
 		getter,
-		setter,
+		isCommand: isNever,
+		isFailure: isNever,
+		mapper: mapper ?? makeMapper(setter, getter),
 		refold:
 			getter === id
 				? (id as any)
 				: <Acc, Ctx>(fold: FoldFn<Part, Acc, Ctx>) =>
 						(v: Whole, acc: Acc, ctx: Ctx) =>
 							fold(getter(v) as any, acc, ctx),
-		mapper: mapper ?? makeMapper(setter, getter),
-		isCommand: isNever,
-		command: inert,
-		isFaillure: isNever,
+		setter,
 	})
 }
 
 export function optional<Part, Whole>({
 	getter,
-	setter,
 	mapper,
+	setter,
 }: {
 	getter: Getter<Part, Whole, undefined>
-	setter: Setter<Part, Whole>
 	mapper?: Mapper<Part, Whole>
+	setter: Setter<Part, Whole>
 }) {
 	return optic({
-		getter,
-		setter,
-		mapper,
-		isCommand: isNever,
 		command: inert,
-		isFaillure: isUndefined,
+		getter,
+		isCommand: isNever,
+		isFailure: isUndefined,
+		mapper,
+		setter,
 	})
 }
 
 export function removable<Part, Whole>({
 	getter,
-	setter,
 	mapper,
 	remover,
+	setter,
 }: {
 	getter: Getter<Part, Whole, undefined>
-	setter: Setter<Part, Whole>
 	mapper?: Mapper<Part, Whole>
 	remover: Modify<Whole>
+	setter: Setter<Part, Whole>
 }) {
 	return optic({
-		getter,
-		setter,
-		mapper,
-		isCommand: isRemove,
 		command: (_, a) => remover(a),
-		isFaillure: isUndefined,
+		getter,
+		isCommand: isRemove,
+		isFailure: isUndefined,
+		mapper,
+		setter,
 	})
 }
 
@@ -336,14 +336,12 @@ export function traversal<Part, Whole, Index>({
 	coll: Unfolder<Part, Whole, Index>
 	form: () => FoldForm<Part, Whole, Ctx>
 }) {
-	return optic({
-		refold: <Acc>(foldPart: (p: Part, acc: Acc, ctx: Ctx) => Acc) => {
-			return function (whole: Whole, acc: Acc, { close }: Ctx) {
-				return foldFrom(acc, foldPart, whole, coll, close)
-			}
-		},
+	return optic<Part, Whole, undefined, never>({
+		command: inert,
+		isCommand: isNever,
+		isFailure: isUndefined,
 		mapper: (mod, whole: Whole) => {
-			const { init, foldFn } = form()
+			const { foldFn, init } = form()
 			const acc = fromInit(init)
 			return foldFrom(
 				acc,
@@ -353,9 +351,11 @@ export function traversal<Part, Whole, Index>({
 				noop,
 			)
 		},
-		isFaillure: isUndefined,
-		isCommand: isNever,
-		command: inert,
+		refold: <Acc>(foldPart: (p: Part, acc: Acc, ctx: Ctx) => Acc) => {
+			return function (whole: Whole, acc: Acc, { close }: Ctx) {
+				return foldFrom(acc, foldPart, whole, coll, close)
+			}
+		},
 	})
 }
 
@@ -366,13 +366,13 @@ export function traversal<Part, Whole, Index>({
 // we need to cast is as any
 
 export function enabled<Part>(
-	value: Part | ((p: Part) => Part),
+	value: ((p: Part) => Part) | Part,
 	areEqual: AreEqual<any> = Object.is,
 ) {
 	return function <Whole, Fail, Command>(
 		o: IOptic<Part, Whole, Fail, Command>,
 	): IOptic<boolean, Whole, never, never> {
-		const update_ = memo1((value: Part | ((p: Part) => Part)) =>
+		const update_ = memo1((value: ((p: Part) => Part) | Part) =>
 			update(o, value),
 		)
 		const v = view(o)
@@ -384,13 +384,13 @@ export function enabled<Part>(
 			return update(o, value)(whole)
 		}
 		return {
+			command: id,
 			getter,
-			setter,
+			isCommand: isNever,
+			isFailure: isNever,
 			mapper: makeMapper(setter, getter),
 			refold: (fold) => (v, acc, ctx) => fold(getter(v), acc, ctx),
-			isFaillure: isNever,
-			isCommand: isNever,
-			command: id,
+			setter,
 		}
 	}
 }
@@ -404,23 +404,23 @@ export function valueOr<Part>(value: Init<Part>) {
 			throw new Error("valueOr don't work with traversals")
 		const getter = (whole: Whole) => {
 			const part = o.getter!(whole)
-			if (o.isFaillure(part)) return fromInit(value)
+			if (o.isFailure(part)) return fromInit(value)
 			return part
 		}
 		return {
+			command: o.command,
 			getter,
-			setter: o.setter,
+			isCommand: o.isCommand,
+			isFailure: isNever,
 			mapper: makeMapper(o.setter, getter),
 			refold: (foldPart) => {
 				const lastFold = o.refold(foldPart)
 				return (whole, acc, ctx) =>
-					o.isFaillure(o.getter!(whole))
+					o.isFailure(o.getter!(whole))
 						? foldPart(getter(whole), acc, ctx)
 						: lastFold(whole, acc, ctx)
 			},
-			isFaillure: isNever,
-			isCommand: o.isCommand,
-			command: o.command,
+			setter: o.setter,
 		}
 	}
 }

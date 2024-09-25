@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export function isFunction<T>(x: T): x is T & ((...args: any[]) => any) {
+export function isFunction<T>(x: T): x is ((...args: any[]) => any) & T {
 	return typeof x === 'function'
 }
 

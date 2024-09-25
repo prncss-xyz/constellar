@@ -19,8 +19,8 @@ type ExtractEvents<Transitions extends Record<PropertyKey, unknown>> =
 	UnionValues<ExtractEventObject<Transitions>>
 
 type Transition<State, Transformed> =
-	| State
 	| ((e: any, s: Transformed) => State | undefined)
+	| State
 
 type Transitions<State, Transformed> = Record<
 	any,
@@ -33,17 +33,18 @@ export function fixstateMachine<
 	Transformed = State,
 	InitialArg = void,
 	Final = never,
->({
-	init,
-	events,
-	transform,
-	getFinal,
-}: {
-	init: Init<State, InitialArg>
-	events: T
-	transform?: (s: State) => Transformed
-	getFinal?: (s: Transformed) => Final | undefined
-}) {
+>(
+	{
+		events,
+		init,
+		transform,
+	}: {
+		events: T
+		init: Init<State, InitialArg>
+		transform?: (s: State) => Transformed
+	},
+	getFinal?: (s: Transformed) => Final | undefined,
+) {
 	return (
 		initialArg: InitialArg,
 	): IMachine<
@@ -54,8 +55,8 @@ export function fixstateMachine<
 		Final
 	> => {
 		return {
+			getFinal: getFinal ?? (() => undefined),
 			init: toInit(init)(initialArg),
-			visit: (acc, fold, state, ...args) => fold(state, acc, '', ...args),
 			reducer: (event, transformed) => {
 				const e = fromSendable(event as any)
 				if (getFinal?.(transformed) !== undefined) return undefined
@@ -66,7 +67,7 @@ export function fixstateMachine<
 				return res
 			},
 			transform: transform ?? (id as (s: State) => Transformed),
-			getFinal: getFinal ?? (() => undefined),
+			visit: (acc, fold, state, ...args) => fold(state, acc, '', ...args),
 		}
 	}
 }

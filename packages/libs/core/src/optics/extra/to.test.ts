@@ -17,12 +17,12 @@ describe('defined', () => {
 	})
 })
 
-function firstVoyel(s: string) {
+function firstVowel(s: string) {
 	return s.match(/[aeiou]/i)?.[0]
 }
 
 describe('optional', () => {
-	const focus = flow(eq<string>(), to(firstVoyel))
+	const focus = flow(eq<string>(), to(firstVowel))
 	it('view', () => {
 		const v = view(focus)('foo')
 		expectTypeOf(v).toEqualTypeOf<string | undefined>()

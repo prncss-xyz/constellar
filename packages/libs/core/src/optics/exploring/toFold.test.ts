@@ -8,21 +8,21 @@ function toFold<Part, Acc>(form: FoldForm<Part, Acc, Ctx>) {
 		o: IOptic<Part, Whole, Fail, Command>,
 	): IOptic<Acc, Whole, never, never> {
 		return {
+			command: inert,
 			getter: (whole) => fold(o)(form, whole),
-			setter: inert,
-			mapper: inert,
-			refold: () => {
-				throw new Error('not implemented')
-			},
+			isCommand: isNever,
 			/*
 			refold:
 				<A, Ctx>(fold: FoldFn<Part, Acc, Ctx>) =>
 				(v: Whole, acc: Acc, ctx: Ctx) =>
 					fold(getter(v) as any, acc, ctx),
         */
-			isFaillure: isNever,
-			isCommand: isNever,
-			command: inert,
+			isFailure: isNever,
+			mapper: inert,
+			refold: () => {
+				throw new Error('not implemented')
+			},
+			setter: inert,
 		}
 	}
 }
@@ -32,7 +32,7 @@ describe('toFold', () => {
 		const focus = flow(
 			eq<number[]>(),
 			elems(),
-			toFold({ init: 0, foldFn: (a, b) => a + b }),
+			toFold({ foldFn: (a, b) => a + b, init: 0 }),
 			linear(3),
 		)
 		expect(view(focus)([1, 2, 3])).toBe(18)

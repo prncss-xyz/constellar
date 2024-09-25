@@ -45,7 +45,7 @@ describe('find 2', () => {
 		)
 		const v = view(optics)
 		const fn = () => v(data2)
-		bench('compsoer', fn as () => void)
+		bench('constellar', fn as () => void)
 		expect(fn()).toEqual({ id, name })
 	})()
 	;(() => {

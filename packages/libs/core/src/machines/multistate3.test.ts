@@ -3,28 +3,28 @@ import { objectMachine } from './object'
 
 describe('machine', () => {
 	type Event = {
-		type: 'next' | 'inc' | 'zz'
+		type: 'inc' | 'next' | 'zz'
 	}
 
 	type State = {
-		type: 'a' | 'b' | 'c'
 		count: number
+		type: 'a' | 'b' | 'c'
 	}
 
 	const machine = multistateMachine<Event, State>()({
-		init: (n: number) => ({ type: 'a' as const, count: n }),
+		init: (n: number) => ({ count: n, type: 'a' as const }),
 		states: {
 			a: {
 				always: (s) => (s.count > 3 ? { ...s, count: 3 } : undefined),
 				events: {
-					next: (_, s) => (s.count % 2 ? { ...s, type: 'b' } : undefined),
 					inc: (_, s) => ({ ...s, count: s.count + 1 }),
+					next: (_, s) => (s.count % 2 ? { ...s, type: 'b' } : undefined),
 				},
 			},
 			b: {
 				events: {
-					next: (_, s) => ({ ...s, type: 'a' }),
 					inc: (_, s) => ({ ...s, count: s.count + 1 }),
+					next: (_, s) => ({ ...s, type: 'a' }),
 				},
 				wildcard: (_, s) => ({ ...s, type: 'c' }),
 			},
@@ -55,7 +55,7 @@ describe('machine', () => {
 		m.send('zz')
 		expect(m.final).toEqual({ count: 3, type: 'c' })
 		expectTypeOf(m.final).toEqualTypeOf<
-			{ type: 'c'; count: number } | undefined
+			{ count: number; type: 'c' } | undefined
 		>()
 	})
 })

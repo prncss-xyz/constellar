@@ -12,38 +12,38 @@ type AnyStates<
 > = {
 	[StateType in State['type']]: {
 		always?:
-			| Sendable<State>
-			| (<S extends State & { type: StateType } & DerivedLocal & Derived>(
+			| (<S extends { type: StateType } & Derived & DerivedLocal & State>(
 					state: S,
 			  ) => Sendable<State> | undefined)
+			| Sendable<State>
 		events?: Partial<{
 			[EventType in Event['type']]:
-				| Sendable<State>
 				| (<
-						E extends Event & { type: EventType },
-						S extends State & { type: StateType } & DerivedLocal & Derived,
+						E extends { type: EventType } & Event,
+						S extends { type: StateType } & Derived & DerivedLocal & State,
 				  >(
 						event: E,
 						state: S,
 				  ) => Sendable<State> | undefined)
+				| Sendable<State>
 		}>
 		wildcard?:
-			| Sendable<State>
 			| (<
-					E extends Event & { type: Event },
-					S extends State & { type: StateType } & DerivedLocal & Derived,
+					E extends { type: Event } & Event,
+					S extends { type: StateType } & Derived & DerivedLocal & State,
 			  >(
 					event: E,
 					state: S,
 			  ) => Sendable<State> | undefined)
+			| Sendable<State>
 	}
 } & (DerivedLocal extends { [K in keyof DerivedLocal]: never }
 	? { [StateType in State['type']]: object }
 	: {
 			[StateType in State['type']]: {
 				derive:
+					| ((state: Prettify<{ type: StateType } & State>) => DerivedLocal)
 					| DerivedLocal
-					| ((state: Prettify<State & { type: StateType }>) => DerivedLocal)
 			}
 		})
 
@@ -53,9 +53,9 @@ type AnyMachine<
 	DerivedLocal = object,
 	Derived = object,
 > = {
+	derive?: ((s: Prettify<DerivedLocal & State>) => Derived) | Derived
 	init: Init<Sendable<State>, any>
 	states: AnyStates<Event, State, DerivedLocal, Derived>
-	derive?: Derived | ((s: Prettify<State & DerivedLocal>) => Derived)
 }
 
 export type IsFinal<
@@ -82,7 +82,7 @@ type FinalStates<States extends Record<string, unknown>> =
 type Final<
 	State extends Typed,
 	States extends Record<string, unknown>,
-> = State & FinalStates<States>
+> = FinalStates<States> & State
 
 export function multistateMachine<
 	Event extends Typed,
@@ -92,7 +92,7 @@ export function multistateMachine<
 >() {
 	return function <
 		Machine extends AnyMachine<Event, State, DerivedLocal, Derived>,
-	>({ init, states, derive }: Machine) {
+	>({ derive, init, states }: Machine) {
 		const init0 = toInit(init)
 		function fromAlways(s: State) {
 			while (true) {
@@ -103,7 +103,7 @@ export function multistateMachine<
 			}
 			return s
 		}
-		type Transformed = State & DerivedLocal & Derived
+		type Transformed = Derived & DerivedLocal & State
 		return function (
 			initialArg: ArgOfInit<Machine['init']>,
 		): IMachine<
@@ -114,12 +114,17 @@ export function multistateMachine<
 			Prettify<Final<State, Machine['states']>>
 		> {
 			return {
+				getFinal: (s) => {
+					const state = (states as any)[s.type]
+					if (state.always) return undefined
+					if (state.wildcard) return undefined
+					if (!isEmpty(state.events)) return undefined
+					return s as any
+				},
 				init: fromAlways(fromSendable(init0(initialArg))),
-				visit: (acc, fold, state, ...args) =>
-					fold(state, acc, state.type, ...args),
 				reducer: (
 					event: Sendable<Event>,
-					s: State & DerivedLocal & Derived,
+					s: Derived & DerivedLocal & State,
 				) => {
 					const e = fromSendable(event)
 					const state = (states as any)[s.type]
@@ -136,25 +141,20 @@ export function multistateMachine<
 					const localDerive = (states as any)[s.type].derive
 					const d1 = localDerive
 						? join(s, localDerive)
-						: (s as State & DerivedLocal)
+						: (s as DerivedLocal & State)
 					const d2 = derive
 						? join(d1, derive)
-						: (d1 as State & DerivedLocal & Derived)
+						: (d1 as Derived & DerivedLocal & State)
 					return d2
 				},
-				getFinal: (s) => {
-					const state = (states as any)[s.type]
-					if (state.always) return undefined
-					if (state.wildcard) return undefined
-					if (!isEmpty(state.events)) return undefined
-					return s as any
-				},
+				visit: (acc, fold, state, ...args) =>
+					fold(state, acc, state.type, ...args),
 			}
 		}
 	}
 }
 
-function join<A, B>(a: A, b: B | ((a: A) => B)): A & B {
+function join<A, B>(a: A, b: ((a: A) => B) | B): A & B {
 	const x = isFunction(b) ? b(a) : b
 	return { ...a, ...x }
 }

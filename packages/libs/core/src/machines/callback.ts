@@ -3,8 +3,8 @@ import { IMachine, Sendable } from './core'
 
 export type Spiced<Event extends Typed, Transformed, Substate, Final> = {
 	final: Final | undefined
-	next: (event: Sendable<Event>) => Transformed
 	isDisabled: (event: Sendable<Event>) => boolean
+	next: (event: Sendable<Event>) => Transformed
 	visit: <Acc>(
 		fold: (substate: Substate, acc: Acc, index: string) => Acc,
 		acc: Acc,
@@ -23,13 +23,13 @@ export function machineCb<
 		return {
 			...transformed,
 			final: machine.getFinal(transformed),
+			isDisabled: (event: Sendable<Event>) =>
+				machine.reducer(event, transformed) === undefined,
 			next: (event: Sendable<Event>) => {
 				const nextState = machine.reducer(event, transformed)
 				if (nextState === undefined) return transformed
 				return machine.transform(nextState)
 			},
-			isDisabled: (event: Sendable<Event>) =>
-				machine.reducer(event, transformed) === undefined,
 			visit: <Acc>(
 				fold: (substate: Substate, acc: Acc, index: string) => Acc,
 				acc: Acc,

@@ -7,12 +7,12 @@ describe('find', () => {
 	const sourceDefined: Source[] = [
 		{ bar: 'baz' },
 		{ bar: 'quux' },
-		{ bar: 'xyzzy' },
+		{ bar: 'foo' },
 	]
 	const sourceUndefined: Source[] = [
 		{ bar: 'baz' },
 		{ bar: 'nomatch' },
-		{ bar: 'xyzzy' },
+		{ bar: 'foo' },
 	]
 	const focus = flow(
 		eq<Source[]>(),
@@ -31,14 +31,14 @@ describe('find', () => {
 			expect(put(focus, { bar: 'UPDATED' })(sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'UPDATED' },
-				{ bar: 'xyzzy' },
+				{ bar: 'foo' },
 			])
 		})
 		it('undefined', () => {
 			expect(update(focus, { bar: 'UPDATED' })(sourceUndefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'nomatch' },
-				{ bar: 'xyzzy' },
+				{ bar: 'foo' },
 				{ bar: 'UPDATED' },
 			])
 		})
@@ -49,7 +49,7 @@ describe('find', () => {
 				update(focus, (x) => ({
 					bar: `${x.bar} UPDATED`,
 				}))(sourceDefined),
-			).toEqual([{ bar: 'baz' }, { bar: 'quux UPDATED' }, { bar: 'xyzzy' }])
+			).toEqual([{ bar: 'baz' }, { bar: 'quux UPDATED' }, { bar: 'foo' }])
 		})
 		it('undefined', () => {
 			expect(
@@ -63,7 +63,7 @@ describe('find', () => {
 		it('defined', () => {
 			expect(command(focus, REMOVE)(sourceDefined)).toEqual([
 				{ bar: 'baz' },
-				{ bar: 'xyzzy' },
+				{ bar: 'foo' },
 			])
 		})
 		it('undefined', () => {
@@ -71,7 +71,7 @@ describe('find', () => {
 		})
 	})
 	test('refine type', () => {
-		type T = string | number
+		type T = number | string
 		const focus = flow(
 			eq<T[]>(),
 			findOne((item) => typeof item === 'string'),

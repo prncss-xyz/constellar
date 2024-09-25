@@ -31,7 +31,7 @@ describe('when', () => {
 		})
 	})
 	describe('narrow type', () => {
-		type Source = string | number
+		type Source = number | string
 		function isString(x: unknown) {
 			return typeof x === 'string'
 		}

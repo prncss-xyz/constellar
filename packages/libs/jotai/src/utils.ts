@@ -2,7 +2,7 @@
 export type NonFunction<T> = [T] extends [(...args: any[]) => any] ? never : T
 
 export function unwrap<Part, Whole>(
-	source: Whole | Promise<Whole>,
+	source: Promise<Whole> | Whole,
 	select: (w: Whole) => Part,
 ) {
 	return source instanceof Promise ? source.then(select) : select(source)

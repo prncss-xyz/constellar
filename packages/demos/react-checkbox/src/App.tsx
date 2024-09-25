@@ -4,7 +4,7 @@ import { disabledFocusAtom, focusAtom } from '@constellar/jotai'
 import { atom, useAtom } from 'jotai'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
 
-function isVoyel(s: string) {
+function isVowel(s: string) {
 	return 'aeiouy'.includes(s)
 }
 const names = ['a', 'b', 'c', 'd', 'e']
@@ -18,18 +18,18 @@ const stateAtom = atom<State>({ fields: { contents: [] } })
 const toggle = (v: boolean) => !v
 function Checkbox({
 	name,
-	value,
 	setValue,
+	value,
 }: {
 	name: string
-	value: boolean
 	setValue: Dispatch<SetStateAction<boolean>>
+	value: boolean
 }) {
 	const onChange = useCallback(() => setValue(toggle), [setValue])
 	return (
 		<div>
 			<label>{name}</label>
-			<input type="checkbox" checked={value} onChange={onChange} />
+			<input checked={value} onChange={onChange} type="checkbox" />
 		</div>
 	)
 }
@@ -44,20 +44,20 @@ function ItemCheckbox({ name }: { name: string }) {
 		[name],
 	)
 	const [value, setValue] = useAtom(valueAtom)
-	return <Checkbox name={name} value={value} setValue={setValue} />
+	return <Checkbox name={name} setValue={setValue} value={value} />
 }
 
-const clearVoyelsAtom = disabledFocusAtom(
+const clearVowelsAtom = disabledFocusAtom(
 	stateAtom,
-	pipe(prop('fields'), prop('contents'), findMany(isVoyel)),
+	pipe(prop('fields'), prop('contents'), findMany(isVowel)),
 	[],
 )
 
-function ClearVoyels() {
-	const [disabled, clear] = useAtom(clearVoyelsAtom)
+function ClearVowels() {
+	const [disabled, clear] = useAtom(clearVowelsAtom)
 	return (
 		<button disabled={disabled} onClick={() => clear()}>
-			Clear voyels
+			Clear vowels
 		</button>
 	)
 }
@@ -70,7 +70,7 @@ export default function App() {
 					<ItemCheckbox key={name} name={name} />
 				))}
 			</div>
-			<ClearVoyels />
+			<ClearVowels />
 			<Json store={stateAtom} />
 		</>
 	)

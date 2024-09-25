@@ -3,7 +3,7 @@ import {
 	Interpreter,
 	isFunction,
 	machineCb,
-	ManchineEffects,
+	MachineEffects,
 	Sendable,
 	Spiced,
 	Typed,
@@ -88,9 +88,9 @@ export function useMachineEffects<
 	send: (event: Sendable<Event>) => void,
 	interpreter: Interpreter<Event, Transformed>,
 ) {
-	const machineEffects = useRef<ManchineEffects<Event, Transformed>>()
+	const machineEffects = useRef<MachineEffects<Event, Transformed>>()
 	useEffect(() => {
-		machineEffects.current = new ManchineEffects<Event, Transformed>(
+		machineEffects.current = new MachineEffects<Event, Transformed>(
 			send,
 			interpreter,
 		)

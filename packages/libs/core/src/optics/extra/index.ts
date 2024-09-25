@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { append, id, prepend, remove, replace } from '../../utils'
 import { fromArray, toArray } from '../collections'
 import {
@@ -124,20 +123,20 @@ export function prop<Key extends keyof O, O>(
 export function prop<Key extends keyof O, O>(key: Key) {
 	return removable<Exclude<O[Key], undefined>, O>({
 		getter: (o) => o[key] as Exclude<O[Key], undefined>,
-		setter: (v, o) => ({ ...o, [key]: v }),
 		remover: (o) => {
 			const res = { ...o }
 			delete res[key]
 			return res
 		},
+		setter: (v, o) => ({ ...o, [key]: v }),
 	})
 }
 
 export function at<X>(index: number) {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(index),
-		setter: (x: X, xs) => replace(x, index, xs),
 		remover: (xs) => remove(index, xs),
+		setter: (x: X, xs) => replace(x, index, xs),
 		// replace when better browser support
 		/* setter: (x: X, xs) => {
 			if (index >= xs.length) return xs
@@ -166,11 +165,6 @@ export function findOne<X>(
 export function findOne<X>(p: (x: X) => unknown) {
 	return removable<X, X[]>({
 		getter: (xs) => xs.find(p),
-		setter: (x, xs) => {
-			const index = xs.findIndex(p)
-			if (index < 0) return append(x, xs)
-			return [...xs.slice(0, index), x, ...xs.slice(index + 1)]
-		},
 		mapper: (f, xs) => {
 			const index = xs.findIndex(p)
 			if (index < 0) return xs
@@ -182,10 +176,15 @@ export function findOne<X>(p: (x: X) => unknown) {
 			if (index < 0) return xs
 			return [...xs.slice(0, index), ...xs.slice(index + 1)]
 		},
+		setter: (x, xs) => {
+			const index = xs.findIndex(p)
+			if (index < 0) return append(x, xs)
+			return [...xs.slice(0, index), x, ...xs.slice(index + 1)]
+		},
 	})
 }
 
-// defective (when setting a value not repecting predicate)
+// defective (when setting a value not respecting predicate)
 export function findMany<X, Y extends X>(
 	p: (x: X) => x is Y,
 ): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y[], A, F, never>
@@ -222,8 +221,8 @@ export function findMany<X>(p: (x: X) => unknown) {
 export function tail<X>() {
 	return removable<X[], X[]>({
 		getter: (last) => (last.length ? last.slice(1) : undefined),
-		setter: (next, last) => (last.length ? [last[0]!, ...next] : last),
 		remover: (last) => (last.length ? last.slice(0, 1) : last),
+		setter: (next, last) => (last.length ? [last[0]!, ...next] : last),
 	})
 }
 
@@ -233,8 +232,8 @@ export function tail<X>() {
 export function head<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(0),
-		setter: prepend,
 		remover: (xs) => xs.slice(1),
+		setter: prepend,
 	})
 }
 
@@ -244,8 +243,8 @@ export function head<X>() {
 export function foot<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(-1),
-		setter: append,
 		remover: (xs) => xs.slice(0, -1),
+		setter: append,
 	})
 }
 
@@ -253,8 +252,8 @@ export function foot<X>() {
 export function queue<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(0),
-		setter: append,
 		remover: (xs) => xs.slice(1),
+		setter: append,
 	})
 }
 

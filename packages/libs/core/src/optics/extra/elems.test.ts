@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { elems, prop, when } from '.'
 import { flow } from '../../utils'
 import { toArray, toFirst } from '../collections'
@@ -56,7 +55,7 @@ describe('simple', () => {
 })
 
 describe('composed', () => {
-	describe('prop-elemets-prop', () => {
+	describe('prop-elements-prop', () => {
 		type Source = { a: { c: number }[] }
 		const source: Source = { a: [{ c: 1 }, { c: 2 }] }
 		const focus = flow(eq<Source>(), prop('a'), elems(), prop('c'))
@@ -89,17 +88,17 @@ describe('composed', () => {
 	describe('when', () => {
 		it('fold', () => {
 			type Source = string[]
-			const source: Source = ['baz', 'quux', 'xyzzy']
+			const source: Source = ['baz', 'quux', 'foo']
 			const focus = flow(
 				eq<Source>(),
 				elems(),
 				when((item) => item !== 'quux'),
 			)
-			expect(fold(focus)(toArray(), source)).toEqual(['baz', 'xyzzy'])
+			expect(fold(focus)(toArray(), source)).toEqual(['baz', 'foo'])
 		})
 		it('map', () => {
 			type Source = string[]
-			const source: Source = ['baz', 'quux', 'xyzzy']
+			const source: Source = ['baz', 'quux', 'foo']
 			const focus = flow(
 				eq<Source>(),
 				elems(),
@@ -108,22 +107,22 @@ describe('composed', () => {
 			expect(update(focus, (x) => x.toUpperCase())(source)).toEqual([
 				'baz',
 				'QUUX',
-				'XYZZY',
+				'FOO',
 			])
 		})
 		it('fold', () => {
 			type Source = string[]
-			const source: Source = ['baz', 'quux', 'xyzzy']
+			const source: Source = ['baz', 'quux', 'foo']
 			const focus = flow(
 				eq<Source>(),
 				elems(),
 				when((item) => item !== 'baz'),
 			)
-			expect(fold(focus)(toArray(), source)).toEqual(['quux', 'xyzzy'])
+			expect(fold(focus)(toArray(), source)).toEqual(['quux', 'foo'])
 		})
 		it('view', () => {
 			type Source = string[]
-			const source: Source = ['baz', 'quux', 'xyzzy', 'baz']
+			const source: Source = ['baz', 'quux', 'foo', 'baz']
 			const focus = flow(
 				eq<Source>(),
 				elems(),
@@ -133,7 +132,7 @@ describe('composed', () => {
 		})
 		it('put', () => {
 			type Source = string[]
-			const source: Source = ['baz', 'quux', 'xyzzy']
+			const source: Source = ['baz', 'quux', 'foo']
 			const focus = flow(
 				eq<Source>(),
 				elems(),

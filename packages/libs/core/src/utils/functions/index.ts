@@ -1,5 +1,5 @@
 export * from './flow'
 export * from './guards'
-export * from './pipe'
 export * from './misc'
+export * from './pipe'
 export * from './shallowEqual'

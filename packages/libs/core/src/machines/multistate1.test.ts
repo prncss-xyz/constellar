@@ -4,23 +4,23 @@ import { objectMachine } from './object'
 describe('machine', () => {
 	type Event =
 		| {
-				type: 'toggle'
 				now: number
+				type: 'reset'
 		  }
 		| {
-				type: 'reset'
 				now: number
+				type: 'toggle'
 		  }
 		| { type: 'bye' }
 
 	type State =
 		| {
-				type: 'running'
-				since: number
+				elapsed: number
+				type: 'stopped'
 		  }
 		| {
-				type: 'stopped'
-				elapsed: number
+				since: number
+				type: 'running'
 		  }
 		| { type: 'final' }
 
@@ -29,63 +29,63 @@ describe('machine', () => {
 	}
 
 	const machine = multistateMachine<Event, State, LocalDerived>()({
-		init: { type: 'stopped', elapsed: 0 },
+		derive: (s) => s,
+		init: { elapsed: 0, type: 'stopped' },
 		states: {
+			final: {
+				derive: { count: () => 0 },
+				events: {},
+			},
 			running: {
-				events: {
-					toggle: ({ now }, { since }) => ({
-						type: 'stopped',
-						elapsed: now - since,
-					}),
-					reset: ({ now }) => ({
-						type: 'running',
-						since: now,
-					}),
-					bye: 'final',
-				},
 				derive: (s) => ({
 					count: (now: number) => now - s.since,
 				}),
+				events: {
+					bye: 'final',
+					reset: ({ now }) => ({
+						since: now,
+						type: 'running',
+					}),
+					toggle: ({ now }, { since }) => ({
+						elapsed: now - since,
+						type: 'stopped',
+					}),
+				},
 			},
 			stopped: {
-				events: {
-					toggle: ({ now }, { elapsed }) => ({
-						type: 'running',
-						since: now - elapsed,
-					}),
-					reset: {
-						type: 'stopped',
-						elapsed: 0,
-					},
-					bye: 'final',
-				},
 				derive: (s) => ({
 					count: () => s.elapsed,
 				}),
-			},
-			final: {
-				events: {},
-				derive: { count: () => 0 },
+				events: {
+					bye: 'final',
+					reset: {
+						elapsed: 0,
+						type: 'stopped',
+					},
+					toggle: ({ now }, { elapsed }) => ({
+						since: now - elapsed,
+						type: 'running',
+					}),
+				},
 			},
 		},
-		derive: (s) => s,
 	})
 
 	it('should start running', () => {
 		const m = objectMachine(machine())
 
-		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 0 })
-		m.send({ type: 'toggle', now: 1 })
-		expect(m.state).toMatchObject({ type: 'running', since: 1 })
+		expect(m.state).toMatchObject({ elapsed: 0, type: 'stopped' })
+		m.send({ now: 1, type: 'toggle' })
+		expect(m.state).toMatchObject({ since: 1, type: 'running' })
 		expect(m.state.count(3)).toBe(2)
-		m.send({ type: 'toggle', now: 3 })
+		m.send({ now: 3, type: 'toggle' })
 		expect(m.state.count(3)).toBe(2)
-		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 2 })
-		m.send({ type: 'reset', now: 6 })
-		expect(m.state).toMatchObject({ type: 'stopped', elapsed: 0 })
-		m.send({ type: 'toggle', now: 9 })
-		m.send({ type: 'reset', now: 11 })
-		m.send({ type: 'toggle', now: 11 })
+		expect(m.state).toMatchObject({ elapsed: 2, type: 'stopped' })
+		m.send({ now: 6, type: 'reset' })
+		expect(m.state).toMatchObject({ elapsed: 0, type: 'stopped' })
+		m.send({ now: 9, type: 'toggle' })
+		m.send({ now: 11, type: 'reset' })
+		m.send({ now: 11, type: 'toggle' })
 		m.send('bye')
 		expect(m.state).toMatchObject({ type: 'final' })
 		const acc = m.visit((_, acc, index) => acc + index, '')

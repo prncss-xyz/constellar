@@ -9,19 +9,19 @@ import { timerMachine } from './machine'
 
 const timerAtom = machineAtom(timerMachine())
 const toggleAtom = atom(null, (get, set) =>
-	set(timerAtom, { type: 'toggle', now: get(clockAtom) }),
+	set(timerAtom, { now: get(clockAtom), type: 'toggle' }),
 )
 const toggledAtom = selectAtom(
 	timerAtom,
 	({ next }) =>
 		next({
-			type: 'toggle',
 			now: 0,
+			type: 'toggle',
 		}).type,
 )
 const toStateNames = {
-	stopped: 'Stop',
 	running: 'Start',
+	stopped: 'Stop',
 }
 function Toggle() {
 	const toggle = useSetAtom(toggleAtom)
@@ -35,8 +35,8 @@ function Reset() {
 		useCallback(
 			(get) => {
 				send({
-					type: 'reset',
 					now: get(clockAtom),
+					type: 'reset',
 				})
 			},
 			[send],

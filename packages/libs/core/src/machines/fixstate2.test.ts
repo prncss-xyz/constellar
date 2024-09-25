@@ -1,13 +1,15 @@
 import { fixstateMachine } from './fixstate'
 import { objectMachine } from './object'
 
-const machine = fixstateMachine({
-	init: { n: 0 },
-	events: {
-		next: (e: { u: number }, { n }) => ({ n: n + e.u }),
+const machine = fixstateMachine(
+	{
+		events: {
+			next: (e: { u: number }, { n }) => ({ n: n + e.u }),
+		},
+		init: { n: 0 },
 	},
-	getFinal: (s) => (s.n === 1 ? s : undefined),
-})
+	(s) => (s.n === 1 ? s : undefined),
+)
 
 describe('description', () => {
 	test('without transform', () => {

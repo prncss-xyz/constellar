@@ -1,12 +1,12 @@
-import { fixstateMachine, machineCb, ManchineEffects } from '.'
+import { fixstateMachine, machineCb, MachineEffects } from '.'
 import { objectMachine } from './object'
 
 const machine = fixstateMachine({
-	init: { n: 0 },
 	events: {
 		e: ({ n }: { n: number }) => ({ n }),
 	},
-	transform: ({ n }) => ({ n, effects: { a: n, b: n === 0 ? 1 : undefined } }),
+	init: { n: 0 },
+	transform: ({ n }) => ({ effects: { a: n, b: n === 0 ? 1 : undefined }, n }),
 })
 
 test('effects with interpreter', () => {
@@ -29,8 +29,8 @@ test('effects with interpreter', () => {
 	expect(cbInA).toHaveBeenCalledTimes(1)
 	expect(cbInB).toHaveBeenCalledTimes(1)
 	expect(cbOutA).toHaveBeenCalledTimes(0)
-	m.send({ type: 'e', n: 1 })
-	m.send({ type: 'e', n: 1 })
+	m.send({ n: 1, type: 'e' })
+	m.send({ n: 1, type: 'e' })
 	expect(cbInA.mock.calls[1]?.[0]).toBe(1)
 	expect(cbInB).toHaveBeenCalledTimes(1)
 	expect(cbOutA).toHaveBeenCalledTimes(1)
@@ -45,7 +45,7 @@ test('effects without interpreter', () => {
 		const cb = machineCb(m)
 		const { visit } = cb(m.transform({ n: 0 }))
 		m.transform({ n: 1 })
-		const eff = new ManchineEffects(() => {}, undefined)
+		const eff = new MachineEffects(() => {}, undefined)
 		eff.update(visit)
 	}).not.toThrowError()
 })

@@ -12,20 +12,23 @@ import {
 
 describe('machineAtom', () => {
 	type State = { n: number }
-	const someMachine = fixstateMachine({
-		init: { n: 1 },
-		events: {
-			add: (e: { n: number }, { n }) => ({
-				n: n + e.n,
-			}),
-			noop: () => undefined,
+	const someMachine = fixstateMachine(
+		{
+			events: {
+				add: (e: { n: number }, { n }) => ({
+					n: n + e.n,
+				}),
+				noop: () => undefined,
+			},
+			init: { n: 1 },
 		},
-		getFinal: (s) => (s.n === 2 ? s : undefined),
-	})
+
+		(s) => (s.n === 2 ? s : undefined),
+	)
 	test('default factory', async () => {
 		const someAtom = machineAtom(someMachine())
 		const store = createStore()
-		store.set(someAtom, { type: 'add', n: 1 })
+		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
 		expect(store.get(someAtom)).toMatchObject({ n: 2 })
 	})
@@ -34,7 +37,7 @@ describe('machineAtom', () => {
 			atomFactory: (init) => atom(Promise.resolve(init)),
 		})
 		const store = createStore()
-		store.set(someAtom, { type: 'add', n: 1 })
+		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
 		expect(await store.get(someAtom)).toMatchObject({ n: 2 })
 	})
@@ -52,7 +55,7 @@ describe('machineAtom', () => {
 			atomFactory: (init) => atom(Promise.resolve(init)),
 		})
 		const store = createStore()
-		store.set(someAtom, { type: 'add', n: 1 })
+		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
 		expect(await store.get(someAtom)).toMatchObject({ n: 2 })
 	})
@@ -71,7 +74,7 @@ describe('machineAtom', () => {
 			},
 		})
 		const store = createStore()
-		store.set(someAtom, { type: 'add', n: 1 })
+		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
 		expect(store.get(someAtom)).toMatchObject({ n: 2 })
 		// only the serializable part is stored
@@ -80,16 +83,18 @@ describe('machineAtom', () => {
 })
 
 describe('effects', () => {
-	const someMachine = fixstateMachine({
-		init: { n: 0 },
-		events: {
-			n: (e: { value: number }) => ({
-				n: e.value,
-			}),
+	const someMachine = fixstateMachine(
+		{
+			events: {
+				n: (e: { value: number }) => ({
+					n: e.value,
+				}),
+			},
+			init: { n: 0 },
+			transform: (s) => ({ ...s, effects: s.n < 0 ? {} : { a: s.n } }),
 		},
-		transform: (s) => ({ ...s, effects: s.n < 0 ? {} : { a: s.n } }),
-		getFinal: (s) => (s.n === 2 ? s : undefined),
-	})
+		(s) => (s.n === 2 ? s : undefined),
+	)
 	test('effects', async () => {
 		const someAtom = machineAtom(someMachine())
 		const cbIn = vi.fn((..._: unknown[]) => {})
@@ -125,7 +130,7 @@ describe('effects', () => {
 		expect(cbIn).toHaveBeenCalledTimes(2)
 		expect(cbOut).toHaveBeenCalledTimes(1)
 
-		// unmount th ecomponent
+		// unmount the component
 		fireEvent.click(screen.getByText('toggle'))
 		expect(cbIn).toHaveBeenCalledTimes(2)
 		expect(cbOut).toHaveBeenCalledTimes(2)
@@ -135,11 +140,11 @@ describe('effects', () => {
 describe('disabledEventAtom', () => {
 	const store = createStore()
 	const machine = fixstateMachine({
-		init: { a: 0 },
 		events: {
 			a: ({ value }: { value: number }) =>
 				value === 0 ? undefined : { a: value },
 		},
+		init: { a: 0 },
 	})
 	test('sync', () => {
 		const reducerAtom = machineAtom(machine())
@@ -167,10 +172,10 @@ describe('disabledEventAtom', () => {
 
 describe('value', () => {
 	const someMachine = fixstateMachine({
-		init: { a: 0 },
 		events: {
 			a: (e: { value: number }) => ({ a: e.value }),
 		},
+		init: { a: 0 },
 	})
 	test('sync', async () => {
 		const store = createStore()

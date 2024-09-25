@@ -2,16 +2,18 @@ import { machineCb } from './callback'
 import { fixstateMachine } from './fixstate'
 
 describe('callback', () => {
-	const machine = fixstateMachine({
-		init: { n: 1 },
-		events: {
-			add: (e: { n: number }, { n }) => ({
-				n: n + e.n,
-			}),
-			noop: () => undefined,
+	const machine = fixstateMachine(
+		{
+			events: {
+				add: (e: { n: number }, { n }) => ({
+					n: n + e.n,
+				}),
+				noop: () => undefined,
+			},
+			init: { n: 1 },
 		},
-		getFinal: (s) => (s.n === 2 ? s : undefined),
-	})()
+		(s) => (s.n === 2 ? s : undefined),
+	)()
 	const init = machine.init
 	const cb = machineCb(machine)
 
@@ -19,7 +21,7 @@ describe('callback', () => {
 		expect(cb(init)).toMatchObject({ n: 1 })
 	})
 	test('next, defined', () => {
-		expect(cb(init).next({ type: 'add', n: 2 })).toMatchObject({
+		expect(cb(init).next({ n: 2, type: 'add' })).toMatchObject({
 			n: 3,
 		})
 	})

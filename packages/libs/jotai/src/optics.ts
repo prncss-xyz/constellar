@@ -21,11 +21,11 @@ import { NonFunction, unwrap } from './utils'
 export function viewAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Promise<Whole>>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): Atom<Promise<Part | Fail>>
+): Atom<Promise<Fail | Part>>
 export function viewAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): Atom<Part | Fail>
+): Atom<Fail | Part>
 export function viewAtom<Part, Whole, Fail, Command>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command>,
@@ -55,15 +55,15 @@ export function foldAtom<Part, Whole, Fail, Command>(
 export function focusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Promise<Whole>, [Promise<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): WritableAtom<Promise<Part | Fail>, [Updater<Part, Command>], void>
+): WritableAtom<Promise<Fail | Part>, [Updater<Part, Command>], void>
 export function focusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Promise<Whole>, [Whole], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): WritableAtom<Promise<Part | Fail>, [Updater<Part, Command>], void>
+): WritableAtom<Promise<Fail | Part>, [Updater<Part, Command>], void>
 export function focusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
-): WritableAtom<Part | Fail, [Updater<Part, Command>], void>
+): WritableAtom<Fail | Part, [Updater<Part, Command>], void>
 export function focusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,

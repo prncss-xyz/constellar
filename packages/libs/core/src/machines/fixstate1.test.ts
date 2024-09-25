@@ -1,17 +1,19 @@
 import { fixstateMachine } from './fixstate'
 import { objectMachine } from './object'
 
-const machine = fixstateMachine({
-	init: (a: string) => a.length,
-	events: {
-		next: (e: { u: number }, n) => n + e.u,
-		jazz: (e: { j: boolean }) => (e.j ? 20 : undefined),
-		toto: (e: { j: string }) => e.j.length,
-		fluf: 4,
+const machine = fixstateMachine(
+	{
+		events: {
+			gogo: 4,
+			jazz: (e: { j: boolean }) => (e.j ? 20 : undefined),
+			next: (e: { u: number }, n) => n + e.u,
+			toto: (e: { j: string }) => e.j.length,
+		},
+		init: (a: string) => a.length,
+		transform: (x) => x * 2,
 	},
-	transform: (x) => x * 2,
-	getFinal: (x) => (x === 8 ? x : undefined),
-})
+	(x) => (x === 8 ? x : undefined),
+)
 
 describe('fixstateMachine', () => {
 	test('with transform and isFinal', () => {
@@ -19,13 +21,13 @@ describe('fixstateMachine', () => {
 		expect(m.state).toBe(10)
 		m.send({ type: 'next', u: 2 })
 		expect(m.state).toBe(24)
-		m.send({ type: 'toto', j: 'oo' })
+		m.send({ j: 'oo', type: 'toto' })
 		expect(m.state).toBe(4)
-		m.send({ type: 'jazz', j: false })
+		m.send({ j: false, type: 'jazz' })
 		expect(m.state).toBe(4)
-		m.send({ type: 'jazz', j: true })
+		m.send({ j: true, type: 'jazz' })
 		expect(m.state).toBe(40)
-		m.send('fluf')
+		m.send('gogo')
 		expect(m.state).toBe(8)
 		m.send({ type: 'next', u: 2 })
 		expect(m.state).toBe(8)

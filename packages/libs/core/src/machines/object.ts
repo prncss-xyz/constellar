@@ -1,30 +1,24 @@
 import { IMachine } from './core'
-import { Interpreter, ManchineEffects } from './effects'
+import { Interpreter, MachineEffects } from './effects'
 
 class ObjectMachine<Event, State, Transformed, Substate, Final> {
+	private effects: MachineEffects<Event, Substate> | undefined
 	private queue: Event[] = []
-	private effects: ManchineEffects<Event, Substate> | undefined
-	public state: Transformed
 	public final: Final | undefined
+	public state: Transformed
 	constructor(
 		private machine: IMachine<Event, State, Transformed, Substate, Final>,
 		private opts?: {
-			onFinal?: (final: Final) => void
 			interpreter?: Interpreter<Event, Substate>
+			onFinal?: (final: Final) => void
 		},
 	) {
 		this.state = machine.transform(machine.init)
 		this.final = machine.getFinal(this.state)
 		if (opts?.interpreter) {
-			this.effects = new ManchineEffects(this.send, opts.interpreter)
+			this.effects = new MachineEffects(this.send, opts.interpreter)
 			this.effects.update(this.visit.bind(this))
 		}
-	}
-	visit<Acc>(
-		fold: (substate: Substate, acc: Acc, index: string) => Acc,
-		acc: Acc,
-	) {
-		return this.machine.visit(acc, fold, this.state)
 	}
 	private onChange() {
 		if (!this.effects) return
@@ -39,6 +33,14 @@ class ObjectMachine<Event, State, Transformed, Substate, Final> {
 	flush() {
 		this.effects?.flush()
 	}
+	isDisabled(event: Event) {
+		return this.machine.reducer(event, this.state) === undefined
+	}
+	next(event: Event) {
+		const nextState = this.machine.reducer(event, this.state)
+		if (nextState === undefined) return this.state
+		return this.machine.transform(nextState)
+	}
 	send(event: Event) {
 		const state = this.machine.reducer(event, this.state)
 		if (state !== undefined) {
@@ -49,21 +51,19 @@ class ObjectMachine<Event, State, Transformed, Substate, Final> {
 				this.opts.onFinal(this.final)
 		}
 	}
-	next(event: Event) {
-		const nextState = this.machine.reducer(event, this.state)
-		if (nextState === undefined) return this.state
-		return this.machine.transform(nextState)
-	}
-	isDisabled(event: Event) {
-		return this.machine.reducer(event, this.state) === undefined
+	visit<Acc>(
+		fold: (substate: Substate, acc: Acc, index: string) => Acc,
+		acc: Acc,
+	) {
+		return this.machine.visit(acc, fold, this.state)
 	}
 }
 
 export function objectMachine<Event, State, Transformed, Substate, Final>(
 	machine: IMachine<Event, State, Transformed, Substate, Final>,
 	opts?: {
-		onFinal?: (final: Final) => void
 		interpreter?: Interpreter<Event, Substate>
+		onFinal?: (final: Final) => void
 	},
 ) {
 	return new ObjectMachine(machine, opts)

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Json } from '@/json'
 import { machineAtom, selectAtom, useMachineEffects } from '@constellar/jotai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
