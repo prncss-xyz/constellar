@@ -1,4 +1,4 @@
-import { fixstateMachine } from '@constellar/core'
+import { fixstateMachine, multistateMachine } from '@constellar/core'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'
@@ -211,5 +211,40 @@ describe('value', () => {
 		store.set(valueAtom, (x) => x + 1)
 		await Promise.resolve()
 		expect(await store.get(valueAtom)).toBe(2)
+	})
+})
+
+describe('messages', () => {
+	type State = { type: 'a' }
+	type Event = { type: 'in' }
+	type Message = { type: 'out' }
+	const someMachine = multistateMachine<
+		Event,
+		State,
+		object,
+		object,
+		Message
+	>()({
+		init: 'a',
+		states: {
+			a: {
+				events: {
+					in: (_e, _s, send) => send('out'),
+				},
+			},
+		},
+	})
+	const countAtom = atom(0)
+	const reducerAtom = machineAtom(someMachine(), {
+		listener: (_, get, set) => {
+			set(countAtom, get(countAtom) + 1)
+		},
+	})
+	test('event should propagate as message', async () => {
+		const store = createStore()
+		expect(store.get(countAtom)).toBe(0)
+		store.set(reducerAtom, 'in')
+		await Promise.resolve()
+		expect(store.get(countAtom)).toBe(1)
 	})
 })

@@ -9,7 +9,7 @@ import {
 	Typed,
 	Updater,
 } from '@constellar/core'
-import { atom, WritableAtom } from 'jotai'
+import { atom, Getter, Setter, WritableAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
 import { unwrap } from './utils'
@@ -17,16 +17,25 @@ import { unwrap } from './utils'
 export function machineAtom<
 	Event extends Typed,
 	State,
+	Message,
 	Transformed,
 	Substate,
 	Final,
 	R,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
+	machine: IMachine<
+		Sendable<Event>,
+		State,
+		Message,
+		Transformed,
+		Substate,
+		Final
+	>,
 	opts: {
 		atomFactory: (
 			init: State,
 		) => WritableAtom<Promise<State>, [Promise<State>], R>
+		listener?: (event: Message, get: Getter, set: Setter) => void
 	},
 ): WritableAtom<
 	Promise<Spiced<Event, Transformed, Substate, Final>>,
@@ -36,14 +45,23 @@ export function machineAtom<
 export function machineAtom<
 	Event extends Typed,
 	State,
+	Message,
 	Transformed,
 	Substate,
 	Final,
 	R = void,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
+	machine: IMachine<
+		Sendable<Event>,
+		State,
+		Message,
+		Transformed,
+		Substate,
+		Final
+	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+		listener?: (event: Message, get: Getter, set: Setter) => void
 	},
 ): WritableAtom<
 	Spiced<Event, Transformed, Substate, Final>,
@@ -53,14 +71,23 @@ export function machineAtom<
 export function machineAtom<
 	Event extends Typed,
 	State,
+	Message,
 	Transformed,
 	Substate,
 	Final,
 	R,
 >(
-	machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>,
+	machine: IMachine<
+		Sendable<Event>,
+		State,
+		Message,
+		Transformed,
+		Substate,
+		Final
+	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+		listener?: (event: Message, get: Getter, set: Setter) => void
 	},
 ) {
 	const stateAtom = (
@@ -72,7 +99,15 @@ export function machineAtom<
 		(get) => unwrap(get(stateAtom), cb),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
-				const nextState = reducer(event, machine.transform(state))
+				const nextState = reducer(
+					event,
+					machine.transform(state),
+					opts?.listener
+						? (e) => {
+								opts.listener!(e, get, set)
+							}
+						: () => {},
+				)
 				if (nextState === undefined) return
 				set(stateAtom, nextState)
 			}),

@@ -50,6 +50,7 @@ export function fixstateMachine<
 	): IMachine<
 		Sendable<Prettify<ExtractEvents<T>> & Typed>,
 		State,
+		void,
 		Transformed,
 		Transformed,
 		Final

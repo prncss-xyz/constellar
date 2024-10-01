@@ -1,9 +1,13 @@
 import { Typed } from '../utils'
 
-export interface IMachine<Event, State, Transformed, Substate, Final> {
+export interface IMachine<Event, State, Message, Transformed, Substate, Final> {
 	getFinal: (transformed: Transformed) => Final | undefined
 	init: State
-	reducer: (event: Event, transformed: Transformed) => State | undefined
+	reducer: (
+		event: Event,
+		transformed: Transformed,
+		send: (e: Message) => void,
+	) => State | undefined
 	transform: (state: State) => Transformed
 	visit: <Acc>(
 		acc: Acc,
@@ -13,9 +17,15 @@ export interface IMachine<Event, State, Transformed, Substate, Final> {
 }
 
 // when event is just { type: string }, we can use string as shorthand
-export type Sendable<T extends Typed> =
+export type Sendable<T extends Typed | void> =
 	| T
-	| (T extends { type: infer U } ? ({ type: U } extends T ? U : never) : never)
+	| (T extends { type: infer U }
+			? { type: U } extends T
+				? U
+				: never
+			: T extends void
+				? void
+				: never)
 
 export function fromSendable<Event extends Typed>(
 	event: Sendable<Event>,

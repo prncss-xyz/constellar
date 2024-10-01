@@ -7,6 +7,7 @@ type ArgOfInit<T> = T extends (p: infer R) => any ? R : void
 type AnyStates<
 	Event extends Typed,
 	State extends Typed,
+	Message extends Typed | void,
 	DerivedLocal,
 	Derived,
 > = {
@@ -24,6 +25,7 @@ type AnyStates<
 				  >(
 						event: E,
 						state: S,
+						send: (m: Sendable<Message>) => undefined,
 				  ) => Sendable<State> | undefined)
 				| Sendable<State>
 		}>
@@ -34,6 +36,7 @@ type AnyStates<
 			  >(
 					event: E,
 					state: S,
+					send: (m: Sendable<Message>) => undefined,
 			  ) => Sendable<State> | undefined)
 			| Sendable<State>
 	}
@@ -50,12 +53,13 @@ type AnyStates<
 type AnyMachine<
 	Event extends Typed,
 	State extends Typed,
+	Message extends Typed | void = void,
 	DerivedLocal = object,
 	Derived = object,
 > = {
 	derive?: ((s: Prettify<DerivedLocal & State>) => Derived) | Derived
 	init: Init<Sendable<State>, any>
-	states: AnyStates<Event, State, DerivedLocal, Derived>
+	states: AnyStates<Event, State, Message, DerivedLocal, Derived>
 }
 
 export type IsFinal<
@@ -84,14 +88,21 @@ type Final<
 	States extends Record<string, unknown>,
 > = FinalStates<States> & State
 
+function withSend<Message extends Typed | void>(
+	send: (m: Sendable<Message>) => void,
+) {
+	return (m: Sendable<Message>) => send(fromSendable(m as any)) as undefined
+}
+
 export function multistateMachine<
 	Event extends Typed,
 	State extends Typed,
 	DerivedLocal = object,
 	Derived = object,
+	Message extends Typed | void = void,
 >() {
 	return function <
-		Machine extends AnyMachine<Event, State, DerivedLocal, Derived>,
+		Machine extends AnyMachine<Event, State, Message, DerivedLocal, Derived>,
 	>({ derive, init, states }: Machine) {
 		const init0 = toInit(init)
 		function fromAlways(s: State) {
@@ -109,6 +120,7 @@ export function multistateMachine<
 		): IMachine<
 			Sendable<Event>,
 			State,
+			Sendable<Message>,
 			Transformed,
 			Transformed,
 			Prettify<Final<State, Machine['states']>>
@@ -122,22 +134,19 @@ export function multistateMachine<
 					return s as any
 				},
 				init: fromAlways(fromSendable(init0(initialArg))),
-				reducer: (
-					event: Sendable<Event>,
-					s: Derived & DerivedLocal & State,
-				) => {
+				reducer: (event, s, send) => {
 					const e = fromSendable(event)
 					const state = (states as any)[s.type]
 					let res = state?.events?.[e.type]
-					if (isFunction(res)) res = res(e, s)
+					if (isFunction(res)) res = res(e, s, withSend(send))
 					if (res === undefined) {
 						res = state?.wildcard
-						if (isFunction(res)) res = res(e, s)
+						if (isFunction(res)) res = res(e, s, withSend(send))
 						if (res === undefined) return undefined
 					}
 					return fromAlways(fromSendable(res))
 				},
-				transform: (s: State) => {
+				transform: (s) => {
 					const localDerive = (states as any)[s.type].derive
 					const d1 = localDerive
 						? join(s, localDerive)

@@ -12,6 +12,7 @@ describe('machine', () => {
 				type: 'toggle'
 		  }
 		| { type: 'bye' }
+		| { type: 'say' }
 
 	type State =
 		| {
@@ -24,11 +25,19 @@ describe('machine', () => {
 		  }
 		| { type: 'final' }
 
+	type Message = { type: 'hi' }
+
 	type LocalDerived = {
 		count: (now: number) => number
 	}
 
-	const machine = multistateMachine<Event, State, LocalDerived>()({
+	const machine = multistateMachine<
+		Event,
+		State,
+		LocalDerived,
+		object,
+		Message
+	>()({
 		derive: (s) => s,
 		init: { elapsed: 0, type: 'stopped' },
 		states: {
@@ -46,6 +55,7 @@ describe('machine', () => {
 						since: now,
 						type: 'running',
 					}),
+					say: (_e, _s, send) => send('hi'),
 					toggle: ({ now }, { since }) => ({
 						elapsed: now - since,
 						type: 'stopped',
@@ -72,11 +82,19 @@ describe('machine', () => {
 	})
 
 	it('should start running', () => {
-		const m = objectMachine(machine())
-
+		const listener = vi.fn()
+		const m = objectMachine(machine(), { listener })
 		expect(m.state).toMatchObject({ elapsed: 0, type: 'stopped' })
+		expect(m.isDisabled('say')).toBeTruthy()
+		expect(m.next({ now: 1, type: 'toggle' })).toMatchObject({
+			since: 1,
+			type: 'running',
+		})
 		m.send({ now: 1, type: 'toggle' })
 		expect(m.state).toMatchObject({ since: 1, type: 'running' })
+		expect(m.isDisabled('say')).toBeFalsy()
+		m.send('say')
+		expect(listener.mock.calls).toEqual([[{ type: 'hi' }]])
 		expect(m.state.count(3)).toBe(2)
 		m.send({ now: 3, type: 'toggle' })
 		expect(m.state.count(3)).toBe(2)

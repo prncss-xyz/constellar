@@ -14,19 +14,34 @@ export type Spiced<Event extends Typed, Transformed, Substate, Final> = {
 export function machineCb<
 	Event extends Typed,
 	State,
+	Message,
 	Transformed,
 	Substate,
 	Final,
->(machine: IMachine<Sendable<Event>, State, Transformed, Substate, Final>) {
+>(
+	machine: IMachine<
+		Sendable<Event>,
+		State,
+		Message,
+		Transformed,
+		Substate,
+		Final
+	>,
+) {
 	return function (state: State) {
 		const transformed = machine.transform(state)
 		return {
 			...transformed,
 			final: machine.getFinal(transformed),
-			isDisabled: (event: Sendable<Event>) =>
-				machine.reducer(event, transformed) === undefined,
-			next: (event: Sendable<Event>) => {
-				const nextState = machine.reducer(event, transformed)
+			isDisabled: (event: Sendable<Event>) => {
+				let touched = false
+				return (
+					machine.reducer(event, transformed, () => (touched = true)) ===
+						undefined && !touched
+				)
+			},
+			next: (event: Sendable<Event>, send: (e: Message) => void = () => {}) => {
+				const nextState = machine.reducer(event, transformed, send)
 				if (nextState === undefined) return transformed
 				return machine.transform(nextState)
 			},
