@@ -1,12 +1,12 @@
 import { Typed } from '../utils'
 import { IMachine, Sendable } from './core'
 
-export type Spiced<Event extends Typed, Transformed, Substate, Final> = {
+export type Spiced<Event extends Typed, Transformed, SubState, Final> = {
 	final: Final | undefined
 	isDisabled: (event: Sendable<Event>) => boolean
 	next: (event: Sendable<Event>) => Transformed
 	visit: <Acc>(
-		fold: (substate: Substate, acc: Acc, index: string) => Acc,
+		fold: (subState: SubState, acc: Acc, index: string) => Acc,
 		acc: Acc,
 	) => Acc
 } & Transformed
@@ -16,7 +16,7 @@ export function machineCb<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 >(
 	machine: IMachine<
@@ -24,7 +24,7 @@ export function machineCb<
 		State,
 		Message,
 		Transformed,
-		Substate,
+		SubState,
 		Final
 	>,
 ) {
@@ -46,9 +46,9 @@ export function machineCb<
 				return machine.transform(nextState)
 			},
 			visit: <Acc>(
-				fold: (substate: Substate, acc: Acc, index: string) => Acc,
+				fold: (subState: SubState, acc: Acc, index: string) => Acc,
 				acc: Acc,
 			) => machine.visit(acc, fold, transformed),
-		} satisfies Spiced<Event, Transformed, Substate, Final>
+		} satisfies Spiced<Event, Transformed, SubState, Final>
 	}
 }

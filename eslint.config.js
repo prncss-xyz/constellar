@@ -31,13 +31,10 @@ export default tseslint.config({
 					words: [
 						'constellar',
 						'elems',
-						'fixstate',
 						'Lamarche',
-						'multistate',
 						'prncss',
 						'rambda',
 						'removables',
-						'substate',
 						'tseslint',
 					],
 				},

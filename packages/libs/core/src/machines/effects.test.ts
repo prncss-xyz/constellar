@@ -1,7 +1,7 @@
-import { fixstateMachine, machineCb, MachineEffects } from '.'
+import { machineCb, MachineEffects, simpleStateMachine } from '.'
 import { objectMachine } from './object'
 
-const machine = fixstateMachine({
+const machine = simpleStateMachine({
 	events: {
 		e: ({ n }: { n: number }) => ({ n }),
 	},

@@ -1,8 +1,8 @@
 import { IMachine } from './core'
 import { Interpreter, MachineEffects } from './effects'
 
-class ObjectMachine<Event, State, Message, Transformed, Substate, Final> {
-	private effects: MachineEffects<Event, Substate> | undefined
+class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
+	private effects: MachineEffects<Event, SubState> | undefined
 	private listener: (event: Message) => void
 	private onFinal?: (final: Final) => void
 	private queue: Event[] = []
@@ -14,11 +14,11 @@ class ObjectMachine<Event, State, Message, Transformed, Substate, Final> {
 			State,
 			Message,
 			Transformed,
-			Substate,
+			SubState,
 			Final
 		>,
 		opts?: {
-			interpreter?: Interpreter<Event, Substate>
+			interpreter?: Interpreter<Event, SubState>
 			listener?: (event: Message) => void
 			onFinal?: (final: Final) => void
 		},
@@ -69,7 +69,7 @@ class ObjectMachine<Event, State, Message, Transformed, Substate, Final> {
 		}
 	}
 	visit<Acc>(
-		fold: (substate: Substate, acc: Acc, index: string) => Acc,
+		fold: (subState: SubState, acc: Acc, index: string) => Acc,
 		acc: Acc,
 	) {
 		return this.machine.visit(acc, fold, this.state)
@@ -81,12 +81,12 @@ export function objectMachine<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 >(
-	machine: IMachine<Event, State, Message, Transformed, Substate, Final>,
+	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
 	opts?: {
-		interpreter?: Interpreter<Event, Substate>
+		interpreter?: Interpreter<Event, SubState>
 		listener?: (event: Message) => void
 		onFinal?: (final: Final) => void
 	},
@@ -99,11 +99,11 @@ export function promiseMachine<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 >(
-	machine: IMachine<Event, State, Message, Transformed, Substate, Final>,
-	interpreter: Interpreter<Event, Substate>,
+	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	interpreter: Interpreter<Event, SubState>,
 ) {
 	return new Promise<Final>((resolve) => {
 		new ObjectMachine(machine, { interpreter, onFinal: resolve })

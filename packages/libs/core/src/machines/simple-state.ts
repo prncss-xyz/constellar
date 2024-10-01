@@ -27,7 +27,7 @@ type Transitions<State, Transformed> = Record<
 	Transition<State, Transformed>
 >
 
-export function fixstateMachine<
+export function simpleStateMachine<
 	State,
 	T extends Transitions<State, Transformed>,
 	Transformed = State,

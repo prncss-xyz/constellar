@@ -94,7 +94,7 @@ function withSend<Message extends Typed | void>(
 	return (m: Sendable<Message>) => send(fromSendable(m as any)) as undefined
 }
 
-export function multistateMachine<
+export function multiStateMachine<
 	Event extends Typed,
 	State extends Typed,
 	DerivedLocal = object,

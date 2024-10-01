@@ -1,8 +1,8 @@
 import { machineCb } from './callback'
-import { fixstateMachine } from './fixstate'
+import { simpleStateMachine } from './simple-state'
 
 describe('callback', () => {
-	const machine = fixstateMachine(
+	const machine = simpleStateMachine(
 		{
 			events: {
 				add: (e: { n: number }, { n }) => ({

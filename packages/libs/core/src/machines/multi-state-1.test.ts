@@ -1,4 +1,4 @@
-import { multistateMachine } from './multistate'
+import { multiStateMachine } from './multi-state'
 import { objectMachine } from './object'
 
 describe('machine', () => {
@@ -31,7 +31,7 @@ describe('machine', () => {
 		count: (now: number) => number
 	}
 
-	const machine = multistateMachine<
+	const machine = multiStateMachine<
 		Event,
 		State,
 		LocalDerived,

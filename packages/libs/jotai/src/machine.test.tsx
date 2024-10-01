@@ -1,4 +1,4 @@
-import { fixstateMachine, multistateMachine } from '@constellar/core'
+import { multiStateMachine, simpleStateMachine } from '@constellar/core'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'
@@ -12,7 +12,7 @@ import {
 
 describe('machineAtom', () => {
 	type State = { n: number }
-	const someMachine = fixstateMachine(
+	const someMachine = simpleStateMachine(
 		{
 			events: {
 				add: (e: { n: number }, { n }) => ({
@@ -83,7 +83,7 @@ describe('machineAtom', () => {
 })
 
 describe('effects', () => {
-	const someMachine = fixstateMachine(
+	const someMachine = simpleStateMachine(
 		{
 			events: {
 				n: (e: { value: number }) => ({
@@ -139,7 +139,7 @@ describe('effects', () => {
 
 describe('disabledEventAtom', () => {
 	const store = createStore()
-	const machine = fixstateMachine({
+	const machine = simpleStateMachine({
 		events: {
 			a: ({ value }: { value: number }) =>
 				value === 0 ? undefined : { a: value },
@@ -171,7 +171,7 @@ describe('disabledEventAtom', () => {
 })
 
 describe('value', () => {
-	const someMachine = fixstateMachine({
+	const someMachine = simpleStateMachine({
 		events: {
 			a: (e: { value: number }) => ({ a: e.value }),
 		},
@@ -218,7 +218,7 @@ describe('messages', () => {
 	type State = { type: 'a' }
 	type Event = { type: 'in' }
 	type Message = { type: 'out' }
-	const someMachine = multistateMachine<
+	const someMachine = multiStateMachine<
 		Event,
 		State,
 		object,

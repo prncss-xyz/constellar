@@ -1,6 +1,6 @@
 import { Typed } from '../utils'
 
-export interface IMachine<Event, State, Message, Transformed, Substate, Final> {
+export interface IMachine<Event, State, Message, Transformed, SubState, Final> {
 	getFinal: (transformed: Transformed) => Final | undefined
 	init: State
 	reducer: (
@@ -11,7 +11,7 @@ export interface IMachine<Event, State, Message, Transformed, Substate, Final> {
 	transform: (state: State) => Transformed
 	visit: <Acc>(
 		acc: Acc,
-		fold: (substate: Substate, acc: Acc, index: string) => Acc,
+		fold: (subState: SubState, acc: Acc, index: string) => Acc,
 		transformed: Transformed,
 	) => Acc
 }

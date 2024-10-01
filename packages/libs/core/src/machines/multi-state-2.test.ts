@@ -1,4 +1,4 @@
-import { multistateMachine } from './multistate'
+import { multiStateMachine } from './multi-state'
 import { objectMachine } from './object'
 
 describe('machine', () => {
@@ -10,7 +10,7 @@ describe('machine', () => {
 		type: 'green' | 'red' | 'yellow'
 	}
 
-	const machine = multistateMachine<Event, State, object, { len: number }>()({
+	const machine = multiStateMachine<Event, State, object, { len: number }>()({
 		derive: (s) => ({ ...s, len: s.type.length }),
 		init: 'green',
 		states: {

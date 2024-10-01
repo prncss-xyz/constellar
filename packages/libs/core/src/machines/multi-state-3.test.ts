@@ -1,4 +1,4 @@
-import { multistateMachine } from './multistate'
+import { multiStateMachine } from './multi-state'
 import { objectMachine } from './object'
 
 describe('machine', () => {
@@ -11,7 +11,7 @@ describe('machine', () => {
 		type: 'a' | 'b' | 'c'
 	}
 
-	const machine = multistateMachine<Event, State>()({
+	const machine = multiStateMachine<Event, State>()({
 		init: (n: number) => ({ count: n, type: 'a' as const }),
 		states: {
 			a: {

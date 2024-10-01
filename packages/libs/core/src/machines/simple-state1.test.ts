@@ -1,7 +1,7 @@
-import { fixstateMachine } from './fixstate'
 import { objectMachine } from './object'
+import { simpleStateMachine } from './simple-state'
 
-const machine = fixstateMachine(
+const machine = simpleStateMachine(
 	{
 		events: {
 			gogo: 4,
@@ -15,7 +15,7 @@ const machine = fixstateMachine(
 	(x) => (x === 8 ? x : undefined),
 )
 
-describe('fixstateMachine', () => {
+describe('simpleStateMachine', () => {
 	test('with transform and isFinal', () => {
 		const m = objectMachine(machine('hello'))
 		expect(m.state).toBe(10)

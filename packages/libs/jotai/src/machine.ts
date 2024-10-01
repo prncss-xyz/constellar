@@ -19,7 +19,7 @@ export function machineAtom<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 	R,
 >(
@@ -28,7 +28,7 @@ export function machineAtom<
 		State,
 		Message,
 		Transformed,
-		Substate,
+		SubState,
 		Final
 	>,
 	opts: {
@@ -38,7 +38,7 @@ export function machineAtom<
 		listener?: (event: Message, get: Getter, set: Setter) => void
 	},
 ): WritableAtom<
-	Promise<Spiced<Event, Transformed, Substate, Final>>,
+	Promise<Spiced<Event, Transformed, SubState, Final>>,
 	[Sendable<Event>],
 	R
 >
@@ -47,7 +47,7 @@ export function machineAtom<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 	R = void,
 >(
@@ -56,7 +56,7 @@ export function machineAtom<
 		State,
 		Message,
 		Transformed,
-		Substate,
+		SubState,
 		Final
 	>,
 	opts?: {
@@ -64,7 +64,7 @@ export function machineAtom<
 		listener?: (event: Message, get: Getter, set: Setter) => void
 	},
 ): WritableAtom<
-	Spiced<Event, Transformed, Substate, Final>,
+	Spiced<Event, Transformed, SubState, Final>,
 	[Sendable<Event>],
 	R
 >
@@ -73,7 +73,7 @@ export function machineAtom<
 	State,
 	Message,
 	Transformed,
-	Substate,
+	SubState,
 	Final,
 	R,
 >(
@@ -82,7 +82,7 @@ export function machineAtom<
 		State,
 		Message,
 		Transformed,
-		Substate,
+		SubState,
 		Final
 	>,
 	opts?: {

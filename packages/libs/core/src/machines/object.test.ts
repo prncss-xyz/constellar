@@ -1,10 +1,10 @@
-import { fixstateMachine } from './fixstate'
 import { promiseMachine } from './object'
+import { simpleStateMachine } from './simple-state'
 
 type Effect = Partial<{ dbl: true; inc: true }>
 
 test('promiseMachine', async () => {
-	const machine = fixstateMachine(
+	const machine = simpleStateMachine(
 		{
 			events: {
 				double: (_: object, { n }) => ({
