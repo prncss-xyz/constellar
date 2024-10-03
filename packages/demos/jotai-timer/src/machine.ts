@@ -1,4 +1,4 @@
-import { multistateMachine } from '@constellar/core'
+import { multiStateMachine } from '@constellar/core'
 
 type Event = { now: number; type: 'reset' } | { now: number; type: 'toggle' }
 
@@ -10,7 +10,7 @@ type Derived = {
 	count: (now: number) => number
 }
 
-export const timerMachine = multistateMachine<Event, State, Derived>()({
+export const timerMachine = multiStateMachine<Event, State, Derived>()({
 	init: { elapsed: 0, type: 'stopped' },
 	states: {
 		running: {

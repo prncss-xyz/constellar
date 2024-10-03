@@ -1,4 +1,4 @@
-import { multistateMachine } from '@constellar/core'
+import { multiStateMachine } from '@constellar/core'
 
 export type Event = { type: 'next' }
 
@@ -8,7 +8,7 @@ export type Effects = {
 	timeout: { delay: number; event: 'next' }
 }
 
-export const lightsMachine = multistateMachine<
+export const lightsMachine = multiStateMachine<
 	Event,
 	State,
 	{
