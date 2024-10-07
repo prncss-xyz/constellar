@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Messages &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(7f0da)</samp>](https://github.com/prncss-xyz/constellar/commit/7f0dae8)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.1.3...2.2.0)
+
 ## 2.1.3
 
 *No significant changes*
