@@ -5,6 +5,7 @@
 	"scripts": {
 		"docusaurus": "docusaurus",
 		"dev": "docusaurus start",
+		"dev:test": "pnpm vitest",
 		"build": "docusaurus build",
 		"swizzle": "docusaurus swizzle",
 		"deploy": "docusaurus deploy",
@@ -25,10 +26,14 @@
 		"react-icons": "^5.2.1"
 	},
 	"devDependencies": {
+		"@constellar/core": "^2.2",
+		"@constellar/jotai": "^2.2",
 		"@docusaurus/module-type-aliases": "3.4.0",
 		"@docusaurus/tsconfig": "3.4.0",
 		"@docusaurus/types": "3.4.0",
-		"typescript": "~5.2.2"
+		"jotai": "^2.9.3",
+		"typescript": "~5.2.2",
+		"vitest": "^2.0.5"
 	},
 	"browserslist": {
 		"production": [

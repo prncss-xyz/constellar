@@ -1,62 +1,52 @@
 import Heading from '@theme/Heading'
 import clsx from 'clsx'
-import {
-	TbBatteryCharging,
-	TbCheckbox,
-	TbFeather,
-	TbHelmet,
-	TbLambda,
-} from 'react-icons/tb'
+import { FaGhost } from 'react-icons/fa'
+import { GiWashingMachine } from 'react-icons/gi'
+import { LuGlasses } from 'react-icons/lu'
+import { TbFeather } from 'react-icons/tb'
 
 import styles from './styles.module.css'
 
 type FeatureItem = {
-	title: string
-	Svg: React.ComponentType<React.ComponentProps<'svg'>>
 	description: JSX.Element
+	Svg: React.ComponentType<React.ComponentProps<'svg'>>
+	title: string
 }
 
 const FeatureList: FeatureItem[] = [
 	{
-		title: 'Pure Functions',
-		Svg: TbLambda,
 		description: (
 			<>
-				Define your state logic with composable pure functions. Make it
-				uncoupled and testable.
+				Finite state machine helps model an application logic in a way that is
+				expressive of domain knowledge.
 			</>
 		),
+		Svg: GiWashingMachine,
+		title: 'State Machines',
 	},
 	{
-		title: 'Well known abstractions',
-		Svg: TbBatteryCharging,
 		description: (
-			<>Enjoy finite state machines, functional optics, and async primitives.</>
+			<>
+				Optics are a way of getting and setting parts of a larger data structure
+				in a purely functional way.
+			</>
 		),
+		Svg: LuGlasses,
+		title: 'Functional Optics',
 	},
 	{
-		title: 'Lightweight',
-		Svg: TbFeather,
+		description: <>Jotai is a great complement, yet it's fully decoupled.</>,
+		Svg: FaGhost,
+		title: 'Jotai integration (optional)',
+	},
+	{
 		description: <>The library is tree-shakable and dependency-free.</>,
-	},
-	{
-		title: 'Opt-in integration',
-		Svg: TbCheckbox,
-		description: <>Use react integration with a separate package.</>,
-	},
-	{
-		title: 'Reliable',
-		Svg: TbHelmet,
-		description: (
-			<>
-				The library is written in TypeScript, with focus on the quality of the
-				typing. It is also well tested.
-			</>
-		),
+		Svg: TbFeather,
+		title: 'Lightweight',
 	},
 ]
 
-function Feature({ title, Svg, description }: FeatureItem) {
+function Feature({ description, Svg, title }: FeatureItem) {
 	return (
 		<div className={clsx('col col--4')}>
 			<div className="text--center">

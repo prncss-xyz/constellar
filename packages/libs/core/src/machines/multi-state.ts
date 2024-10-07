@@ -134,14 +134,14 @@ export function multiStateMachine<
 					return s as any
 				},
 				init: fromAlways(fromSendable(init0(initialArg))),
-				reducer: (event, s, send) => {
+				reducer: (event, s, emit) => {
 					const e = fromSendable(event)
 					const state = (states as any)[s.type]
 					let res = state?.events?.[e.type]
-					if (isFunction(res)) res = res(e, s, withSend(send))
+					if (isFunction(res)) res = res(e, s, withSend(emit))
 					if (res === undefined) {
 						res = state?.wildcard
-						if (isFunction(res)) res = res(e, s, withSend(send))
+						if (isFunction(res)) res = res(e, s, withSend(emit))
 						if (res === undefined) return undefined
 					}
 					return fromAlways(fromSendable(res))
