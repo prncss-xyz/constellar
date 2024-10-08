@@ -23,7 +23,7 @@ store.set(partAtom, 3) // { a: 3 }
 ## viewAtom
 
 ```typescript
-function viewAtom(wholeAtom: Atom, focus: Focus): Atom
+function viewAtom(wholeAtom, focus)
 ```
 
 Takes an atom and creates a readonly atom with corresponding focus. It is useful when the `wholeAtom` is either readonly or has a setter type that would not be compatible with `focusAtom`, such as a `machineAtom`.
@@ -61,4 +61,18 @@ const sumAtom = foldAtom(
 })
 
 store.get(sumAtom) // 4
+```
+
+## disabledFocusAtom
+
+The setter of the resulting atom takes no parameter and updates wholeAtom according to part and focus.
+
+The getter is a boolean reflecting whether applying the setter would have an effect on the value. We only compare the value in focus before and after applying the value, which avoid the need for deep comparison (but might be misleading with very unlawful optics, such as `queue`). The default comparison function is `shallowEqual`.
+
+`part` can also be the symbol `REMOVE` (when applicable) or an update function.
+
+This is useful for binding an event with a button-like element, hence the name.
+
+```typescript
+disabledFocusAtom(wholeAtom, focus, part, areEqual?)
 ```

@@ -40,7 +40,7 @@ export function disabledEventAtom(
 ): Atom
 ```
 
-Creates an atom associated to a given event for a given atom. Reading the atom will return `true` if sending the event has any effect on the machine. Writing to the atom (without parameters) will send the event.
+Reading the atom will return `true` if sending the event has any effect on the machine. Writing to the atom (without parameters) will send the event.
 
 This is useful for binding an event with a button-like element, hence the name.
 

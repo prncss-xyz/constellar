@@ -1,8 +1,9 @@
-import { Json } from '@/json'
 import { findMany, includes, pipe, prop } from '@constellar/core'
 import { disabledFocusAtom, focusAtom } from '@constellar/jotai'
 import { atom, useAtom } from 'jotai'
 import { Dispatch, SetStateAction, useCallback, useMemo } from 'react'
+
+import { Json } from './json'
 
 function isVowel(s: string) {
 	return 'aeiouy'.includes(s)
