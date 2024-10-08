@@ -100,10 +100,11 @@ export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 export function disabledFocusAtom<Part, Whole, Fail, Command, R>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command>,
-	part: Part,
+	part: Updater<Part, Command>,
 	areEqual: AreEqual<unknown> = shallowEqual,
 ) {
-	const optic = enabled(part, areEqual)(focus(eq<Whole>()))
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const optic = enabled(part as any, areEqual)(focus(eq<Whole>()))
 	return atom(
 		(get) => unwrap(get(wholeAtom), view(optic)),
 		(get, set) =>
