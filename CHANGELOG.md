@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.2
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- DisabledFocusAtom typing &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(ffb7b)</samp>](https://github.com/prncss-xyz/constellar/commit/ffb7b26)
+- **machine/product**: Remove draft implementation &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(e2e1a)</samp>](https://github.com/prncss-xyz/constellar/commit/e2e1abd)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.2.1...2.2.2)
+
 ## 2.2.1
 
 *No significant changes*
