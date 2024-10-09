@@ -12,7 +12,15 @@ pnpm i @constellar/core
 ```
 
 ```typescript
-import { command, flow, modify, prop, put, view } from '@constellar/core'
+import {
+	command,
+	flow,
+	modify,
+	prop,
+	put,
+	view,
+	REMOVE,
+} from '@constellar/core'
 
 type T = { a?: number }
 
@@ -41,14 +49,6 @@ const updated = put(focus, 212)(sample) // updated === { pools: [{ id: 'asdf', c
 ```
 
 However on a typical front-end application, you will use this through an [integration](../05-jotai/index.md).
-
-## Demo
-
-For a slightly more complex use case, you can look at this [demo with Jotai integration](https://codesandbox.io/p/devbox/react-demo-dxfghj).
-
-## WIP
-
-Optics documentation is still a work in progress. In the meantime you can look at the tests and at [optics-ts](https://akheron.github.io/optics-ts/) which it closely matches.
 
 ## Prior art
 

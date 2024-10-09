@@ -31,11 +31,6 @@ m.send({ n: 2, type: 'inc' }) // m.state -> 7
 m.send('step') // m.state -> 6
 ```
 
-## Demos
-
-- [a timer machine with Jotai integration](https://codesandbox.io/p/devbox/react-demo-wnzsnm)
-- [a machine with effects with Jotai integration](https://codesandbox.io/p/devbox/react-demo-sxjtmf)
-
 ## Prior art
 
 - [xState](https://stately.ai/docs/xstate) is the most popular implementation of finite state machines in TypeScript. Main differences:

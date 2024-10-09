@@ -2,7 +2,7 @@ import { includes, rewrite } from '.'
 import { flow } from '../../utils'
 import { eq, update, view } from '../core'
 
-describe('strToNum', () => {
+describe('includes', () => {
 	const sourceDefined = ['a', 'b', 'c']
 	const sourceUndefined = ['a', 'c']
 	const focus = flow(
