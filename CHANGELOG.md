@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.4
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- **machine**: Listener &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(66e43)</samp>](https://github.com/prncss-xyz/constellar/commit/66e438d)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.2.3...2.2.4)
+
 ## 2.2.3
 
 *No significant changes*
