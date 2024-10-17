@@ -2,10 +2,12 @@ import {
 	IMachine,
 	Interpreter,
 	isFunction,
+	Listener,
 	machineCb,
 	MachineEffects,
 	Sendable,
 	Spiced,
+	toListener,
 	Typed,
 	Updater,
 } from '@constellar/core'
@@ -17,7 +19,7 @@ import { unwrap } from './utils'
 export function machineAtom<
 	Event extends Typed,
 	State,
-	Message,
+	Message extends Typed,
 	Transformed,
 	SubState,
 	Final,
@@ -35,7 +37,7 @@ export function machineAtom<
 		atomFactory: (
 			init: State,
 		) => WritableAtom<Promise<State>, [Promise<State>], R>
-		listener?: (event: Message, get: Getter, set: Setter) => void
+		listener?: Listener<Message, [Getter, Setter]>
 	},
 ): WritableAtom<
 	Promise<Spiced<Event, Transformed, SubState, Final>>,
@@ -45,7 +47,7 @@ export function machineAtom<
 export function machineAtom<
 	Event extends Typed,
 	State,
-	Message,
+	Message extends Typed,
 	Transformed,
 	SubState,
 	Final,
@@ -61,7 +63,7 @@ export function machineAtom<
 	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
-		listener?: (event: Message, get: Getter, set: Setter) => void
+		listener?: Listener<Message, [Getter, Setter]>
 	},
 ): WritableAtom<
 	Spiced<Event, Transformed, SubState, Final>,
@@ -71,7 +73,7 @@ export function machineAtom<
 export function machineAtom<
 	Event extends Typed,
 	State,
-	Message,
+	Message extends Typed,
 	Transformed,
 	SubState,
 	Final,
@@ -87,7 +89,7 @@ export function machineAtom<
 	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
-		listener?: (event: Message, get: Getter, set: Setter) => void
+		listener?: Listener<Message, [Getter, Setter]>
 	},
 ) {
 	const stateAtom = (
@@ -95,18 +97,13 @@ export function machineAtom<
 	) as WritableAtom<State, [State], R>
 	const reducer = machine.reducer
 	const cb = machineCb(machine)
+	const listener = opts?.listener ? toListener(opts.listener) : () => {}
 	return atom(
 		(get) => unwrap(get(stateAtom), cb),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
-				const nextState = reducer(
-					event,
-					machine.transform(state),
-					opts?.listener
-						? (e) => {
-								opts.listener!(e, get, set)
-							}
-						: () => {},
+				const nextState = reducer(event, machine.transform(state), (message) =>
+					listener(message, get, set),
 				)
 				if (nextState === undefined) return
 				set(stateAtom, nextState)
