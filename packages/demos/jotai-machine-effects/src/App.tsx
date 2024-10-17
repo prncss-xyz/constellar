@@ -1,8 +1,8 @@
-import { Json } from '@/json'
 import { machineAtom, selectAtom, useMachineEffects } from '@constellar/jotai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useMemo } from 'react'
 
+import { Json } from './json'
 import { lightsMachine } from './machine'
 
 const lightsAtom = machineAtom(lightsMachine())
@@ -36,7 +36,7 @@ function Next() {
 	const next = useCallback(() => send('next'), [send])
 	return <button onClick={next}>Next</button>
 }
-function Main() {
+export default function App() {
 	return (
 		<div>
 			<Effects />
@@ -45,8 +45,4 @@ function Main() {
 			<Json store={lightsAtom} />
 		</div>
 	)
-}
-
-export default function App() {
-	return <Main />
 }

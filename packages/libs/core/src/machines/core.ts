@@ -17,7 +17,7 @@ export interface IMachine<Event, State, Message, Transformed, SubState, Final> {
 }
 
 // when event is just { type: string }, we can use string as shorthand
-export type Sendable<T extends Typed | void> =
+export type Sendable<T extends Typed> =
 	| T
 	| (T extends { type: infer U }
 			? { type: U } extends T

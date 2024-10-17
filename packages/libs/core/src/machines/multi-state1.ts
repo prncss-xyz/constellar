@@ -7,7 +7,7 @@ type ArgOfInit<T> = T extends (p: infer R) => any ? R : void
 type AnyStates<
 	Event extends Typed,
 	State extends Typed,
-	Message extends Typed,
+	Message,
 	DerivedLocal,
 	Derived,
 > = {
@@ -25,7 +25,7 @@ type AnyStates<
 				  >(
 						event: E,
 						state: S,
-						send: (message: Sendable<Message>) => undefined,
+						send: (m: Message) => undefined,
 				  ) => Sendable<State> | undefined)
 				| Sendable<State>
 		}>
@@ -36,7 +36,7 @@ type AnyStates<
 			  >(
 					event: E,
 					state: S,
-					emit: (message: Sendable<Message>) => undefined,
+					send: (m: Message) => undefined,
 			  ) => Sendable<State> | undefined)
 			| Sendable<State>
 	}
@@ -53,7 +53,7 @@ type AnyStates<
 type AnyMachine<
 	Event extends Typed,
 	State extends Typed,
-	Message extends Typed = { type: never },
+	Message = void,
 	DerivedLocal = object,
 	Derived = object,
 > = {
@@ -88,9 +88,8 @@ type Final<
 	States extends Record<string, unknown>,
 > = FinalStates<States> & State
 
-function withSend<Message extends Typed>(emit: (message: Message) => void) {
-	return (message: Sendable<Message>) =>
-		emit(fromSendable(message)) as undefined
+function withSend<Message>(send: (m: Message) => void) {
+	return (m: Message) => send(fromSendable(m as any)) as undefined
 }
 
 export function multiStateMachine<
@@ -98,7 +97,7 @@ export function multiStateMachine<
 	State extends Typed,
 	DerivedLocal = object,
 	Derived = object,
-	Message extends Typed = { type: never },
+	Message = void,
 >() {
 	return function <
 		Machine extends AnyMachine<Event, State, Message, DerivedLocal, Derived>,

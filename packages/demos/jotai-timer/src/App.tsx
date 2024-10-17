@@ -1,10 +1,10 @@
-import { Json } from '@/json'
 import { machineAtom, selectAtom } from '@constellar/jotai'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
 import { useAtomCallback } from 'jotai/utils'
 import { useCallback } from 'react'
 
 import { clockAtom, useSetupClock } from './clock'
+import { Json } from './json'
 import { timerMachine } from './machine'
 
 const timerAtom = machineAtom(timerMachine())
@@ -53,7 +53,7 @@ function Counter() {
 	return <div>{seconds}</div>
 }
 
-export default function Timer() {
+export default function App() {
 	useSetupClock()
 	return (
 		<div>
