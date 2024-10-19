@@ -10,8 +10,8 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@constellar/jotai": "^2",
-		"@constellar/core": "^2",
+		"@constellar/jotai": "*",
+		"@constellar/core": "*",
 		"@vitejs/plugin-react": "^4.3.1",
 		"jotai": "^2.9.3",
 		"jotai-effect": "^1.0.2",

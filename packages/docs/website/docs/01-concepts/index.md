@@ -12,6 +12,8 @@ Completing the documentation is our current priority. In the meantime, you are i
 - [some optics-powered checkboxes with Jotai integration](https://codesandbox.io/p/devbox/react-demo-dxfghj)
 - [a timer machine with Jotai integration](https://codesandbox.io/p/devbox/react-demo-wnzsnm)
 - [a machine with effects with Jotai integration](https://codesandbox.io/p/devbox/react-demo-sxjtmf)
+  https://codesandbox.io/s/github/prncss-xyz/constellar/tree/main/packages/demos/jotai-turnstile
+- [a machine with effects and messages with Jotai integration](https://codesandbox.io/p/devbox/react-demo-7kcmwc)
 - For a simple application putting it all together, you can look at [timer list](https://github.com/prncss-xyz/timer-list)
 
 ## Roadmap

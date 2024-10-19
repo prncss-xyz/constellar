@@ -39,6 +39,10 @@ A state without `events` nor `always` fields is a final state.
 
 `derive` is a function receiving the state and its locally derived value, and returning an object of type Derived which will be merged with state.
 
+## Note on Typing
+
+If you forget the key corresponding to a possible State, TypeScript will complain. However, if you add a key that do not correspond to a possible State or Event, TypeScript will accept it (however, other parameter will have type `any`).
+
 ## Example
 
 ```typescript

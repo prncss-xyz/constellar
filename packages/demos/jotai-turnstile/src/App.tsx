@@ -1,21 +1,28 @@
+import { queue } from '@constellar/core'
 import {
 	disabledEventAtom,
+	focusAtom,
 	machineAtom,
 	useMachineEffects,
 } from '@constellar/jotai'
-import { useAtom } from 'jotai'
+import { atom, useAtom, useAtomValue } from 'jotai'
 import { useCallback, useMemo } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
 
 import { Json } from './json'
 import { localCached } from './localCache'
 import { turnstileMachine } from './machine'
 
+const messagesAtom = atom<string[]>([])
+const messageQueueAtom = focusAtom(messagesAtom, queue())
+
 const turnstileAtom = machineAtom(turnstileMachine(), {
 	listener: {
-		error: () => toast.error('Payment refused.'),
-		success: ({ amount }) =>
-			toast.success(`Payment accepted, you still have ${amount} tickets.`),
+		error: (_event, _get, set) => set(messageQueueAtom, 'Payment refused.'),
+		success: ({ amount }, _get, set) =>
+			set(
+				messageQueueAtom,
+				`Payment accepted, you still have ${amount} tickets.`,
+			),
 	},
 })
 
@@ -69,14 +76,32 @@ function Push() {
 	)
 }
 
-export default function App() {
+function Messages() {
+	const messages = useAtomValue(messagesAtom)
 	return (
 		<div>
-			<Effects />
-			<Pay id="123" />
-			<Push />
-			<Json store={turnstileAtom} />
-			<Toaster />
+			<p>Messages:</p>
+			<div>
+				{messages.map((m, i) => (
+					<div key={String(i)}>{m}</div>
+				))}
+			</div>
 		</div>
+	)
+}
+
+export default function App() {
+	return (
+		<>
+			<Effects />
+			<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+				<div>
+					<Pay id="123" />
+					<Push />
+				</div>
+				<Json store={turnstileAtom} />
+				<Messages />
+			</div>
+		</>
 	)
 }
