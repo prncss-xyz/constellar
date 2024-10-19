@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.3.0
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Listener &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(ba4d4)</samp>](https://github.com/prncss-xyz/constellar/commit/ba4d4a1)
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Build step &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(b576b)</samp>](https://github.com/prncss-xyz/constellar/commit/b576ba3)
+- Build step &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(f9c0e)</samp>](https://github.com/prncss-xyz/constellar/commit/f9c0e16)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.2.4...2.3.0)
+
 ## 2.2.4
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
