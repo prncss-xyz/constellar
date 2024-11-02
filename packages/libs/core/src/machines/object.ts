@@ -28,14 +28,14 @@ class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
 		this.state = machine.transform(machine.init)
 		this.final = machine.getFinal(this.state)
 		if (opts?.interpreter) {
-			this.effects = new MachineEffects(this.send.bind(this), opts.interpreter)
-			this.effects.update(this.visit.bind(this))
+			this.effects = new MachineEffects(opts.interpreter)
+			this.effects.update(this.visit.bind(this), this.send.bind(this))
 		}
 	}
 	private onChange() {
 		if (!this.effects) return
 		const run = this.queue.length === 0
-		this.effects.update(this.visit.bind(this))
+		this.effects.update(this.visit.bind(this), this.send.bind(this))
 		if (!run) return
 		while (true) {
 			const event = this.queue.shift()

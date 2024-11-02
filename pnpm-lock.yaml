@@ -62,10 +62,10 @@ importers:
   packages/demos/jotai-checkbox:
     dependencies:
       '@constellar/core':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0
       '@constellar/jotai':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0(@constellar/core@2.2.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.3
@@ -102,10 +102,10 @@ importers:
   packages/demos/jotai-machine-effects:
     dependencies:
       '@constellar/core':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0
       '@constellar/jotai':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0(@constellar/core@2.2.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
@@ -145,10 +145,10 @@ importers:
   packages/demos/jotai-timer:
     dependencies:
       '@constellar/core':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0
       '@constellar/jotai':
-        specifier: '2.2'
+        specifier: '*'
         version: 2.2.0(@constellar/core@2.2.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
@@ -185,10 +185,10 @@ importers:
   packages/demos/jotai-turnstile:
     dependencies:
       '@constellar/core':
-        specifier: '*'
+        specifier: workspace:^
         version: link:../../libs/core
       '@constellar/jotai':
-        specifier: '*'
+        specifier: workspace:^
         version: link:../../libs/jotai
       '@vitejs/plugin-react':
         specifier: ^4.3.1
@@ -253,10 +253,10 @@ importers:
         version: 5.3.0(react@18.3.1)
     devDependencies:
       '@constellar/core':
-        specifier: ^2.2
+        specifier: ^2
         version: 2.2.0
       '@constellar/jotai':
-        specifier: ^2.2
+        specifier: ^2
         version: 2.2.0(@constellar/core@2.2.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@docusaurus/module-type-aliases':
         specifier: 3.4.0

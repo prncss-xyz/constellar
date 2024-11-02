@@ -6,7 +6,7 @@ export interface IMachine<Event, State, Message, Transformed, SubState, Final> {
 	reducer: (
 		event: Event,
 		transformed: Transformed,
-		send: (e: Message) => void,
+		emit: (e: Message) => void,
 	) => State | undefined
 	transform: (state: State) => Transformed
 	visit: <Acc>(
@@ -34,4 +34,8 @@ export function fromSendable<Event extends Typed>(
 		? // Sendable type guarantees that resulting event is valid
 			({ type: event } as unknown as Event)
 		: event
+}
+
+export function withSend<Event extends Typed>(emit: (event: Event) => void) {
+	return (e: Sendable<Event>) => emit(fromSendable(e)) as undefined
 }

@@ -37,6 +37,7 @@ export function machineAtom<
 		atomFactory: (
 			init: State,
 		) => WritableAtom<Promise<State>, [Promise<State>], R>
+		interpreter?: Interpreter<Event, SubState>
 		listener?: Listener<Message, [Getter, Setter]>
 	},
 ): WritableAtom<
@@ -63,6 +64,7 @@ export function machineAtom<
 	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+		interpreter?: Interpreter<Event, SubState>
 		listener?: Listener<Message, [Getter, Setter]>
 	},
 ): WritableAtom<
@@ -89,6 +91,7 @@ export function machineAtom<
 	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
+		interpreter?: Interpreter<Event, SubState>
 		listener?: Listener<Message, [Getter, Setter]>
 	},
 ) {
@@ -98,7 +101,16 @@ export function machineAtom<
 	const reducer = machine.reducer
 	const cb = machineCb(machine)
 	const listener = opts?.listener ? toListener(opts.listener) : () => {}
-	return atom(
+	const effAtom = opts?.interpreter
+		? atom<MachineEffects<Event, SubState>>()
+		: null
+	if (effAtom)
+		effAtom.onMount = (setAtom) => {
+			const effects = new MachineEffects<Event, SubState>(opts!.interpreter!)
+			setAtom(effects)
+			return () => effects.flush()
+		}
+	const resAtom = atom(
 		(get) => unwrap(get(stateAtom), cb),
 		(get, set, event: Sendable<Event>) =>
 			unwrap(get(stateAtom), (state) => {
@@ -107,8 +119,18 @@ export function machineAtom<
 				)
 				if (nextState === undefined) return
 				set(stateAtom, nextState)
+				const send = (e: Event) => set(resAtom, e)
+				if (effAtom)
+					setTimeout(
+						() =>
+							unwrap(get(resAtom), (res) =>
+								get(effAtom)!.update(res.visit, send),
+							),
+						0,
+					)
 			}),
 	)
+	return resAtom
 }
 
 export function useMachineEffects<
@@ -122,14 +144,11 @@ export function useMachineEffects<
 ) {
 	const machineEffects = useRef<MachineEffects<Event, Transformed>>()
 	useEffect(() => {
-		machineEffects.current = new MachineEffects<Event, Transformed>(
-			send,
-			interpreter,
-		)
+		machineEffects.current = new MachineEffects<Event, Transformed>(interpreter)
 		return () => machineEffects.current!.flush()
 	}, [interpreter, send])
 	useEffect(
-		() => machineEffects.current!.update(transformed.visit),
+		() => machineEffects.current!.update(transformed.visit, send),
 		[transformed, send, interpreter],
 	)
 }

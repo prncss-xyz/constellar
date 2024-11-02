@@ -14,8 +14,9 @@ describe('listener', () => {
 		expect(b).toHaveBeenCalledTimes(0)
 	})
 	test('function', () => {
-		const listener = toListener(vi.fn())
+		const a = vi.fn()
+		const listener = toListener(a)
 		listener({ type: 'a', value: 1 }, 2)
-		expect(listener).toHaveBeenCalledWith({ type: 'a', value: 1 }, 2)
+		expect(a).toHaveBeenCalledWith({ type: 'a', value: 1 }, 2)
 	})
 })

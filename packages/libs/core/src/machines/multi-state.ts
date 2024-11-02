@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fromSendable, IMachine, Sendable } from '.'
+import { fromSendable, IMachine, Sendable, withSend } from '.'
 import { Init, isEmpty, isFunction, Prettify, toInit, Typed } from '../utils'
 
 type ArgOfInit<T> = T extends (p: infer R) => any ? R : void
@@ -25,7 +25,7 @@ type AnyStates<
 				  >(
 						event: E,
 						state: S,
-						send: (message: Sendable<Message>) => undefined,
+						emit: (message: Sendable<Message>) => undefined,
 				  ) => Sendable<State> | undefined)
 				| Sendable<State>
 		}>
@@ -87,11 +87,6 @@ type Final<
 	State extends Typed,
 	States extends Record<string, unknown>,
 > = FinalStates<States> & State
-
-function withSend<Message extends Typed>(emit: (message: Message) => void) {
-	return (message: Sendable<Message>) =>
-		emit(fromSendable(message)) as undefined
-}
 
 export function multiStateMachine<
 	Event extends Typed,

@@ -1,6 +1,6 @@
 import { multiStateMachine } from '@constellar/core'
 
-type State =
+export type State =
 	| { effects: { payment: { id: string; now: number } }; type: 'payment' }
 	| { id: string; type: 'payment' }
 	| { type: 'locked' }

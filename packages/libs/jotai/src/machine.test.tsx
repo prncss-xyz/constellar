@@ -1,4 +1,8 @@
-import { multiStateMachine, simpleStateMachine } from '@constellar/core'
+import {
+	Listener,
+	multiStateMachine,
+	simpleStateMachine,
+} from '@constellar/core'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
 import { useState } from 'react'
@@ -248,3 +252,30 @@ describe('messages', () => {
 		expect(store.get(countAtom)).toBe(1)
 	})
 })
+
+/*
+describe('listener', () => {
+	type Message = { p: number; type: 'out' } | { q: string; type: 'in' }
+	const x: Listener<Message, [number, string]> = {
+		in: ({ q }, x, y) => console.log(e.type, x, q),
+		out: ({ p }, x, y) => console.log(e.type, x, p),
+	}
+	type State = { type: 'a' }
+	type Event = { q: string; type: 'a' }
+	const someMachine = multiStateMachine<
+		Event,
+		State,
+		object,
+		object,
+		Message
+	>()({
+		init: 'a',
+		states: {
+			a: {},
+		},
+	})
+	const someAtom = machineAtom(someMachine(), {
+		listener: (x) => console.log(x),
+	})
+})
+*/
