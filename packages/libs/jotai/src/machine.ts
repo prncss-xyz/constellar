@@ -5,7 +5,6 @@ import {
 	Listener,
 	machineCb,
 	MachineEffects,
-	Sendable,
 	Spiced,
 	toListener,
 	Typed,
@@ -17,7 +16,7 @@ import { useEffect, useRef } from 'react'
 import { unwrap } from './utils'
 
 export function machineAtom<
-	Event extends Typed,
+	Event,
 	State,
 	Message extends Typed,
 	Transformed,
@@ -25,14 +24,7 @@ export function machineAtom<
 	Final,
 	R,
 >(
-	machine: IMachine<
-		Sendable<Event>,
-		State,
-		Message,
-		Transformed,
-		SubState,
-		Final
-	>,
+	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
 	opts: {
 		atomFactory: (
 			init: State,
@@ -42,11 +34,11 @@ export function machineAtom<
 	},
 ): WritableAtom<
 	Promise<Spiced<Event, Transformed, SubState, Final>>,
-	[Sendable<Event>],
+	[Event],
 	R
 >
 export function machineAtom<
-	Event extends Typed,
+	Event,
 	State,
 	Message extends Typed,
 	Transformed,
@@ -54,26 +46,15 @@ export function machineAtom<
 	Final,
 	R = void,
 >(
-	machine: IMachine<
-		Sendable<Event>,
-		State,
-		Message,
-		Transformed,
-		SubState,
-		Final
-	>,
+	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
 		interpreter?: Interpreter<Event, SubState>
 		listener?: Listener<Message, [Getter, Setter]>
 	},
-): WritableAtom<
-	Spiced<Event, Transformed, SubState, Final>,
-	[Sendable<Event>],
-	R
->
+): WritableAtom<Spiced<Event, Transformed, SubState, Final>, [Event], R>
 export function machineAtom<
-	Event extends Typed,
+	Event,
 	State,
 	Message extends Typed,
 	Transformed,
@@ -81,14 +62,7 @@ export function machineAtom<
 	Final,
 	R,
 >(
-	machine: IMachine<
-		Sendable<Event>,
-		State,
-		Message,
-		Transformed,
-		SubState,
-		Final
-	>,
+	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
 		interpreter?: Interpreter<Event, SubState>
@@ -99,7 +73,7 @@ export function machineAtom<
 		opts?.atomFactory ? opts.atomFactory(machine.init) : atom(machine.init)
 	) as WritableAtom<State, [State], R>
 	const reducer = machine.reducer
-	const cb = machineCb(machine)
+	const toSpiced = machineCb(machine)
 	const listener = opts?.listener ? toListener(opts.listener) : () => {}
 	const effAtom = opts?.interpreter
 		? atom<MachineEffects<Event, SubState>>()
@@ -111,8 +85,8 @@ export function machineAtom<
 			return () => effects.flush()
 		}
 	const resAtom = atom(
-		(get) => unwrap(get(stateAtom), cb),
-		(get, set, event: Sendable<Event>) =>
+		(get) => unwrap(get(stateAtom), toSpiced),
+		(get, set, event: Event) =>
 			unwrap(get(stateAtom), (state) => {
 				const nextState = reducer(event, machine.transform(state), (message) =>
 					listener(message, get, set),
@@ -134,12 +108,12 @@ export function machineAtom<
 }
 
 export function useMachineEffects<
-	Event extends Typed,
+	Event,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	Transformed extends Spiced<Event, unknown, any, unknown>,
 >(
 	transformed: Transformed,
-	send: (event: Sendable<Event>) => void,
+	send: (event: Event) => void,
 	interpreter: Interpreter<Event, Transformed>,
 ) {
 	const machineEffects = useRef<MachineEffects<Event, Transformed>>()

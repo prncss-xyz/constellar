@@ -1,5 +1,6 @@
 import { IMachine } from './core'
 import { Interpreter, MachineEffects } from './effects'
+import { isDisabled, nextState } from './utils'
 
 class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
 	private effects: MachineEffects<Event, SubState> | undefined
@@ -47,17 +48,10 @@ class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
 		this.effects?.flush()
 	}
 	isDisabled(event: Event) {
-		let touched = false
-		return (
-			this.machine.reducer(event, this.state, () => {
-				touched = true
-			}) === undefined && !touched
-		)
+		return isDisabled(this.machine, this.state, event)
 	}
 	next(event: Event) {
-		const nextState = this.machine.reducer(event, this.state, () => {})
-		if (nextState === undefined) return this.state
-		return this.machine.transform(nextState)
+		return nextState(this.machine, this.state, event)
 	}
 	send(event: Event) {
 		const state = this.machine.reducer(event, this.state, this.listener)
