@@ -1,7 +1,22 @@
-import { IMachine } from './core'
+import { Typed } from '../utils'
+import { IMachine, MessageCtx } from './core'
 
-export function isDisabled<Event, State, Message, Transformed, SubState, Final>(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+export function isDisabled<
+	Event,
+	State,
+	Message extends Typed,
+	Transformed,
+	SubState,
+	Final,
+>(
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	transformed: Transformed,
 	event: Event,
 ) {
@@ -12,8 +27,22 @@ export function isDisabled<Event, State, Message, Transformed, SubState, Final>(
 	return !touched && res === undefined
 }
 
-export function nextState<Event, State, Message, Transformed, SubState, Final>(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+export function nextState<
+	Event,
+	State,
+	Message extends Typed,
+	Transformed,
+	SubState,
+	Final,
+>(
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	transformed: Transformed,
 	event: Event,
 ) {

@@ -5,6 +5,7 @@ import {
 	Listener,
 	machineCb,
 	MachineEffects,
+	MessageCtx,
 	Spiced,
 	toListener,
 	Typed,
@@ -24,7 +25,14 @@ export function machineAtom<
 	Final,
 	R,
 >(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	opts: {
 		atomFactory: (
 			init: State,
@@ -46,7 +54,14 @@ export function machineAtom<
 	Final,
 	R = void,
 >(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
 		interpreter?: Interpreter<Event, SubState>
@@ -62,7 +77,14 @@ export function machineAtom<
 	Final,
 	R,
 >(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	opts?: {
 		atomFactory?: (init: State) => WritableAtom<State, [State], R>
 		interpreter?: Interpreter<Event, SubState>

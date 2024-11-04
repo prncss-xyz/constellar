@@ -1,5 +1,5 @@
-import { IMachine } from './core'
-import { isDisabled, nextState } from './utils'
+import { noop, Typed } from '../utils'
+import { IMachine, MessageCtx } from './core'
 
 export type Spiced<Event, Transformed, SubState, Final> = {
 	final: Final | undefined
@@ -11,8 +11,22 @@ export type Spiced<Event, Transformed, SubState, Final> = {
 	) => Acc
 } & Transformed
 
-export function machineCb<Event, State, Message, Transformed, SubState, Final>(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+export function machineCb<
+	Event,
+	State,
+	Message extends Typed,
+	Transformed,
+	SubState,
+	Final,
+>(
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 ) {
 	return function (state: State) {
 		const transformed = machine.transform(state)
@@ -20,10 +34,16 @@ export function machineCb<Event, State, Message, Transformed, SubState, Final>(
 			...transformed,
 			final: machine.getFinal(transformed),
 			isDisabled: (event: Event) => {
-				return isDisabled(machine, transformed, event)
+				let touched = false
+				const res = machine.reducer(event, transformed, () => {
+					touched = true
+				})
+				return !touched && res === undefined
 			},
 			next: (event: Event) => {
-				return nextState(machine, transformed, event)
+				const nextState = machine.reducer(event, transformed, noop)
+				if (nextState === undefined) return transformed
+				return machine.transform(nextState)
 			},
 			visit: <Acc>(
 				fold: (subState: SubState, acc: Acc, index: string) => Acc,

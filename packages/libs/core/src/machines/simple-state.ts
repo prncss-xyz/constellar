@@ -50,7 +50,7 @@ export function simpleStateMachine<
 	): IMachine<
 		Sendable<Prettify<ExtractEvents<T>> & Typed>,
 		State,
-		{ type: never },
+		[],
 		Transformed,
 		Transformed,
 		Final

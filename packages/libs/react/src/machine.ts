@@ -4,6 +4,7 @@ import {
 	isFunction,
 	Listener,
 	MachineEffects,
+	MessageCtx,
 	Sendable,
 	Spiced,
 	toListener,
@@ -23,7 +24,7 @@ export function useMachine<
 	machine: IMachine<
 		Sendable<Event>,
 		State,
-		Message,
+		MessageCtx<Message>,
 		Transformed,
 		SubState,
 		Final

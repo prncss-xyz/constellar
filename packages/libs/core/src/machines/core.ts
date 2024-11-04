@@ -1,12 +1,19 @@
 import { Typed } from '../utils'
 
-export interface IMachine<Event, State, Message, Transformed, SubState, Final> {
+export interface IMachine<
+	Event,
+	State,
+	Ctx extends unknown[],
+	Transformed,
+	SubState,
+	Final,
+> {
 	getFinal: (transformed: Transformed) => Final | undefined
 	init: State
 	reducer: (
 		event: Event,
 		transformed: Transformed,
-		emit: (e: Message) => void,
+		...args: Ctx
 	) => State | undefined
 	transform: (state: State) => Transformed
 	visit: <Acc>(
@@ -15,6 +22,10 @@ export interface IMachine<Event, State, Message, Transformed, SubState, Final> {
 		transformed: Transformed,
 	) => Acc
 }
+
+export type MessageCtx<Message extends Typed> = [
+	(event: Sendable<Message>) => void,
+]
 
 // when event is just { type: string }, we can use string as shorthand
 export type Sendable<T extends Typed> =

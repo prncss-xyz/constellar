@@ -1,10 +1,19 @@
-import { IMachine } from './core'
+import { Typed } from '../utils'
+import { IMachine, MessageCtx, Sendable } from './core'
 import { Interpreter, MachineEffects } from './effects'
+import { Listener, toListener } from './listener'
 import { isDisabled, nextState } from './utils'
 
-class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
+class ObjectMachine<
+	Event,
+	State,
+	Message extends Typed,
+	Transformed,
+	SubState,
+	Final,
+> {
 	private effects: MachineEffects<Event, SubState> | undefined
-	private listener: (event: Message) => void
+	private listener: (event: Sendable<Message>) => void
 	private onFinal?: (final: Final) => void
 	private queue: Event[] = []
 	public final: Final | undefined
@@ -13,18 +22,18 @@ class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
 		private machine: IMachine<
 			Event,
 			State,
-			Message,
+			MessageCtx<Message>,
 			Transformed,
 			SubState,
 			Final
 		>,
 		opts?: {
 			interpreter?: Interpreter<Event, SubState>
-			listener?: (event: Message) => void
+			listener?: Listener<Message, []>
 			onFinal?: (final: Final) => void
 		},
 	) {
-		this.listener = opts?.listener ?? (() => {})
+		this.listener = opts?.listener ? toListener(opts.listener) : () => {}
 		this.onFinal = opts?.onFinal
 		this.state = machine.transform(machine.init)
 		this.final = machine.getFinal(this.state)
@@ -73,15 +82,22 @@ class ObjectMachine<Event, State, Message, Transformed, SubState, Final> {
 export function objectMachine<
 	Event,
 	State,
-	Message,
+	Message extends Typed,
 	Transformed,
 	SubState,
 	Final,
 >(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	opts?: {
 		interpreter?: Interpreter<Event, SubState>
-		listener?: (event: Message) => void
+		listener?: Listener<Message, []>
 		onFinal?: (final: Final) => void
 	},
 ) {
@@ -91,12 +107,19 @@ export function objectMachine<
 export function promiseMachine<
 	Event,
 	State,
-	Message,
+	Message extends Typed,
 	Transformed,
 	SubState,
 	Final,
 >(
-	machine: IMachine<Event, State, Message, Transformed, SubState, Final>,
+	machine: IMachine<
+		Event,
+		State,
+		MessageCtx<Message>,
+		Transformed,
+		SubState,
+		Final
+	>,
 	interpreter: Interpreter<Event, SubState>,
 ) {
 	return new Promise<Final>((resolve) => {
