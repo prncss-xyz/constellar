@@ -361,27 +361,17 @@ export function traversal<Part, Whole, Index>({
 
 // optics modifier
 
-// TODO: memoize ?
 // FIXME: type inference is problematic when value can be command
 // we need to cast is as any
 
-export function enabled<Part>(
-	value: ((p: Part) => Part) | Part,
-	areEqual: AreEqual<any> = Object.is,
-) {
+export function disabled<Part>(value: ((p: Part) => Part) | Part) {
 	return function <Whole, Fail, Command>(
 		o: IOptic<Part, Whole, Fail, Command>,
 	): IOptic<boolean, Whole, never, never> {
-		const update_ = memo1((value: ((p: Part) => Part) | Part) =>
-			update(o, value),
-		)
-		const v = view(o)
-		const getter = (whole: Whole) => {
-			return areEqual(v(update_(value)(whole)), v(whole))
-		}
-		const setter = (b: boolean, whole: Whole) => {
-			if (!b) return whole
-			return update(o, value)(whole)
+		const getter = (whole: Whole) => Object.is(update(o, value)(whole), whole)
+		const setter = (d: boolean, whole: Whole) => {
+			if (d) return update(o, value)(whole)
+			return whole
 		}
 		return {
 			command: id,

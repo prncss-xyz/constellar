@@ -66,8 +66,6 @@ export function nth<Index extends keyof O & number, O extends unknown[]>(
 	return lens<O[Index], O>({
 		getter: (o) => o[index],
 		setter: (v, o) => replace(v, index, o) as O,
-		// we will use this when browser support is better
-		/* setter: (v, o) => o.with(index, v) as O, */
 	})
 }
 
@@ -77,7 +75,7 @@ export function includes<X>(x: X) {
 		getter: (xs) => xs.includes(x),
 		setter: (v, xs) => {
 			if (xs.includes(x) === v) return xs
-			if (v) return [...xs, x]
+			if (v) return xs.concat(x)
 			return xs.filter((x_) => x_ !== x)
 		},
 		// mapper could improve speed
@@ -110,7 +108,7 @@ type OptionalKeys<T> = {
 	[K in keyof T]: object extends Pick<T, K> ? K : never
 }[keyof T]
 
-export function prop<Key extends keyof O, O>(
+export function prop<Key extends keyof O, O extends object>(
 	key: Key,
 ): <A, F1, C>(
 	p: IOptic<O, A, F1, C>,
@@ -120,15 +118,21 @@ export function prop<Key extends keyof O, O>(
 	F1 | (Key extends OptionalKeys<O> ? undefined : never),
 	Key extends OptionalKeys<O> ? typeof REMOVE : never
 >
-export function prop<Key extends keyof O, O>(key: Key) {
+export function prop<Key extends keyof O, O extends object>(key: Key) {
 	return removable<Exclude<O[Key], undefined>, O>({
 		getter: (o) => o[key] as Exclude<O[Key], undefined>,
 		remover: (o) => {
+			if (!(key in o)) return o
 			const res = { ...o }
 			delete res[key]
 			return res
 		},
-		setter: (v, o) => ({ ...o, [key]: v }),
+		setter: (v, o) => {
+			// the second check is to differentiate between a key not existing
+			// and a key existing with a value of undefined
+			if (Object.is(o[key], v) && key in o) return o
+			return { ...o, [key]: v }
+		},
 	})
 }
 
@@ -137,18 +141,6 @@ export function at<X>(index: number) {
 		getter: (xs) => xs.at(index),
 		remover: (xs) => remove(index, xs),
 		setter: (x: X, xs) => replace(x, index, xs),
-		// replace when better browser support
-		/* setter: (x: X, xs) => {
-			if (index >= xs.length) return xs
-			return xs.with(xs, index, x)
-		}, 
-		remover: (xs) => {
-			if (index < 0) index += xs.length
-			if (index < 0) return xs
-			if (index >= xs.length) return xs
-			return xs.toSpliced(index, 1)
-		},
-    */
 	})
 }
 
@@ -184,6 +176,7 @@ export function findOne<X>(p: (x: X) => unknown) {
 	})
 }
 
+// TODO: remover, dirty
 // defective (when setting a value not respecting predicate)
 export function findMany<X, Y extends X>(
 	p: (x: X) => x is Y,
@@ -195,7 +188,8 @@ export function findMany<X>(p: (x: X) => unknown) {
 	return lens<X[], X[]>({
 		getter: (xs) => xs.filter(p),
 		setter: (fs, xs) => {
-			const rs = []
+			let dirty = false
+			const rs: X[] = []
 			let i = 0
 			let j = 0
 			let k = 0
@@ -203,16 +197,23 @@ export function findMany<X>(p: (x: X) => unknown) {
 				const x = xs[i]!
 				if (p(x)) {
 					if (j < fs.length) {
-						rs[k++] = fs[j++]!
+						dirty = dirty || !Object.is(fs[j], x)
+						rs[k] = fs[j]!
+						j++
+						k++
+					} else {
+						dirty = true
 					}
 				} else {
-					rs[k++] = x
+					rs[k] = x
+					k++
 				}
 			}
-			for (; j < fs.length; j++, i++) {
-				rs[k++] = fs[j]!
+			for (; j < fs.length; j++, k++) {
+				dirty = true
+				rs[k] = fs[j]!
 			}
-			return rs
+			return dirty ? rs : xs
 		},
 		// if needed, implementing a custom mapper could greatly improve speed
 	})
@@ -228,22 +229,22 @@ export function tail<X>() {
 
 // defective
 // aka prepend
-// can represent a stack, although foot is less efficient
+// can represent a stack, although foot is more efficient
 export function head<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(0),
-		remover: (xs) => xs.slice(1),
+		remover: (last) => (last.length ? last.slice(1) : last),
 		setter: prepend,
 	})
 }
 
 // defective
-// aka append
+// aka foot, append
 // can represent a stack
-export function foot<X>() {
+export function stack<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(-1),
-		remover: (xs) => xs.slice(0, -1),
+		remover: (last) => (last.length ? last.slice(0, -1) : last),
 		setter: append,
 	})
 }
@@ -252,7 +253,7 @@ export function foot<X>() {
 export function queue<X>() {
 	return removable<X, X[]>({
 		getter: (xs) => xs.at(0),
-		remover: (xs) => xs.slice(1),
+		remover: (last) => (last.length ? last.slice(1) : last),
 		setter: append,
 	})
 }
