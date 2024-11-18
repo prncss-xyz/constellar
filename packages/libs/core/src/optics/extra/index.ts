@@ -3,8 +3,11 @@ import { fromArray, toArray } from '../collections'
 import {
 	inert,
 	IOptic,
+	iso,
 	lens,
+	NON_PRISM,
 	optional,
+	prism,
 	removable,
 	REMOVE,
 	traversal,
@@ -14,21 +17,26 @@ import {
 
 export function to<Micro, Part>(
 	getter: (v: Part) => Micro,
-): <Whole, F, C>(o: IOptic<Part, Whole, F, C>) => IOptic<Micro, Whole, F, never>
+): <Mega, FL, CL, SL>(
+	l: IOptic<Part, Mega, FL, CL, SL>,
+) => IOptic<Micro, Mega, FL, never, SL>
 export function to<Micro, Part>(
 	getter: (v: Part) => Micro | undefined,
-): <A, F, C>(o: IOptic<Part, A, F, C>) => IOptic<Micro, A, F | undefined, never>
+): <Mega, FL, CL, SL>(
+	l: IOptic<Part, Mega, FL, CL, SL>,
+) => IOptic<Micro, Mega, FL | undefined, never, SL>
 export function to<Micro, Part>(getter: (v: Part) => Micro | undefined) {
 	return optional<Micro, Part>({
 		getter,
-		setter: inert,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		setter: inert as any,
 	})
 }
 
 // isomorphisms
 
 export function reread<Whole>(mod: (a: Whole) => Whole) {
-	return lens<Whole, Whole>({
+	return iso<Whole, Whole>({
 		getter: mod,
 		setter: id,
 		// optics-ts setter is equivalent to: `setter: (_v, a) => a`
@@ -52,7 +60,7 @@ export function dedupe<Whole>(
 }
 
 export function linear(m: number, b = 0) {
-	return lens<number, number>({
+	return iso<number, number>({
 		getter: (x) => m * x + b,
 		setter: (y) => (y - b) / m,
 	})
@@ -87,16 +95,16 @@ export function includes<X>(x: X) {
 
 export function when<Part, Micro extends Part>(
 	p: (v: Part) => v is Micro,
-): <Whole, F, C>(
-	o: IOptic<Part, Whole, F, C>,
-) => IOptic<Micro, Whole, F | undefined, never>
+): <Mega, FL, CL, SL>(
+	l: IOptic<Part, Mega, FL, CL, SL>,
+) => IOptic<Micro, Mega, FL | undefined, never, SL & void>
 export function when<Part>(
 	p: (v: Part) => unknown,
-): <Whole, F, C>(
-	o: IOptic<Part, Whole, F, C>,
-) => IOptic<Part, Whole, F | undefined, never>
+): <Mega, FL, CL, SL>(
+	l: IOptic<Part, Mega, FL, CL, SL>,
+) => IOptic<Part, Mega, FL | undefined, never, SL & void>
 export function when<V>(p: (v: V) => unknown) {
-	return optional<V, V>({
+	return prism<V, V>({
 		getter: (v) => (p(v) ? v : undefined),
 		setter: id,
 	})
@@ -110,13 +118,14 @@ type OptionalKeys<T> = {
 
 export function prop<Key extends keyof O, O extends object>(
 	key: Key,
-): <A, F1, C>(
-	p: IOptic<O, A, F1, C>,
+): <A, F1, C, S>(
+	p: IOptic<O, A, F1, C, S>,
 ) => IOptic<
 	Exclude<O[Key], undefined>,
 	A,
 	F1 | (Key extends OptionalKeys<O> ? undefined : never),
-	Key extends OptionalKeys<O> ? typeof REMOVE : never
+	Key extends OptionalKeys<O> ? typeof REMOVE : never,
+	NON_PRISM
 >
 export function prop<Key extends keyof O, O extends object>(key: Key) {
 	return removable<Exclude<O[Key], undefined>, O>({
@@ -146,14 +155,14 @@ export function at<X>(index: number) {
 
 export function findOne<X, Y extends X>(
 	p: (x: X) => x is Y,
-): <Mega, F2, C2>(
-	o: IOptic<X[], Mega, F2, C2>,
-) => IOptic<Y, Mega, F2 | undefined, typeof REMOVE>
+): <Mega, F2, C2, S>(
+	o: IOptic<X[], Mega, F2, C2, S>,
+) => IOptic<Y, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
 export function findOne<X>(
 	p: (x: X) => unknown,
-): <Mega, F2, C2>(
-	o: IOptic<X[], Mega, F2, C2>,
-) => IOptic<X, Mega, F2 | undefined, typeof REMOVE>
+): <Mega, F2, C2, S>(
+	o: IOptic<X[], Mega, F2, C2, S>,
+) => IOptic<X, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
 export function findOne<X>(p: (x: X) => unknown) {
 	return removable<X, X[]>({
 		getter: (xs) => xs.find(p),
@@ -176,14 +185,17 @@ export function findOne<X>(p: (x: X) => unknown) {
 	})
 }
 
-// TODO: remover, dirty
 // defective (when setting a value not respecting predicate)
 export function findMany<X, Y extends X>(
 	p: (x: X) => x is Y,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<Y[], A, F, never>
+): <A, F, C, S>(
+	o: IOptic<X[], A, F, C, S>,
+) => IOptic<Y[], A, F, never, NON_PRISM>
 export function findMany<X>(
 	p: (x: X) => unknown,
-): <A, F, C>(o: IOptic<X[], A, F, C>) => IOptic<X[], A, F, never>
+): <A, F, C, S>(
+	o: IOptic<X[], A, F, C, S>,
+) => IOptic<X[], A, F, never, NON_PRISM>
 export function findMany<X>(p: (x: X) => unknown) {
 	return lens<X[], X[]>({
 		getter: (xs) => xs.filter(p),
@@ -215,7 +227,7 @@ export function findMany<X>(p: (x: X) => unknown) {
 			}
 			return dirty ? rs : xs
 		},
-		// if needed, implementing a custom mapper could greatly improve speed
+		// if needed, implementing a custom mapper could improve speed
 	})
 }
 

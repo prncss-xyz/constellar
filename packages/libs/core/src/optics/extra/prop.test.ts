@@ -1,4 +1,4 @@
-import { prop } from '.'
+import { prop, when } from '.'
 import { flow } from '../../utils'
 import { eq, REMOVE, update, view } from '../core'
 
