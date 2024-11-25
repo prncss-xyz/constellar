@@ -52,11 +52,15 @@ function isRemove(v: unknown) {
 	return v === REMOVE
 }
 
+export function forbidden<Part, Whole>(_part: Part, _whole: Whole): Whole {
+	throw new Error('forbidden')
+}
+
 export function inert<Part, Whole>(_: Part, whole: Whole) {
 	return whole
 }
 
-// S (setter) extends void | unknown; use `void` to represent a prism, `unknown` otherwise
+// S (setter) extends void | unknown; use `void` to represent a prism, `never` otherwise
 export type PRISM = void
 export type NON_PRISM = never
 type Setter<Part, Whole, S> = (p: Part, w: S | Whole) => Whole
@@ -91,12 +95,18 @@ export function fold<Part, Whole, Fail, Command, T>(
 	}
 }
 
-export function put<Part, Whole, Fail, Command, T>(
-	focus: IOptic<Part, Whole, Fail, Command, T>,
-	value: Part,
+export function encode<Part, Whole, Fail, Command>(
+	focus: IOptic<Part, Whole, Fail, Command, PRISM>,
 ) {
-	if (focus.getter) return (whole: T | Whole) => focus.setter!(value, whole)
-	return (whole: T | Whole) => focus.mapper(() => value, whole as Whole)
+	return (part: Part) => focus.setter!(part)
+}
+
+export function put<Part, Whole, Fail, Command, S>(
+	focus: IOptic<Part, Whole, Fail, Command, S>,
+	part: Part,
+) {
+	if (focus.setter) return (whole: S | Whole) => focus.setter!(part, whole)
+	return (whole: S | Whole) => focus.mapper(() => part, whole as Whole)
 }
 
 export function modify<Part, Whole, Fail, Command, T>(
@@ -196,12 +206,8 @@ function composeSetter<Whole, Mega, Fail, Part, SL>(
 			? (b, t) => rSetter(b, t) as any
 			: (b, t, w) => lSetter(rSetter(b, t), w)
 	return (b, w) => {
-		// This is as hack to avoid requiring the second parameter for prisms
-		if (w === undefined) {
-			return lSetter(rSetter(b, w as any), w)
-		}
-		const t = lGetter(w as Mega)
-		if (rIsFailure(t)) return w as Mega
+		const t = lGetter(w)
+		if (rIsFailure(t)) return w
 		return set(b, t, w)
 	}
 }
@@ -272,7 +278,6 @@ export function opticPrism<Part, Whole, Fail, Command>(
 						}),
 				l.refold,
 			),
-			// TODO: is it ok to do away with l.isFailure? (behavior is different)
 			setter: composePrismSetter(l.getter, l.setter, r.setter),
 		}
 	}
@@ -482,11 +487,11 @@ export function disabled<Part>(value: ((p: Part) => Part) | Part) {
 }
 
 // TODO: exclude traversals by type
+// prism in prism out
 export function valueOr<Part>(value: Init<Part>) {
 	return function <Whole, Fail, Command, S>(
 		o: IOptic<Part, Whole, Fail, Command, S>,
-		// FIXME: is it really NON_PRISM?
-	): IOptic<Part, Whole, never, Command, NON_PRISM> {
+	): IOptic<Part, Whole, never, Command, S> {
 		if (!(o.getter && o.setter))
 			throw new Error("valueOr don't work with traversals")
 		const getter = (whole: Whole) => {

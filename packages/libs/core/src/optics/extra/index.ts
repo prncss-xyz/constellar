@@ -1,7 +1,7 @@
 import { append, id, prepend, remove, replace } from '../../utils'
 import { fromArray, toArray } from '../collections'
 import {
-	inert,
+	forbidden,
 	IOptic,
 	iso,
 	lens,
@@ -28,8 +28,7 @@ export function to<Micro, Part>(
 export function to<Micro, Part>(getter: (v: Part) => Micro | undefined) {
 	return optional<Micro, Part>({
 		getter,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		setter: inert as any,
+		setter: forbidden,
 	})
 }
 
@@ -107,6 +106,17 @@ export function when<V>(p: (v: V) => unknown) {
 	return prism<V, V>({
 		getter: (v) => (p(v) ? v : undefined),
 		setter: id,
+	})
+}
+
+export function strToNum() {
+	return prism<number, string>({
+		getter: (str) => {
+			const parsed = parseInt(str)
+			if (isNaN(parsed)) return undefined
+			return parsed
+		},
+		setter: (num) => String(num),
 	})
 }
 
