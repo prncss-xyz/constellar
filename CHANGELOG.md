@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.1
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Add dummy test for react integration &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(00974)</samp>](https://github.com/prncss-xyz/constellar/commit/00974a4)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.4.0...2.4.1)
+
 ## 2.4.0
 
 ### &nbsp;&nbsp;&nbsp;Features
