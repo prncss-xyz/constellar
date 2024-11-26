@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.4.0
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Improve messages &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(b8abb)</samp>](https://github.com/prncss-xyz/constellar/commit/b8abb49)
+- Vanilla react integration &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(f0539)</samp>](https://github.com/prncss-xyz/constellar/commit/f0539a5)
+- Better jotai integration &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(97862)</samp>](https://github.com/prncss-xyz/constellar/commit/97862ed)
+- **optics**:
+  - Stabilize references when setter has no effect &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(0c262)</samp>](https://github.com/prncss-xyz/constellar/commit/0c262c1)
+  - True prisms &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(c368b)</samp>](https://github.com/prncss-xyz/constellar/commit/c368bac)
+  - Finalize prism implementation &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(d8778)</samp>](https://github.com/prncss-xyz/constellar/commit/d87788a)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.3.0...2.4.0)
+
 ## 2.3.0
 
 ### &nbsp;&nbsp;&nbsp;Features
