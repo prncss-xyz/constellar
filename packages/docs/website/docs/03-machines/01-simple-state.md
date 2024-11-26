@@ -8,7 +8,7 @@ This is basically a glorified reducer, where state is simply an arbitrary value.
 ```typescript
 import { simpleStateMachine } from '@constellar/core'
 
-const machine = simpleStateMachine(
+const machine = simpleStateMachine<Message = {type: never}>()(
 	{
 		init: (a: string) => a.length,
 		transform: (s) => s * 2,
@@ -26,6 +26,6 @@ const machine = simpleStateMachine(
 
 (optional) `transform: (s: State) => Transformed` is a transforming function. It can be used to normalize state or add computed properties. If not provided, is it assumed to be the identity function.
 
-`events` is an object whose keys are transition functions of the form `(e: Event, t: Transformed) => State`. The type of the event is the union of the type parameter with `{type: Key}` where key is a string constant. When `type` is the only field, `event` must be of type `object`. Alternatively, you can provide a constant in place of a transition function. `Transformed` and `State` are respectively the output and input of the transform function.
+`events` is an object whose keys are transition functions of the form `(e: Event, t: Transformed, emit: (m: Message) => void) => State`. The type of the event is the union of the type parameter with `{type: Key}` where key is a string constant. When `type` is the only field, `event` must be of type `object`. Alternatively, you can provide a constant in place of a transition function. `Transformed` and `State` are respectively the output and input of the transform function. Finally, the function emit can be called inside the function to send a message.
 
 (optional second parameter) `getFinal: (t: Transformed) => Final | undefined` extracts a final value or returns undefined. If result is not undefined, the `send` method will become inert.

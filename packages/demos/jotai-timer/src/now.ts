@@ -1,10 +1,10 @@
 import { atom, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 
-export const clockAtom = atom(0)
+export const nowAtom = atom(0)
 
-export function useSetupClock(period = 100) {
-	const setClock = useSetAtom(clockAtom)
+export function useSetupNow(period = 100) {
+	const setClock = useSetAtom(nowAtom)
 	useEffect(() => {
 		const timer = setInterval(() => {
 			setClock(Date.now())

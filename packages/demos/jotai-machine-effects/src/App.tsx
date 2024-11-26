@@ -1,5 +1,5 @@
 import { machineAtom, selectAtom, useMachineEffects } from '@constellar/jotai'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useMemo } from 'react'
 
 import { Json } from './json'
@@ -9,14 +9,12 @@ const lightsAtom = machineAtom(lightsMachine())
 const typeAtom = selectAtom(lightsAtom, (s) => s?.type)
 
 function Effects() {
-	const [state, send] = useAtom(lightsAtom)
 	useMachineEffects(
-		state,
-		send,
+		lightsAtom,
 		useMemo(
 			() => ({
-				timeout: ({ delay, event }, send) => {
-					const t = setTimeout(() => send({ type: event }), delay)
+				timeout: ({ delay }, send) => {
+					const t = setTimeout(() => send('next'), delay)
 					return () => clearTimeout(t)
 				},
 			}),

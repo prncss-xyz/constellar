@@ -5,17 +5,18 @@ describe('listener', () => {
 	test('object', () => {
 		const a = vi.fn()
 		const b = vi.fn()
-		const listener = toListener<any, any>({
+		const listener = toListener<any>({
 			a,
 			b,
 		})
-		listener({ type: 'a', value: 1 }, 2)
-		expect(a).toHaveBeenCalledWith({ type: 'a', value: 1 }, 2)
+		listener({ type: 'a', value: 1 })
+		expect(a).toHaveBeenCalledWith({ type: 'a', value: 1 })
 		expect(b).toHaveBeenCalledTimes(0)
 	})
 	test('function', () => {
-		const listener = toListener(vi.fn())
-		listener({ type: 'a', value: 1 }, 2)
-		expect(listener).toHaveBeenCalledWith({ type: 'a', value: 1 }, 2)
+		const a = vi.fn()
+		const listener = toListener(a)
+		listener({ type: 'a', value: 1 })
+		expect(a).toHaveBeenCalledWith({ type: 'a', value: 1 })
 	})
 })

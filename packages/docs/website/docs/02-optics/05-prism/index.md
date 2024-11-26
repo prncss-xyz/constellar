@@ -1,21 +1,21 @@
 ---
 ---
 
-# Optionals
+# Prisms
 
-Optionals are optics where the focus is not always present.
+Primsms are opionals where the setter doesn't need a second (`whole`) argument, which makes them reveresible. They are used for converting back and forth between two reprenstations of the same data, hence the name.
 
-When composing with an optional, you don't have to explicitly handle undefined values.
+You can create an iso by calling:
 
 ```typescript
-function optional<Part, Whole>({
+prism<Part, Whole>({
 	getter,
 	mapper,
 	setter,
 }: {
 	getter: (whole: Whole) => Part | undefined
 	mapper?: (mod: (p: Part) => Part, w: Whole) => Whole
-	setter: (part: Part, whole: Whole) => Whole
+	setter: (part: Part) => Whole
 })
 ```
 

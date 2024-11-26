@@ -15,6 +15,15 @@ describe('findMany', () => {
 		expect(res).toEqual(['baz', 'foo'])
 	})
 	describe('put', () => {
+		it('preserves reference when possible', () => {
+			type Source = string[]
+			const source: Source = ['baz', 'quux', 'foo']
+			const focus = flow(
+				eq<Source>(),
+				findMany((item) => item !== 'quux'),
+			)
+			expect(update(focus, ['baz', 'foo'])(source)).toBe(source)
+		})
 		it('put the same numbers of items', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo']
@@ -28,24 +37,34 @@ describe('findMany', () => {
 				'FOO',
 			])
 		})
-		it('put fewer items', () => {
-			type Item = number | string
-			type Source = Item[]
-			const source: Source = [1, 2, 3, 5, 6]
-			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
-			const focus = flow(eq<Source>(), findMany(isOdd))
-			const result = update(focus, ['foo', 'bar'])(source)
-			expect(result).toEqual(['foo', 2, 'bar', 6])
+		it('put zero items', () => {
+			type Source = string[]
+			const source: Source = ['foo', '', 'bar']
+			const focus = flow(
+				eq<Source>(),
+				findMany((s) => s.length > 0),
+			)
+			const result = update(focus, [])(source)
+			expect(result).toEqual([''])
 		})
-		it('put more items', () => {
-			type Item = number | string
-			type Source = Item[]
-			const source: Source = [1, 2, 3, 5, 6]
-			const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
-			const focus = flow(eq<Source>(), findMany(isOdd))
-			const result = update(focus, ['foo', 'bar', 'baz', 'quux', 'foo'])(source)
-			expect(result).toEqual(['foo', 2, 'bar', 'baz', 6, 'quux', 'foo'])
-		})
+	})
+	it('put fewer items', () => {
+		type Item = number | string
+		type Source = Item[]
+		const source: Source = [1, 2, 3, 5, 6]
+		const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
+		const focus = flow(eq<Source>(), findMany(isOdd))
+		const result = update(focus, ['foo', 'bar'])(source)
+		expect(result).toEqual(['foo', 2, 'bar', 6])
+	})
+	it('put more items', () => {
+		type Item = number | string
+		type Source = Item[]
+		const source: Source = [1, 2, 3, 5, 6]
+		const isOdd = (x: Item) => typeof x === 'number' && x % 2 === 1
+		const focus = flow(eq<Source>(), findMany(isOdd))
+		const result = update(focus, ['foo', 'bar', 'baz', 'quux', 'foo'])(source)
+		expect(result).toEqual(['foo', 2, 'bar', 'baz', 6, 'quux', 'foo'])
 	})
 	describe('narrow type', () => {
 		type Source = (number | string)[]

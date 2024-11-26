@@ -1,10 +1,10 @@
-import { enabled, eq, REMOVE, update, view } from '.'
+import { disabled, eq, REMOVE, update, view } from '.'
 import { flow } from '../../utils'
-import { prop } from '../extra'
+import { findMany, prop } from '../extra'
 
-describe('enabled', () => {
+describe('disabled', () => {
 	describe('simple', () => {
-		const focus = flow(eq<string>(), enabled('titi'))
+		const focus = flow(eq<string>(), disabled('titi'))
 		it('view', () => {
 			expect(view(focus)('toto')).toEqual(false)
 			expect(view(focus)('titi')).toEqual(true)
@@ -15,22 +15,28 @@ describe('enabled', () => {
 		})
 	})
 	describe('array', () => {
-		function sameLength(a: unknown[], b: unknown[]) {
-			return a.length === b.length
-		}
-		const focus = flow(eq<string[]>(), enabled([] as string[], sameLength))
-		it('view', () => {
+		const zeroLength: string[] = []
+		const focus = flow(
+			eq<string[]>(),
+			findMany(() => true),
+			disabled(zeroLength),
+		)
+		test('view, false', () => {
 			expect(view(focus)(['titi'])).toEqual(false)
+		})
+		test('view, true', () => {
 			expect(view(focus)([])).toEqual(true)
 		})
-		it('put', () => {
-			expect(update(focus, true)(['toto'])).toEqual([])
+		test('put, false', () => {
 			expect(update(focus, false)(['toto'])).toEqual(['toto'])
+		})
+		test('put, true', () => {
+			expect(update(focus, true)(['toto'])).toEqual([])
 		})
 	})
 	describe('update', () => {
 		const double = (x: number) => x * 2
-		const focus = flow(eq<number>(), enabled(double))
+		const focus = flow(eq<number>(), disabled(double))
 		it('view', () => {
 			expect(view(focus)(1)).toEqual(false)
 			expect(view(focus)(0)).toEqual(true)
@@ -43,7 +49,7 @@ describe('enabled', () => {
 	describe('removable', () => {
 		type T = { a: string; b?: number }
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const focus = flow(eq<T>(), prop('b'), enabled<any>(REMOVE))
+		const focus = flow(eq<T>(), prop('b'), disabled<any>(REMOVE))
 		it('view', () => {
 			expect(view(focus)({ a: 'toto', b: 1 })).toEqual(false)
 			expect(view(focus)({ a: 'toto' })).toEqual(true)
@@ -58,7 +64,7 @@ describe('enabled', () => {
 	})
 	describe('compose', () => {
 		type T = { a: string }
-		const focus = flow(eq<T>(), prop('a'), enabled('titi'))
+		const focus = flow(eq<T>(), prop('a'), disabled('titi'))
 		it('view', () => {
 			expect(view(focus)({ a: 'toto' })).toEqual(false)
 			expect(view(focus)({ a: 'titi' })).toEqual(true)

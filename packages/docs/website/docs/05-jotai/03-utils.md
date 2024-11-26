@@ -1,18 +1,28 @@
 ---
 ---
 
-# Miscellaneous
+# Utils
 
-## selectAtom
+## mappedAtom
 
 ```typescript
-function selectAtom<Part, Whole>(
+function mappedAtom<Part, Whole>(
 	sourceAtom: Atom<Whole>,
-	select: (w: Whole) => Part,
+	map: (w: Whole) => Part,
 )
 ```
 
-Returns a readonly atom whose value is derived by the select function.
+Returns a readonly atom whose value is derived by the map function.
+
+## flattenedAtom
+
+```typescript
+function flattenedAtom<Value, Args extends unknown[], Result>(
+	atomAtom: Atom<WritableAtom<Value, Args, Result>>,
+)
+```
+
+Returns the atom (getter and setter) that is wrapped inside another atom.
 
 ## resolvedAtom
 

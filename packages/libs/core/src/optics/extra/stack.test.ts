@@ -1,12 +1,12 @@
-import { foot } from '.'
+import { stack } from '.'
 import { flow } from '../../utils'
 import { eq, REMOVE, update, view } from '../core'
 
-describe('foot', () => {
+describe('stack', () => {
 	type Source = string[]
 	const sourceDefined: Source = ['a', 'b', 'c']
 	const sourceUndefined: Source = []
-	const focus = flow(eq<string[]>(), foot())
+	const focus = flow(eq<string[]>(), stack())
 	describe('view', () => {
 		it('defined', () => {
 			expect(view(focus)(sourceDefined)).toBe('c')

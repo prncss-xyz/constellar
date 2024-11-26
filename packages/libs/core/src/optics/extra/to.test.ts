@@ -13,7 +13,7 @@ describe('defined', () => {
 		expect(v).toBe('FOO')
 	})
 	it('update', () => {
-		expect(update(focus, '')('foo')).toBe('foo')
+		expect(() => update(focus, '')('foo')).toThrowError()
 	})
 })
 
@@ -32,6 +32,6 @@ describe('optional', () => {
 		expect(view(focus)('rrr')).toBeUndefined()
 	})
 	it('update', () => {
-		expect(update(focus, '')('foo')).toBe('foo')
+		expect(() => update(focus, '')('foo')).toThrowError()
 	})
 })

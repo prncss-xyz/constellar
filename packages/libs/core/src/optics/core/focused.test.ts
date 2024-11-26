@@ -1,18 +1,18 @@
 // exploring how to compose optics
-import { eq, Focus, IOptic, optic, view } from '.'
+import { eq, Focus, IOptic, opticNonPrism, view } from '.'
 import { flow } from '../../utils'
 import { prop } from '../extra'
 
-export function focused<Whole, Part, Fail, Command>(
-	focus: IOptic<Part, Whole, Fail, Command>,
+export function focused<Whole, Part, Fail, Command, S>(
+	focus: IOptic<Part, Whole, Fail, Command, S>,
 ) {
-	return optic(focus)
+	return opticNonPrism(focus)
 }
 
-export function focused2<Whole, Part, Fail, Command>(
-	focus: Focus<Part, Whole, Fail, Command>,
+export function focused2<Whole, Part, Fail, Command, S>(
+	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	return optic(focus(eq<Whole>()))
+	return opticNonPrism(focus(eq<Whole>()))
 }
 
 describe('focused', () => {

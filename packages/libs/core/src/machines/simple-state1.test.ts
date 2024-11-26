@@ -1,7 +1,7 @@
 import { objectMachine } from './object'
 import { simpleStateMachine } from './simple-state'
 
-const machine = simpleStateMachine(
+const machine = simpleStateMachine()(
 	{
 		events: {
 			gogo: 4,

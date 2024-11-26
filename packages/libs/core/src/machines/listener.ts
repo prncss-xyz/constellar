@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { isFunction, Typed } from '../utils'
+import { fromSendable, Sendable } from './core'
 
-export type Listener<Message extends Typed, Args extends any[]> =
-	| ((event: Message, ...args: Args) => void)
+export type Listener<Message extends Typed> =
+	| ((message: Message) => void)
 	| {
-			[K in Message['type']]: (
-				event: { type: K } & Message,
-				...args: Args
-			) => void
+			[K in Message['type']]: (message: { type: K } & Message) => void
 	  }
 
-export function toListener<Message extends Typed, Args extends any[]>(
-	listener: Listener<Message, Args>,
-): (event: Message, ...args: Args) => void {
-	if (isFunction(listener)) return listener
-	return (message, ...args) => {
-		;(listener as any)[message.type](message, ...args)
+export function toListener<Message extends Typed>(
+	listener: Listener<Message>,
+): (message: Sendable<Message>) => void {
+	if (isFunction(listener))
+		return (message: Sendable<Message>) => listener(fromSendable(message))
+	return (message) => {
+		const m = fromSendable(message)
+		;(listener as any)[m.type](m)
 	}
 }

@@ -19,11 +19,13 @@ export function replace<T>(x: T, index: number, xs: T[]) {
 	if (index < 0) index += xs.length
 	if (index < 0) return xs
 	if (index >= xs.length) return xs
+	if (Object.is(xs[index], x)) return xs
 	return [...xs.slice(0, index), x, ...xs.slice(index + 1)]
 }
 
 export function remove<T>(index: number, xs: T[]) {
 	if (index < 0) index += xs.length
 	if (index < 0) return xs
+	if (index >= xs.length) return xs
 	return [...xs.slice(0, index), ...xs.slice(index + 1)]
 }

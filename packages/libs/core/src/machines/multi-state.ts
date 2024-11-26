@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fromSendable, IMachine, Sendable } from '.'
+import { fromSendable, IMachine, MessageCtx, Sendable } from '.'
 import { Init, isEmpty, isFunction, Prettify, toInit, Typed } from '../utils'
 
 type ArgOfInit<T> = T extends (p: infer R) => any ? R : void
@@ -7,7 +7,7 @@ type ArgOfInit<T> = T extends (p: infer R) => any ? R : void
 type AnyStates<
 	Event extends Typed,
 	State extends Typed,
-	Message extends Typed,
+	Ctx extends unknown[],
 	DerivedLocal,
 	Derived,
 > = {
@@ -25,8 +25,8 @@ type AnyStates<
 				  >(
 						event: E,
 						state: S,
-						send: (message: Sendable<Message>) => undefined,
-				  ) => Sendable<State> | undefined)
+						...args: Ctx
+				  ) => Sendable<State> | undefined | void)
 				| Sendable<State>
 		}>
 		wildcard?:
@@ -36,8 +36,8 @@ type AnyStates<
 			  >(
 					event: E,
 					state: S,
-					emit: (message: Sendable<Message>) => undefined,
-			  ) => Sendable<State> | undefined)
+					...args: Ctx
+			  ) => Sendable<State> | undefined | void)
 			| Sendable<State>
 	}
 } & (DerivedLocal extends { [K in keyof DerivedLocal]: never }
@@ -53,13 +53,13 @@ type AnyStates<
 type AnyMachine<
 	Event extends Typed,
 	State extends Typed,
-	Message extends Typed = { type: never },
+	Ctx extends unknown[] = [],
 	DerivedLocal = object,
 	Derived = object,
 > = {
 	derive?: ((s: Prettify<DerivedLocal & State>) => Derived) | Derived
 	init: Init<Sendable<State>, any>
-	states: AnyStates<Event, State, Message, DerivedLocal, Derived>
+	states: AnyStates<Event, State, Ctx, DerivedLocal, Derived>
 }
 
 export type IsFinal<
@@ -88,11 +88,6 @@ type Final<
 	States extends Record<string, unknown>,
 > = FinalStates<States> & State
 
-function withSend<Message extends Typed>(emit: (message: Message) => void) {
-	return (message: Sendable<Message>) =>
-		emit(fromSendable(message)) as undefined
-}
-
 export function multiStateMachine<
 	Event extends Typed,
 	State extends Typed,
@@ -100,13 +95,30 @@ export function multiStateMachine<
 	Derived = object,
 	Message extends Typed = { type: never },
 >() {
+	return multiStateBaseMachine<
+		Event,
+		State,
+		DerivedLocal,
+		Derived,
+		MessageCtx<Message>
+	>()
+}
+
+export function multiStateBaseMachine<
+	Event extends Typed,
+	State extends Typed,
+	DerivedLocal,
+	Derived,
+	Ctx extends unknown[],
+>() {
 	return function <
-		Machine extends AnyMachine<Event, State, Message, DerivedLocal, Derived>,
+		Machine extends AnyMachine<Event, State, Ctx, DerivedLocal, Derived>,
 	>({ derive, init, states }: Machine) {
 		const init0 = toInit(init)
 		function fromAlways(s: State) {
 			while (true) {
 				let s_ = (states as any)[s.type].always
+				if (s_ === undefined) break
 				if (isFunction(s_)) s_ = s_(s)
 				if (s_ === undefined) break
 				s = s_
@@ -119,7 +131,7 @@ export function multiStateMachine<
 		): IMachine<
 			Sendable<Event>,
 			State,
-			Message,
+			Ctx,
 			Transformed,
 			Transformed,
 			Prettify<Final<State, Machine['states']>>
@@ -132,26 +144,26 @@ export function multiStateMachine<
 					if (!isEmpty(state.events)) return undefined
 					return s as any
 				},
-				init: fromAlways(fromSendable(init0(initialArg))),
-				reducer: (event, s, emit) => {
+				init: () => fromAlways(fromSendable(init0(initialArg))),
+				reducer: (event, s, ...args) => {
 					const e = fromSendable(event)
 					const state = (states as any)[s.type]
 					let res = state?.events?.[e.type]
-					if (isFunction(res)) res = res(e, s, withSend(emit))
-					if (res === undefined) {
+					if (isFunction(res)) res = res(e, s, ...args)
+					else if (res === undefined) {
 						res = state?.wildcard
-						if (isFunction(res)) res = res(e, s, withSend(emit))
-						if (res === undefined) return undefined
+						if (isFunction(res)) res = res(e, s, ...args)
 					}
+					if (res === undefined) return undefined
 					return fromAlways(fromSendable(res))
 				},
-				transform: (s) => {
+				transform: (s, ...args) => {
 					const localDerive = (states as any)[s.type].derive
 					const d1 = localDerive
-						? join(s, localDerive)
+						? join(s, localDerive, ...args)
 						: (s as DerivedLocal & State)
 					const d2 = derive
-						? join(d1, derive)
+						? join(d1, derive, ...args)
 						: (d1 as Derived & DerivedLocal & State)
 					return d2
 				},
@@ -162,7 +174,11 @@ export function multiStateMachine<
 	}
 }
 
-function join<A, B>(a: A, b: ((a: A) => B) | B): A & B {
-	const x = isFunction(b) ? b(a) : b
+function join<A, B, Ctx extends unknown[]>(
+	a: A,
+	b: ((a: A, ...args: Ctx) => B) | B,
+	...args: Ctx
+): A & B {
+	const x = isFunction(b) ? b(a, ...args) : b
 	return { ...a, ...x }
 }

@@ -33,6 +33,10 @@ describe('replace', () => {
 		expect(replace(3, 3, [0, 1, 2])).toEqual([0, 1, 2])
 		expect(replace(-4, 3, [0, 1, 2])).toEqual([0, 1, 2])
 	})
+	it('keeps the reference when possible', () => {
+		const xs = [0, 1, 2]
+		expect(replace(0, 0, xs)).toBe(xs)
+	})
 })
 
 describe('remove', () => {
@@ -43,5 +47,9 @@ describe('remove', () => {
 		expect(remove(-1, [0, 1, 2])).toEqual([0, 1])
 		expect(remove(3, [0, 1, 2])).toEqual([0, 1, 2])
 		expect(remove(-4, [0, 1, 2])).toEqual([0, 1, 2])
+	})
+	it('keeps the reference when possible', () => {
+		const xs = [0, 1, 2]
+		expect(remove(4, xs)).toBe(xs)
 	})
 })
