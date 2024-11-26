@@ -1,7 +1,7 @@
 import { simpleStateMachine } from '@constellar/core'
 import { expect, test } from 'vitest'
 
-const machine = simpleStateMachine(
+const machine = simpleStateMachine()(
 	{
 		events: {
 			inc: ({ n }: { n: number }, s) => n + s,

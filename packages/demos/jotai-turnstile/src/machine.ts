@@ -1,4 +1,6 @@
-import { multiStateMachine } from '@constellar/core'
+import { multiStateJotaiMachine } from '@constellar/jotai'
+
+import { messageQueueAtom } from './messages'
 
 export type State =
 	| { effects: { payment: { id: string; now: number } }; type: 'payment' }
@@ -12,12 +14,11 @@ export type Event =
 	| { type: 'push' }
 export type Message = { amount: number; type: 'success' } | { type: 'error' }
 
-export const turnstileMachine = multiStateMachine<
+export const turnstileMachine = multiStateJotaiMachine<
 	Event,
 	State,
 	object,
-	object,
-	Message
+	object
 >()({
 	init: { type: 'locked' },
 	states: {
@@ -31,10 +32,17 @@ export const turnstileMachine = multiStateMachine<
 		},
 		payment: {
 			events: {
-				error: (_e, _s, emit) => (emit('error'), 'locked'),
-				success: ({ amount }, _s, emit) => (
-					emit({ amount, type: 'success' }), 'unlocked'
-				),
+				error: (_s, _e, _get, set) => {
+					set(messageQueueAtom, 'Payment refused.')
+					return 'locked'
+				},
+				success: ({ amount }, _e, _get, set) => {
+					set(
+						messageQueueAtom,
+						`Payment accepted, you still have ${amount} tickets.`,
+					)
+					return 'unlocked'
+				},
 			},
 		},
 		unlocked: {

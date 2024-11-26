@@ -387,6 +387,8 @@ export function prism<Part, Whole>({
 	})
 }
 
+// TODO: merge optional and removable
+
 export function optional<Part, Whole>({
 	getter,
 	mapper,

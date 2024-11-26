@@ -3,14 +3,14 @@ const init = Symbol('INIT')
 export function localCached<Key extends keyof Obj, Obj extends object, Res>(
 	key: Key,
 	get: (obj: Obj) => Promise<Res>,
-	cb: (r: Res) => void,
 ) {
 	let cachedVal: Obj[Key] | typeof init = init
 	let cachedRes: Res | typeof init = init
-	return function (obj: Obj) {
+	return function (obj: Obj, cb: (r: Res) => void) {
 		const val = obj[key]
 		if (cachedVal === val) {
-			cb(cachedRes as Res)
+			if (cachedRes === init) throw new Error('not initialized')
+			cb(cachedRes)
 			return () => {}
 		}
 		let canceled = false

@@ -3,6 +3,8 @@
 
 # Machine
 
+To use jotai integration, you will need to use `simpleStateJotaiMachine` and `multiStateJotaiMachine` (provided by `@constellar/jotai`) instead of `simpleStateMachine` and `multiStateMachine`. The difference is that in place of a `emit` function, you have instead access to a `get` and a `set` argument. The get argument lets you read from an atom, the `set` argument lets you write to an atom, but do not let you access to the return value provided by the atom's setter.
+
 ## machineAtom
 
 ```typescript
@@ -34,7 +36,7 @@ function useMachineEffects(
 ## disabledEventAtom
 
 ```typescript
-export function disabledEventAtom(
+function disabledEventAtom(
 	machineAtom: WritableAtom,
 	event: { [Key]: (params, send: (e: Event)) => (() => void) | void },
 ): Atom
@@ -44,10 +46,16 @@ Reading the atom will return `true` if sending the event has any effect on the m
 
 This is useful for binding an event with a button-like element, hence the name.
 
+## nextStateAtom
+
+```typescript
+function nextStateAtom(machineAtom: Atom, event: Event): Atom
+```
+
 ## valueEventAtom
 
 ```typescript
-export function valueEventAtom(
+function valueEventAtom(
 	machineAtom: WritableAtom,
 	select: (state: State) => Value,
 	put: (value: Value, send: (event: Event) => void) => void,

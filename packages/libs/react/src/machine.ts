@@ -1,17 +1,26 @@
 import {
+	EffectsHandlers,
 	IMachine,
-	Interpreter,
 	isFunction,
 	Listener,
 	MachineEffects,
 	MessageCtx,
 	Sendable,
-	Spiced,
 	toListener,
 	Typed,
 	Updater,
 } from '@constellar/core'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+type Spiced<Event extends Typed, Transformed, SubState, Final> = {
+	final: Final | undefined
+	isDisabled: (event: Sendable<Event>) => boolean
+	next: (event: Sendable<Event>) => Transformed
+	visit: <Acc>(
+		fold: (subState: SubState, acc: Acc, index: string) => Acc,
+		acc: Acc,
+	) => Acc
+} & Transformed
 
 export function useMachine<
 	Event extends Typed,
@@ -29,13 +38,13 @@ export function useMachine<
 		SubState,
 		Final
 	>,
-	listener?: Listener<Message, []>,
+	onMessage?: Listener<Message>,
 ) {
 	const [state, setState] = useState(machine.init)
 	const transformed = useMemo(() => machine.transform(state), [machine, state])
 	const emit = useMemo(
-		() => (listener ? toListener(listener) : () => {}),
-		[listener],
+		() => (onMessage ? toListener(onMessage) : () => {}),
+		[onMessage],
 	)
 	const send = useCallback(
 		(event: Sendable<Event>) => {
@@ -55,16 +64,16 @@ export function useMachineEffects<
 >(
 	transformed: Transformed,
 	send: (event: Sendable<Event>) => void,
-	interpreter: Interpreter<Event, Transformed>,
+	effects: EffectsHandlers<Event, Transformed>,
 ) {
 	const machineEffects = useRef<MachineEffects<Event, Transformed>>()
 	useEffect(() => {
-		machineEffects.current = new MachineEffects<Event, Transformed>(interpreter)
+		machineEffects.current = new MachineEffects<Event, Transformed>(effects)
 		return () => machineEffects.current!.flush()
-	}, [interpreter, send])
+	}, [effects, send])
 	useEffect(
 		() => machineEffects.current!.update(transformed.visit, send),
-		[transformed, send, interpreter],
+		[transformed, send, effects],
 	)
 }
 

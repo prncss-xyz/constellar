@@ -1,6 +1,6 @@
 import { Typed } from '../utils'
 import { IMachine, MessageCtx, Sendable } from './core'
-import { Interpreter, MachineEffects } from './effects'
+import { EffectsHandlers, MachineEffects } from './effects'
 import { Listener, toListener } from './listener'
 import { isDisabled, nextState } from './utils'
 
@@ -13,8 +13,8 @@ class ObjectMachine<
 	Final,
 > {
 	private effects: MachineEffects<Event, SubState> | undefined
-	private listener: (event: Sendable<Message>) => void
 	private onFinal?: (final: Final) => void
+	private onMessage: (event: Sendable<Message>) => void
 	private queue: Event[] = []
 	public final: Final | undefined
 	public state: Transformed
@@ -28,17 +28,17 @@ class ObjectMachine<
 			Final
 		>,
 		opts?: {
-			interpreter?: Interpreter<Event, SubState>
-			listener?: Listener<Message, []>
+			events?: EffectsHandlers<Event, SubState>
 			onFinal?: (final: Final) => void
+			onMessage?: Listener<Message>
 		},
 	) {
-		this.listener = opts?.listener ? toListener(opts.listener) : () => {}
+		this.onMessage = opts?.onMessage ? toListener(opts.onMessage) : () => {}
 		this.onFinal = opts?.onFinal
-		this.state = machine.transform(machine.init)
+		this.state = machine.transform(machine.init())
 		this.final = machine.getFinal(this.state)
-		if (opts?.interpreter) {
-			this.effects = new MachineEffects(opts.interpreter)
+		if (opts?.events) {
+			this.effects = new MachineEffects(opts.events)
 			this.effects.update(this.visit.bind(this), this.send.bind(this))
 		}
 	}
@@ -63,7 +63,7 @@ class ObjectMachine<
 		return nextState(this.machine, this.state, event)
 	}
 	send(event: Event) {
-		const state = this.machine.reducer(event, this.state, this.listener)
+		const state = this.machine.reducer(event, this.state, this.onMessage)
 		if (state !== undefined) {
 			this.state = this.machine.transform(state)
 			this.final = this.machine.getFinal(this.state)
@@ -96,33 +96,26 @@ export function objectMachine<
 		Final
 	>,
 	opts?: {
-		interpreter?: Interpreter<Event, SubState>
-		listener?: Listener<Message, []>
+		events?: EffectsHandlers<Event, SubState>
 		onFinal?: (final: Final) => void
+		onMessage?: Listener<Message>
 	},
 ) {
 	return new ObjectMachine(machine, opts)
 }
 
-export function promiseMachine<
-	Event,
-	State,
-	Message extends Typed,
-	Transformed,
-	SubState,
-	Final,
->(
+export function promiseMachine<Event, State, Transformed, SubState, Final>(
 	machine: IMachine<
 		Event,
 		State,
-		MessageCtx<Message>,
+		MessageCtx<{ type: never }>,
 		Transformed,
 		SubState,
 		Final
 	>,
-	interpreter: Interpreter<Event, SubState>,
+	events: EffectsHandlers<Event, SubState>,
 ) {
 	return new Promise<Final>((resolve) => {
-		new ObjectMachine(machine, { interpreter, onFinal: resolve })
+		new ObjectMachine(machine, { events: events, onFinal: resolve })
 	})
 }

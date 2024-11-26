@@ -43,7 +43,6 @@ describe('machine', () => {
 		states: {
 			final: {
 				derive: { count: () => 0 },
-				events: {},
 			},
 			running: {
 				derive: (s) => ({
@@ -55,7 +54,7 @@ describe('machine', () => {
 						since: now,
 						type: 'running',
 					}),
-					say: (_e, _s, send) => send('hi'),
+					say: (_e, _s, emit) => emit('hi'),
 					toggle: ({ now }, { since }) => ({
 						elapsed: now - since,
 						type: 'stopped',
@@ -83,7 +82,7 @@ describe('machine', () => {
 
 	it('should start running', () => {
 		const listener = vi.fn()
-		const m = objectMachine(machine(), { listener })
+		const m = objectMachine(machine(), { onMessage: listener })
 		expect(m.state).toMatchObject({ elapsed: 0, type: 'stopped' })
 		expect(m.isDisabled('say')).toBeTruthy()
 		expect(m.next({ now: 1, type: 'toggle' })).toMatchObject({

@@ -1,7 +1,7 @@
-import { machineCb, MachineEffects, simpleStateMachine } from '.'
+import { simpleStateMachine } from '.'
 import { objectMachine } from './object'
 
-const machine = simpleStateMachine({
+const machine = simpleStateMachine()({
 	events: {
 		e: ({ n }: { n: number }) => ({ n }),
 	},
@@ -23,7 +23,7 @@ test('effects with interpreter', () => {
 		},
 	}
 
-	const m = objectMachine(machine(), { interpreter })
+	const m = objectMachine(machine(), { events: interpreter })
 
 	expect(cbInA.mock.calls[0]?.[0]).toBe(0)
 	expect(cbInA).toHaveBeenCalledTimes(1)
@@ -37,15 +37,4 @@ test('effects with interpreter', () => {
 	expect(cbOutA).toHaveBeenCalledTimes(1)
 	m.flush()
 	expect(cbOutA).toHaveBeenCalledTimes(2)
-})
-
-test('effects without interpreter', () => {
-	expect(() => {
-		const m = machine()
-		const cb = machineCb(m)
-		const { visit } = cb(m.transform({ n: 0 }))
-		m.transform({ n: 1 })
-		const eff = new MachineEffects(undefined)
-		eff.update(visit, () => {})
-	}).not.toThrowError()
 })

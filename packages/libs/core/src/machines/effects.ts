@@ -2,39 +2,28 @@ import { shallowEqual } from '../utils'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type Interpreter_<Event, SubState> = SubState extends {
-	effects?: infer Effects
+export type EffectsHandlers<Event, SubState> = SubState extends {
+	effects?: unknown
 }
 	? {
-			[Key in keyof Required<Effects>]: (
-				effect: Exclude<Effects[Key], undefined>,
+			[Key in keyof Exclude<SubState['effects'], undefined>]: (
+				e: Exclude<Exclude<SubState['effects'], undefined>[Key], undefined>,
 				send: (event: Event) => void,
 			) => (() => void) | void
 		}
-	: undefined
-
-export type Interpreter<Event, SubState> = SubState extends {
-	effects?: infer Effects
-}
-	? {
-			[Key in keyof Required<Effects>]: (
-				effect: Exclude<Effects[Key], undefined>,
-				send: (event: Event) => void,
-			) => (() => void) | void
-		}
-	: undefined
+	: never
 
 export class MachineEffects<Event, SubState> {
 	private last = new Map<
 		string,
 		Map<string, { args: any; unmount: (() => void) | void }>
 	>()
-	constructor(private interpreter: Interpreter<Event, SubState>) {}
+	constructor(private effectsHandlers: EffectsHandlers<Event, SubState>) {}
 	private foldSubState(send: (event: Event) => void) {
 		return (subState: SubState, acc: Set<string>, index: string) => {
-			if (this.interpreter === undefined) return acc
+			if (this.effectsHandlers === undefined) return acc
 			acc.add(index)
-			for (const entry of Object.entries(this.interpreter)) {
+			for (const entry of Object.entries(this.effectsHandlers)) {
 				const [effect, cb] = entry as [string, any]
 				const args = ((subState as any).effects as any)?.[effect]
 				let fromIndex = this.last.get(index)

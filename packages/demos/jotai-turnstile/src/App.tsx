@@ -1,30 +1,17 @@
-import { queue } from '@constellar/core'
 import {
 	disabledEventAtom,
-	focusAtom,
 	machineAtom,
 	useMachineEffects,
 } from '@constellar/jotai'
-import { atom, useAtom, useAtomValue } from 'jotai'
-import { useCallback, useMemo } from 'react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useCallback, useMemo, useState } from 'react'
 
 import { Json } from './json'
 import { localCached } from './localCache'
 import { turnstileMachine } from './machine'
+import { messagesAtom } from './messages'
 
-const messagesAtom = atom<string[]>([])
-const messageQueueAtom = focusAtom(messagesAtom, queue())
-
-const turnstileAtom = machineAtom(turnstileMachine(), {
-	listener: {
-		error: (_event, _get, set) => set(messageQueueAtom, 'Payment refused.'),
-		success: ({ amount }, _get, set) =>
-			set(
-				messageQueueAtom,
-				`Payment accepted, you still have ${amount} tickets.`,
-			),
-	},
-})
+const turnstileAtom = machineAtom(turnstileMachine())
 
 function payment(_: {
 	id: string
@@ -43,19 +30,13 @@ function payment(_: {
 	})
 }
 
-function Effects() {
-	const [state, send] = useAtom(turnstileAtom)
-	useMachineEffects(
-		state,
-		send,
-		useMemo(() => ({ payment: localCached('now', payment, send) }), [send]),
-	)
-	return null
-}
-
 function Pay({ id }: { id: string }) {
-	const [state, send] = useAtom(turnstileAtom)
-	const disabled = state.isDisabled({ id, now: 0, type: 'payment' })
+	const paymentAtom = useMemo(
+		() => disabledEventAtom(turnstileAtom, { id, now: 0, type: 'payment' }),
+		[id],
+	)
+	const disabled = useAtomValue(paymentAtom)
+	const send = useSetAtom(turnstileAtom)
 	const onClick = useCallback(() => {
 		send({ id, now: Date.now(), type: 'payment' })
 	}, [id, send])
@@ -88,6 +69,20 @@ function Messages() {
 			</div>
 		</div>
 	)
+}
+
+function Effects() {
+	const [pay] = useState(() => localCached('now', payment))
+	useMachineEffects(
+		turnstileAtom,
+		useMemo(
+			() => ({
+				payment: (e, send) => pay(e, send),
+			}),
+			[pay],
+		),
+	)
+	return null
 }
 
 export default function App() {

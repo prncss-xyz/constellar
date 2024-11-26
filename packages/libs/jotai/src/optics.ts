@@ -13,7 +13,7 @@ import {
 } from '@constellar/core'
 import { atom, Atom, WritableAtom } from 'jotai'
 
-import { selectAtom } from './shared'
+import { mappedAtom } from './shared'
 import { NonFunction, unwrap } from './utils'
 
 export function viewAtom<Part, Whole, Fail, Command, S>(
@@ -28,7 +28,7 @@ export function viewAtom<Part, Whole, Fail, Command, S>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	return selectAtom(wholeAtom, (whole) => view(focus(eq<Whole>()))(whole))
+	return mappedAtom(wholeAtom, (whole) => view(focus(eq<Whole>()))(whole))
 }
 
 export function foldAtom<Part, Whole, Fail, Command, S>(
@@ -44,7 +44,7 @@ export function foldAtom<Part, Whole, Fail, Command, S>(
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
 	return function <Acc>(form: FoldForm<Part, Acc, Ctx>) {
-		return selectAtom(wholeAtom, (whole) =>
+		return mappedAtom(wholeAtom, (whole) =>
 			fold(focus(eq<Whole>()))(form, whole),
 		) as Atom<Acc | Promise<Acc>>
 	}

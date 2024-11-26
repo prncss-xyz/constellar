@@ -1,18 +1,19 @@
-import { multiStateMachine, simpleStateMachine } from '@constellar/core'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { atom, createStore, useAtom } from 'jotai'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
 	disabledEventAtom,
 	machineAtom,
-	useMachineEffects,
+	multiStateJotaiMachine,
+	simpleStateJotaiMachine,
 	valueEventAtom,
 } from './machine'
+import { useMachineEffects } from './machine-effects'
 
 describe('machineAtom', () => {
 	type State = { n: number }
-	const someMachine = simpleStateMachine(
+	const someMachine = simpleStateJotaiMachine()(
 		{
 			events: {
 				add: (e: { n: number }, { n }) => ({
@@ -33,27 +34,27 @@ describe('machineAtom', () => {
 		expect(store.get(someAtom)).toMatchObject({ n: 2 })
 	})
 	test('async factory', async () => {
-		const someAtom = machineAtom(someMachine(), {
-			atomFactory: (init) => atom(Promise.resolve(init)),
-		})
+		const someAtom = machineAtom(someMachine(), (init) =>
+			atom(Promise.resolve(init)),
+		)
 		const store = createStore()
 		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
 		expect(await store.get(someAtom)).toMatchObject({ n: 2 })
 	})
 	test('async factory, noop', async () => {
-		const someAtom = machineAtom(someMachine(), {
-			atomFactory: (init) => atom(Promise.resolve(init)),
-		})
+		const someAtom = machineAtom(someMachine(), (init) =>
+			atom(Promise.resolve(init)),
+		)
 		const store = createStore()
 		store.set(someAtom, 'noop')
 		await Promise.resolve()
 		expect(await store.get(someAtom)).toMatchObject({ n: 1 })
 	})
 	test('provided factory', async () => {
-		const someAtom = machineAtom(someMachine(), {
-			atomFactory: (init) => atom(Promise.resolve(init)),
-		})
+		const someAtom = machineAtom(someMachine(), (init) =>
+			atom(Promise.resolve(init)),
+		)
 		const store = createStore()
 		store.set(someAtom, { n: 1, type: 'add' })
 		await Promise.resolve()
@@ -61,17 +62,15 @@ describe('machineAtom', () => {
 	})
 	test('provided factory', async () => {
 		let r: State = { n: -1 }
-		const someAtom = machineAtom(someMachine(), {
-			atomFactory: (init) => {
-				const baseAtom = atom(init)
-				return atom(
-					(get) => get(baseAtom),
-					(_get, set, value: State) => {
-						r = value
-						return set(baseAtom, value)
-					},
-				)
-			},
+		const someAtom = machineAtom(someMachine(), (init) => {
+			const baseAtom = atom(init)
+			return atom(
+				(get) => get(baseAtom),
+				(_get, set, value: State) => {
+					r = value
+					return set(baseAtom, value)
+				},
+			)
 		})
 		const store = createStore()
 		store.set(someAtom, { n: 1, type: 'add' })
@@ -83,7 +82,7 @@ describe('machineAtom', () => {
 })
 
 describe('effects', () => {
-	const someMachine = simpleStateMachine(
+	const someMachine = simpleStateJotaiMachine()(
 		{
 			events: {
 				n: (e: { value: number }) => ({
@@ -96,17 +95,23 @@ describe('effects', () => {
 		(s) => (s.n === 2 ? s : undefined),
 	)
 	test('effects', async () => {
-		const someAtom = machineAtom(someMachine())
 		const cbIn = vi.fn((..._: unknown[]) => {})
 		const cbOut = vi.fn(() => {})
+		const someAtom = machineAtom(someMachine())
 		function Machine() {
-			const [state, send] = useAtom(someAtom)
-			useMachineEffects(state, send, {
-				a: (...args: unknown[]) => {
-					cbIn(...args)
-					return cbOut
-				},
-			})
+			useMachineEffects(
+				someAtom,
+				useMemo(
+					() => ({
+						a: (e) => {
+							cbIn(e)
+							return () => cbOut()
+						},
+					}),
+					[],
+				),
+			)
+			const [, send] = useAtom(someAtom)
 			return <button onClick={() => send({ type: 'n', value: 2 })}>send</button>
 		}
 		function App() {
@@ -120,13 +125,11 @@ describe('effects', () => {
 		}
 		render(<App />)
 		expect(cbIn.mock.calls[0]?.[0]).toBe(0)
-		expect(typeof cbIn.mock.calls[0]?.[1]).toEqual('function')
 		expect(cbIn).toHaveBeenCalledTimes(1)
 		expect(cbOut).toHaveBeenCalledTimes(0)
 
 		fireEvent.click(screen.getByText('send'))
 		expect(cbIn.mock.calls[1]?.[0]).toBe(2)
-		expect(typeof cbIn.mock.calls[1]?.[1]).toEqual('function')
 		expect(cbIn).toHaveBeenCalledTimes(2)
 		expect(cbOut).toHaveBeenCalledTimes(1)
 
@@ -139,7 +142,7 @@ describe('effects', () => {
 
 describe('disabledEventAtom', () => {
 	const store = createStore()
-	const machine = simpleStateMachine({
+	const machine = simpleStateJotaiMachine()({
 		events: {
 			a: ({ value }: { value: number }) =>
 				value === 0 ? undefined : { a: value },
@@ -157,9 +160,9 @@ describe('disabledEventAtom', () => {
 		expect(store.get(a1Atom)).toBeFalsy()
 	})
 	test('async', async () => {
-		const reducerAtom = machineAtom(machine(), {
-			atomFactory: (init) => atom(Promise.resolve(init)),
-		})
+		const reducerAtom = machineAtom(machine(), (init) =>
+			atom(Promise.resolve(init)),
+		)
 		const a0Atom = disabledEventAtom(reducerAtom, {
 			type: 'a',
 			value: 0,
@@ -171,7 +174,7 @@ describe('disabledEventAtom', () => {
 })
 
 describe('value', () => {
-	const someMachine = simpleStateMachine({
+	const someMachine = simpleStateJotaiMachine()({
 		events: {
 			a: (e: { value: number }) => ({ a: e.value }),
 		},
@@ -183,7 +186,7 @@ describe('value', () => {
 		const valueAtom = valueEventAtom(
 			someAtom,
 			(s) => s.a,
-			(value, send) => send({ type: 'a', value }),
+			(value: number, send) => send({ type: 'a', value }),
 		)
 		expect(store.get(valueAtom)).toBe(0)
 		store.set(valueAtom, 1)
@@ -196,13 +199,13 @@ describe('value', () => {
 
 	test('async', async () => {
 		const store = createStore()
-		const someAtom = machineAtom(someMachine(), {
-			atomFactory: (init) => atom(Promise.resolve(init)),
-		})
+		const someAtom = machineAtom(someMachine(), (init) =>
+			atom(Promise.resolve(init)),
+		)
 		const valueAtom = valueEventAtom(
 			someAtom,
 			(s) => s.a,
-			(value, send) => send({ type: 'a', value }),
+			(value: number, send) => send({ type: 'a', value }),
 		)
 		expect(await store.get(valueAtom)).toBe(0)
 		await store.set(valueAtom, 1)
@@ -217,29 +220,18 @@ describe('value', () => {
 describe('messages', () => {
 	type State = { type: 'a' }
 	type Event = { type: 'in' }
-	type Message = { type: 'out' }
-	const someMachine = multiStateMachine<
-		Event,
-		State,
-		object,
-		object,
-		Message
-	>()({
+	const countAtom = atom(0)
+	const someMachine = multiStateJotaiMachine<Event, State, object, object>()({
 		init: 'a',
 		states: {
 			a: {
 				events: {
-					in: (_e, _s, send) => send('out'),
+					in: (_e, _s, _get, set) => set(countAtom, (x) => x + 1),
 				},
 			},
 		},
 	})
-	const countAtom = atom(0)
-	const reducerAtom = machineAtom(someMachine(), {
-		listener: (_, get, set) => {
-			set(countAtom, get(countAtom) + 1)
-		},
-	})
+	const reducerAtom = machineAtom(someMachine())
 	test('event should propagate as message', async () => {
 		const store = createStore()
 		expect(store.get(countAtom)).toBe(0)

@@ -1,4 +1,5 @@
 export * from './machine'
+export * from './machine-effects'
 export * from './optics'
 export * from './resolved'
 export * from './shared'

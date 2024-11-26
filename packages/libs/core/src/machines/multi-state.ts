@@ -107,9 +107,9 @@ export function multiStateMachine<
 export function multiStateBaseMachine<
 	Event extends Typed,
 	State extends Typed,
-	DerivedLocal = object,
-	Derived = object,
-	Ctx extends unknown[] = [],
+	DerivedLocal,
+	Derived,
+	Ctx extends unknown[],
 >() {
 	return function <
 		Machine extends AnyMachine<Event, State, Ctx, DerivedLocal, Derived>,
@@ -118,6 +118,7 @@ export function multiStateBaseMachine<
 		function fromAlways(s: State) {
 			while (true) {
 				let s_ = (states as any)[s.type].always
+				if (s_ === undefined) break
 				if (isFunction(s_)) s_ = s_(s)
 				if (s_ === undefined) break
 				s = s_
@@ -143,26 +144,26 @@ export function multiStateBaseMachine<
 					if (!isEmpty(state.events)) return undefined
 					return s as any
 				},
-				init: fromAlways(fromSendable(init0(initialArg))),
+				init: () => fromAlways(fromSendable(init0(initialArg))),
 				reducer: (event, s, ...args) => {
 					const e = fromSendable(event)
 					const state = (states as any)[s.type]
 					let res = state?.events?.[e.type]
 					if (isFunction(res)) res = res(e, s, ...args)
-					if (res === undefined) {
+					else if (res === undefined) {
 						res = state?.wildcard
 						if (isFunction(res)) res = res(e, s, ...args)
-						if (res === undefined) return undefined
 					}
+					if (res === undefined) return undefined
 					return fromAlways(fromSendable(res))
 				},
-				transform: (s) => {
+				transform: (s, ...args) => {
 					const localDerive = (states as any)[s.type].derive
 					const d1 = localDerive
-						? join(s, localDerive)
+						? join(s, localDerive, ...args)
 						: (s as DerivedLocal & State)
 					const d2 = derive
-						? join(d1, derive)
+						? join(d1, derive, ...args)
 						: (d1 as Derived & DerivedLocal & State)
 					return d2
 				},
@@ -173,7 +174,11 @@ export function multiStateBaseMachine<
 	}
 }
 
-function join<A, B>(a: A, b: ((a: A) => B) | B): A & B {
-	const x = isFunction(b) ? b(a) : b
+function join<A, B, Ctx extends unknown[]>(
+	a: A,
+	b: ((a: A, ...args: Ctx) => B) | B,
+	...args: Ctx
+): A & B {
+	const x = isFunction(b) ? b(a, ...args) : b
 	return { ...a, ...x }
 }
