@@ -56,10 +56,6 @@ export function forbidden<Part, Whole>(_part: Part, _whole: Whole): Whole {
 	throw new Error('forbidden')
 }
 
-export function inert<Part, Whole>(_: Part, whole: Whole) {
-	return whole
-}
-
 // S (setter) extends void | unknown; use `void` to represent a prism, `never` otherwise
 export type PRISM = void
 export type NON_PRISM = never
@@ -328,7 +324,7 @@ export function iso<Part, Whole>({
 	setter: (part: Part) => Whole
 }) {
 	return opticPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isNever,
@@ -353,7 +349,7 @@ export function lens<Part, Whole>({
 	setter: (part: Part, whole: Whole) => Whole
 }) {
 	return opticNonPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isNever,
@@ -378,7 +374,7 @@ export function prism<Part, Whole>({
 	setter: Setter<Part, Whole, PRISM>
 }) {
 	return opticPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isUndefined,
@@ -399,7 +395,7 @@ export function optional<Part, Whole>({
 	setter: Setter<Part, Whole, NON_PRISM>
 }) {
 	return opticNonPrism<Part, Whole, undefined, never>({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isUndefined,
@@ -437,7 +433,7 @@ export function traversal<Part, Whole, Index>({
 	form: () => FoldForm<Part, Whole, Ctx>
 }) {
 	return opticNonPrism<Part, Whole, undefined, never>({
-		command: inert,
+		command: forbidden,
 		isCommand: isNever,
 		isFailure: isUndefined,
 		mapper: (mod, whole: Whole) => {

@@ -62,11 +62,11 @@ importers:
   packages/demos/jotai-checkbox:
     dependencies:
       '@constellar/core':
-        specifier: workspace:^
-        version: link:../../libs/core
+        specifier: '*'
+        version: 2.4.1
       '@constellar/jotai':
-        specifier: workspace:^
-        version: link:../../libs/jotai
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -102,11 +102,11 @@ importers:
   packages/demos/jotai-machine-effects:
     dependencies:
       '@constellar/core':
-        specifier: workspace:^
-        version: link:../../libs/core
+        specifier: '*'
+        version: 2.4.1
       '@constellar/jotai':
-        specifier: workspace:^
-        version: link:../../libs/jotai
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -145,11 +145,11 @@ importers:
   packages/demos/jotai-timer:
     dependencies:
       '@constellar/core':
-        specifier: workspace:^
-        version: link:../../libs/core
+        specifier: '*'
+        version: 2.4.1
       '@constellar/jotai':
-        specifier: workspace:^
-        version: link:../../libs/jotai
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -185,11 +185,11 @@ importers:
   packages/demos/jotai-turnstile:
     dependencies:
       '@constellar/core':
-        specifier: workspace:^
-        version: link:../../libs/core
+        specifier: '*'
+        version: 2.4.1
       '@constellar/jotai':
-        specifier: workspace:^
-        version: link:../../libs/jotai
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -1727,6 +1727,22 @@ packages:
         integrity: sha512-tpyc+7i6bPG9mvaBbtKUeghfyZSDgWquIDfMgqYtTbmZ9Y9VzEm2je9EYcQ0aoz5o7NvGS+rcDec93yO08MHYA==,
       }
     engines: { node: '>=v18' }
+
+  '@constellar/core@2.4.1':
+    resolution:
+      {
+        integrity: sha512-lR9aTkTTEclWGyLvVzwiXJePYnsNksbsAjc/6osjkdja+Fy18wQatDsoTSHqVNSiwQoD36UyTboKhfuhmOOc7g==,
+      }
+
+  '@constellar/jotai@2.4.1':
+    resolution:
+      {
+        integrity: sha512-I3NFvGHSgFPsgJRNuaijy9rLaYSia8sIedwypgmU0gOBwkH3LzrDdV1dNyDWAKzhvGewNQwvlcrkNaz1M6ytmw==,
+      }
+    peerDependencies:
+      '@constellar/core': ^2.4.1
+      jotai: '>=2.0.0'
+      react: '>=18.0.0'
 
   '@conventional-changelog/git-client@1.0.1':
     resolution:
@@ -13590,6 +13606,14 @@ snapshots:
     dependencies:
       '@types/conventional-commits-parser': 5.0.0
       chalk: 5.3.0
+
+  '@constellar/core@2.4.1': {}
+
+  '@constellar/jotai@2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@constellar/core': 2.4.1
+      jotai: 2.9.3(@types/react@18.3.3)(react@18.3.1)
+      react: 18.3.1
 
   '@conventional-changelog/git-client@1.0.1(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.0.0)':
     dependencies:

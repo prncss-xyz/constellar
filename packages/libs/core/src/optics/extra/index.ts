@@ -67,6 +67,7 @@ export function linear(m: number, b = 0) {
 
 // lenses
 
+// focus on nth element of tuple, use `at` for arrays
 export function nth<Index extends keyof O & number, O extends unknown[]>(
 	index: Index,
 ) {
