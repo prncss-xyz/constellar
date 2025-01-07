@@ -27,6 +27,7 @@ export type Spiced<Event, Transformed, SubState, Final> = {
 	) => Acc
 } & Transformed
 
+// PERF: add some kind of lazy evaluation for methods
 export function machineCb<Event, State, Transformed, SubState, Final>(
 	machine: JotaiMachine<Event, State, Transformed, SubState, Final>,
 ) {

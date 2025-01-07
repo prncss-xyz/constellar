@@ -12,16 +12,6 @@ import {
 } from '@constellar/core'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-type Spiced<Event extends Typed, Transformed, SubState, Final> = {
-	final: Final | undefined
-	isDisabled: (event: Sendable<Event>) => boolean
-	next: (event: Sendable<Event>) => Transformed
-	visit: <Acc>(
-		fold: (subState: SubState, acc: Acc, index: string) => Acc,
-		acc: Acc,
-	) => Acc
-} & Transformed
-
 export function useMachine<
 	Event extends Typed,
 	State,
@@ -59,21 +49,37 @@ export function useMachine<
 
 export function useMachineEffects<
 	Event extends Typed,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Transformed extends Spiced<Event, unknown, any, unknown>,
+	SubState extends Typed,
+	Transformed,
 >(
+	machine: {
+		visit: <Acc>(
+			acc: Acc,
+			fold: (subState: SubState, acc: Acc, index: string) => Acc,
+			transformed: Transformed,
+		) => Acc
+	},
 	transformed: Transformed,
 	send: (event: Sendable<Event>) => void,
-	effects: EffectsHandlers<Event, Transformed>,
+	effects: EffectsHandlers<Event, SubState>,
 ) {
-	const machineEffects = useRef<MachineEffects<Event, Transformed>>()
+	const machineEffects = useRef<MachineEffects<Event, SubState>>()
 	useEffect(() => {
-		machineEffects.current = new MachineEffects<Event, Transformed>(effects)
+		machineEffects.current = new MachineEffects<Event, SubState>(effects)
 		return () => machineEffects.current!.flush()
 	}, [effects, send])
+
+	const visit = useCallback(
+		<Acc>(
+			fold: (subState: SubState, acc: Acc, index: string) => Acc,
+			acc: Acc,
+		) => machine.visit(acc, fold, transformed),
+		[machine, transformed],
+	)
+
 	useEffect(
-		() => machineEffects.current!.update(transformed.visit, send),
-		[transformed, send, effects],
+		() => machineEffects.current!.update(visit, send),
+		[transformed, send, effects, visit],
 	)
 }
 
@@ -81,7 +87,7 @@ export function useMachineEffects<
 
 export function valueEvent<Event, State, Value>(
 	select: (state: State) => Value,
-	put: (value: Value, send: (event: Event) => void) => () => void,
+	put: (value: Value, send: (event: Event) => void) => void,
 	[state, send]: [State, (event: Event) => void],
 ) {
 	function update(arg: Updater<Value, never>, state: State): Value {
@@ -90,6 +96,6 @@ export function valueEvent<Event, State, Value>(
 	}
 	return [
 		select(state),
-		(value: Value) => put(update(value, state), send),
+		(value: Updater<Value, never>) => put(update(value, state), send),
 	] as const
 }

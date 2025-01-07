@@ -1,4 +1,12 @@
-import { append, insert, prepend, remove, replace } from '.'
+import {
+	append,
+	insert,
+	insertValue,
+	prepend,
+	remove,
+	removeValue,
+	replace,
+} from '.'
 
 describe('prepend', () => {
 	it('prepends an element', () => {
@@ -51,5 +59,25 @@ describe('remove', () => {
 	it('keeps the reference when possible', () => {
 		const xs = [0, 1, 2]
 		expect(remove(4, xs)).toBe(xs)
+	})
+})
+
+describe('insertValue', () => {
+	test('insertValue', () => {
+		expect(insertValue(3, [1, 2])).toEqual([1, 2, 3])
+	})
+	test('keep reference', () => {
+		const a = [1, 2, 3]
+		expect(insertValue(1, a)).toBe(a)
+	})
+})
+
+describe('removeValue', () => {
+	test('removeValue', () => {
+		expect(removeValue(1, [1, 2])).toEqual([2])
+	})
+	test('keep reference', () => {
+		const a = [1, 2]
+		expect(removeValue(3, a)).toBe(a)
 	})
 })

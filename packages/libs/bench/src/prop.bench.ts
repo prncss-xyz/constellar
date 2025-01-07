@@ -1,5 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, flow, prop, update, view } from '@constellar/core'
+import { focus, pipe, prop } from '@constellar/core'
 import { Lens } from 'monocle-ts'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
@@ -11,15 +11,10 @@ type Data = typeof data
 
 describe('read', () => {
 	;(() => {
-		const focus = flow(
-			eq<Data>(),
-			prop('a'),
-			prop('b'),
-			prop('c'),
-			prop('d'),
-			prop('e'),
+		const o = focus<Data>()(
+			pipe(prop('a'), prop('b'), prop('c'), prop('d'), prop('e')),
 		)
-		const fn = () => view(focus)(data)
+		const fn = () => o.view(data)
 		bench('constellar', fn as () => void)
 		expect(fn()).toBe('hello')
 	})()
@@ -47,18 +42,13 @@ describe('read', () => {
 describe('write', () => {
 	const str = 'world,'
 	;(() => {
-		const focus = flow(
-			eq<Data>(),
-			prop('a'),
-			prop('b'),
-			prop('c'),
-			prop('d'),
-			prop('e'),
+		const o = focus<Data>()(
+			pipe(prop('a'), prop('b'), prop('c'), prop('d'), prop('e')),
 		)
-		const v = update(focus, str)
+		const v = o.update(str)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(view(focus)(fn())).toEqual(str)
+		expect(o.view(fn())).toEqual(str)
 	})()
 	;(() => {
 		const focus = O.optic<Data>().path('a', 'b', 'c', 'd', 'e')
@@ -86,18 +76,13 @@ describe('modify', () => {
 	;(() => {
 		const cb = (s: string) => s.toUpperCase()
 		const res = 'HELLO'
-		const focus = flow(
-			eq<Data>(),
-			prop('a'),
-			prop('b'),
-			prop('c'),
-			prop('d'),
-			prop('e'),
+		const o = focus<Data>()(
+			pipe(prop('a'), prop('b'), prop('c'), prop('d'), prop('e')),
 		)
-		const v = update(focus, cb)
+		const v = o.update(cb)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(view(focus)(fn())).toEqual(res)
+		expect(o.view.bind(o)(fn())).toEqual(res)
 	})()
 	;(() => {
 		const cb = (s: string) => s.toUpperCase()

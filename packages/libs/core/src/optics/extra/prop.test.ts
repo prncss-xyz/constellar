@@ -1,6 +1,6 @@
 import { prop } from '.'
-import { flow } from '../../utils'
-import { eq, REMOVE, update, view } from '../core'
+import { pipe } from '../../utils'
+import { focus, REMOVE } from '../core'
 
 describe('prop', () => {
 	type Source = {
@@ -9,24 +9,28 @@ describe('prop', () => {
 	}
 	const sourceDefined: Source = { a: 'A', b: 'B' }
 	const sourceUndefined: Source = { a: 'A' }
-	const focusA = flow(eq<Source>(), prop('a'))
-	const focusB = flow(eq<Source>(), prop('b'))
+	const focusA = focus<Source>()(prop('a'))
+	const focusB = focus<Source>()(prop('b'))
 	it('view', () => {
-		expectTypeOf(view(focusA)(sourceDefined)).toEqualTypeOf<string>()
-		expectTypeOf(view(focusB)(sourceDefined)).toEqualTypeOf<
-			string | undefined
+		expectTypeOf(focusA.view(sourceDefined)).toEqualTypeOf<string>()
+		expectTypeOf(focusB.view(sourceDefined)).toEqualTypeOf<string | undefined>()
+		expectTypeOf(focusB.view(sourceDefined, 'toto')).toEqualTypeOf<
+			'toto' | string
+		>()
+		expectTypeOf(focusB.view(sourceDefined, () => 'toto')).toEqualTypeOf<
+			'toto' | string
 		>()
 
-		expect(view(focusA)(sourceDefined)).toBe('A')
-		expect(view(focusA)(sourceUndefined)).toBe('A')
-		expect(view(focusB)(sourceDefined)).toBe('B')
-		expect(view(focusB)(sourceUndefined)).toBeUndefined()
+		expect(focusA.view(sourceDefined)).toBe('A')
+		expect(focusA.view(sourceUndefined)).toBe('A')
+		expect(focusB.view(sourceDefined)).toBe('B')
+		expect(focusB.view(sourceUndefined)).toBeUndefined()
 	})
 	it('put', () => {
-		expect(update(focusA, 'C')(sourceDefined)).toEqual({ a: 'C', b: 'B' })
-		expect(update(focusA, 'C')(sourceUndefined)).toEqual({ a: 'C' })
-		expect(update(focusB, 'C')(sourceDefined)).toEqual({ a: 'A', b: 'C' })
-		expect(update(focusB, 'C')(sourceUndefined)).toEqual({ a: 'A', b: 'C' })
+		expect(focusA.update('C')(sourceDefined)).toEqual({ a: 'C', b: 'B' })
+		expect(focusA.update('C')(sourceUndefined)).toEqual({ a: 'C' })
+		expect(focusB.update('C')(sourceDefined)).toEqual({ a: 'A', b: 'C' })
+		expect(focusB.update('C')(sourceUndefined)).toEqual({ a: 'A', b: 'C' })
 	})
 	it('remove', () => {
 		// testing the types
@@ -34,35 +38,35 @@ describe('prop', () => {
 		;() => {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-expect-error
-			update(focusA, REMOVE)(sourceDefined)
+			focusA.update(REMOVE)(sourceDefined)
 			// no error
-			update(focusB, REMOVE)(sourceDefined)
+			focusB.update(REMOVE)(sourceDefined)
 		}
 
-		expect(update(focusB, REMOVE)(sourceDefined)).toEqual({ a: 'A' })
-		expect(update(focusB, REMOVE)(sourceUndefined)).toEqual({ a: 'A' })
+		expect(focusB.update(REMOVE)(sourceDefined)).toEqual({ a: 'A' })
+		expect(focusB.update(REMOVE)(sourceUndefined)).toEqual({ a: 'A' })
 	})
 	it('modify', () => {
 		const cb = (x: string) => `${x} UPDATED`
-		expect(update(focusA, cb)(sourceDefined)).toEqual({
+		expect(focusA.update(cb)(sourceDefined)).toEqual({
 			a: 'A UPDATED',
 			b: 'B',
 		})
-		expect(update(focusA, cb)(sourceUndefined)).toEqual({ a: 'A UPDATED' })
+		expect(focusA.update(cb)(sourceUndefined)).toEqual({ a: 'A UPDATED' })
 
-		expect(update(focusB, cb)(sourceDefined)).toEqual({
+		expect(focusB.update(cb)(sourceDefined)).toEqual({
 			a: 'A',
 			b: 'B UPDATED',
 		})
-		expect(update(focusB, cb)(sourceUndefined)).toEqual({ a: 'A' })
+		expect(focusB.update(cb)(sourceUndefined)).toEqual({ a: 'A' })
 	})
 	describe('compose', () => {
 		it('removable-lens', () => {
 			type Source = { a?: { b: number } }
 			const source: Source = { a: { b: 2 } }
-			const focus = flow(eq<Source>(), prop('a'), prop('b'))
-			const res = view(focus)(source)
-			expectTypeOf(view(focus)(source)).toEqualTypeOf<number | undefined>(res)
+			const o = focus<Source>()(pipe(prop('a'), prop('b')))
+			const res = o.view(source)
+			expectTypeOf(o.view(source)).toEqualTypeOf<number | undefined>(res)
 		})
 	})
 })

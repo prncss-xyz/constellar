@@ -2,21 +2,18 @@
 import {
 	Ctx,
 	disabled,
-	eq,
+	focus as foc,
 	Focus,
-	fold,
 	FoldForm,
-	put,
-	update,
 	Updater,
-	view,
 } from '@constellar/core'
 
 export function viewValue<Part, Whole, Fail, Command, S>(
 	whole: Whole,
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	return view(focus(eq<Whole>()))(whole)
+	const o = foc<Whole>()(focus)
+	return o.view(whole)
 }
 
 export function foldValue<Part, Whole, Fail, Command, S>(
@@ -24,7 +21,8 @@ export function foldValue<Part, Whole, Fail, Command, S>(
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
 	return function <Acc>(form: FoldForm<Part, Acc, Ctx>) {
-		return fold(focus(eq<Whole>()))(form, whole)
+		const o = foc<Whole>()(focus)
+		return o.fold(form, whole)
 	}
 }
 
@@ -33,11 +31,11 @@ export function focusValue<Part, Whole, Fail, Command, S>(
 	setWhole: (whole: Whole) => void,
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	const optic = focus(eq<Whole>())
+	const o = foc<Whole>()(focus)
 	return [
-		view(optic),
+		o.view(whole),
 		(arg: Updater<Part, Command>) => {
-			setWhole(update(optic, arg)(whole))
+			setWhole(o.update(arg)(whole))
 		},
 	] as const
 }
@@ -49,11 +47,6 @@ export function disabledFocusValue<Part, Whole, Fail, Command, S>(
 	part: Updater<Part, Command>,
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const optic = disabled(part as any)(focus(eq<Whole>()))
-	return [
-		view(optic)(whole),
-		() => {
-			setWhole(put(optic, true)(whole))
-		},
-	] as const
+	const o = disabled(part as any)(foc<Whole>()(focus))
+	return [o.view(whole), () => setWhole(o.put(true, whole))] as const
 }

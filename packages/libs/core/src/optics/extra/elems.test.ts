@@ -1,19 +1,19 @@
 import { elems, prop, when } from '.'
-import { flow } from '../../utils'
+import { pipe } from '../../utils'
 import { toArray, toFirst } from '../collections'
-import { eq, fold, update, view } from '../core'
+import { focus } from '../core'
 
 describe('first element', () => {
 	test('simple', () => {
 		type Source = number[]
-		const focus = flow(eq<Source>(), elems())
-		expect(fold(focus)(toFirst(undefined), [1, 2, 3])).toEqual(1)
+		const o = focus<Source>()(elems())
+		expect(o.fold(toFirst(undefined), [1, 2, 3])).toEqual(1)
 	})
 	test('nested', () => {
 		type Source = number[][]
-		const focus = flow(eq<Source>(), elems(), elems())
+		const o = focus<Source>()(pipe(elems(), elems()))
 		expect(
-			fold(focus)(toFirst(undefined), [
+			o.fold(toFirst(undefined), [
 				[1, 2],
 				[3, 4],
 			]),
@@ -26,31 +26,31 @@ describe('simple', () => {
 	const sourceDefined: Source = [1, 2, 3]
 	const sourceUndefined: Source = []
 	const cb = (x: number) => 2 * x
-	const focus = flow(eq<Source>(), elems())
+	const o = focus<Source>()(elems())
 
 	it('view undefined', () => {
-		expect(view(focus)(sourceUndefined)).toBeUndefined()
+		expect(o.view(sourceUndefined)).toBeUndefined()
 	})
 	it('view defined', () => {
-		expect(view(focus)(sourceDefined)).toBe(1)
+		expect(o.view(sourceDefined)).toBe(1)
 	})
 	it('fold undefined', () => {
-		expect(fold(focus)(toArray(), sourceUndefined)).toEqual([])
+		expect(o.fold(toArray(), sourceUndefined)).toEqual([])
 	})
 	it('fold defined', () => {
-		expect(fold(focus)(toArray(), sourceDefined)).toEqual([1, 2, 3])
+		expect(o.fold(toArray(), sourceDefined)).toEqual([1, 2, 3])
 	})
 	it('put undefined', () => {
-		expect(update(focus, 9)(sourceUndefined)).toEqual(sourceUndefined)
+		expect(o.update(9)(sourceUndefined)).toEqual(sourceUndefined)
 	})
 	it('put defined', () => {
-		expect(update(focus, 8)(sourceDefined)).toEqual([8, 8, 8])
+		expect(o.update(8)(sourceDefined)).toEqual([8, 8, 8])
 	})
 	it('modify undefined', () => {
-		expect(update(focus, cb)(sourceUndefined)).toEqual(sourceUndefined)
+		expect(o.update(cb)(sourceUndefined)).toEqual(sourceUndefined)
 	})
 	it('modify defined', () => {
-		expect(update(focus, cb)(sourceDefined)).toEqual([2, 4, 6])
+		expect(o.update(cb)(sourceDefined)).toEqual([2, 4, 6])
 	})
 })
 
@@ -58,12 +58,12 @@ describe('composed', () => {
 	describe('prop-elements-prop', () => {
 		type Source = { a: { c: number }[] }
 		const source: Source = { a: [{ c: 1 }, { c: 2 }] }
-		const focus = flow(eq<Source>(), prop('a'), elems(), prop('c'))
+		const o = focus<Source>()(pipe(prop('a'), elems(), prop('c')))
 		it('fold', () => {
-			expect(fold(focus)(toArray(), source)).toEqual([1, 2])
+			expect(o.fold(toArray(), source)).toEqual([1, 2])
 		})
 		it('modify', () => {
-			expect(update(focus, (x) => x * 2)(source)).toEqual({
+			expect(o.update((x) => x * 2)(source)).toEqual({
 				a: [{ c: 2 }, { c: 4 }],
 			})
 		})
@@ -74,12 +74,12 @@ describe('composed', () => {
 			[1, 2],
 			[3, 4],
 		]
-		const focus = flow(eq<Source>(), elems(), elems())
+		const o = focus<Source>()(pipe(elems(), elems()))
 		it('fold', () => {
-			expect(fold(focus)(toArray(), source)).toEqual([1, 2, 3, 4])
+			expect(o.fold(toArray(), source)).toEqual([1, 2, 3, 4])
 		})
 		it('modify', () => {
-			expect(update(focus, (x) => x * 2)(source)).toEqual([
+			expect(o.update((x) => x * 2)(source)).toEqual([
 				[2, 4],
 				[6, 8],
 			])
@@ -89,22 +89,24 @@ describe('composed', () => {
 		it('fold', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo']
-			const focus = flow(
-				eq<Source>(),
-				elems(),
-				when((item) => item !== 'quux'),
+			const o = focus<Source>()(
+				pipe(
+					elems(),
+					when((item) => item !== 'quux'),
+				),
 			)
-			expect(fold(focus)(toArray(), source)).toEqual(['baz', 'foo'])
+			expect(o.fold(toArray(), source)).toEqual(['baz', 'foo'])
 		})
 		it('map', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo']
-			const focus = flow(
-				eq<Source>(),
-				elems(),
-				when((item) => item !== 'baz'),
+			const o = focus<Source>()(
+				pipe(
+					elems(),
+					when((item) => item !== 'baz'),
+				),
 			)
-			expect(update(focus, (x) => x.toUpperCase())(source)).toEqual([
+			expect(o.update((x) => x.toUpperCase())(source)).toEqual([
 				'baz',
 				'QUUX',
 				'FOO',
@@ -113,32 +115,35 @@ describe('composed', () => {
 		it('fold', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo']
-			const focus = flow(
-				eq<Source>(),
-				elems(),
-				when((item) => item !== 'baz'),
+			const o = focus<Source>()(
+				pipe(
+					elems(),
+					when((item) => item !== 'baz'),
+				),
 			)
-			expect(fold(focus)(toArray(), source)).toEqual(['quux', 'foo'])
+			expect(o.fold(toArray(), source)).toEqual(['quux', 'foo'])
 		})
 		it('view', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo', 'baz']
-			const focus = flow(
-				eq<Source>(),
-				elems(),
-				when((item) => item !== 'baz'),
+			const o = focus<Source>()(
+				pipe(
+					elems(),
+					when((item) => item !== 'baz'),
+				),
 			)
-			expect(view(focus)(source)).toEqual('quux')
+			expect(o.view(source)).toEqual('quux')
 		})
 		it('put', () => {
 			type Source = string[]
 			const source: Source = ['baz', 'quux', 'foo']
-			const focus = flow(
-				eq<Source>(),
-				elems(),
-				when((item) => item !== 'baz'),
+			const o = focus<Source>()(
+				pipe(
+					elems(),
+					when((item) => item !== 'baz'),
+				),
 			)
-			expect(update(focus, 'toto')(source)).toEqual(['baz', 'toto', 'toto'])
+			expect(o.update('toto')(source)).toEqual(['baz', 'toto', 'toto'])
 		})
 	})
 })

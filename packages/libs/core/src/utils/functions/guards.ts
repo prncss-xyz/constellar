@@ -7,10 +7,6 @@ export function isUndefined(v: unknown): v is undefined {
 	return v === undefined
 }
 
-export function isDefined<V>(v: V): v is Exclude<V, undefined> {
-	return v !== undefined
-}
-
 export function isNever(_v: unknown): _v is never {
 	return false
 }

@@ -1,6 +1,5 @@
 import { findOne } from '.'
-import { flow } from '../../utils'
-import { command, eq, put, REMOVE, update, view } from '../core'
+import { focus, REMOVE } from '../core'
 
 describe('find', () => {
 	type Source = { bar: string }
@@ -14,28 +13,25 @@ describe('find', () => {
 		{ bar: 'nomatch' },
 		{ bar: 'foo' },
 	]
-	const focus = flow(
-		eq<Source[]>(),
-		findOne((item) => item.bar === 'quux'),
-	)
+	const o = focus<Source[]>()(findOne((item) => item.bar === 'quux'))
 	describe('view', () => {
 		it('defined', () => {
-			expect(view(focus)(sourceDefined)).toEqual({ bar: 'quux' })
+			expect(o.view(sourceDefined)).toEqual({ bar: 'quux' })
 		})
 		it('undefined', () => {
-			expect(view(focus)(sourceUndefined)).toBeUndefined()
+			expect(o.view(sourceUndefined)).toBeUndefined()
 		})
 	})
 	describe('put', () => {
 		it('defined', () => {
-			expect(put(focus, { bar: 'UPDATED' })(sourceDefined)).toEqual([
+			expect(o.put({ bar: 'UPDATED' }, sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'UPDATED' },
 				{ bar: 'foo' },
 			])
 		})
 		it('undefined', () => {
-			expect(update(focus, { bar: 'UPDATED' })(sourceUndefined)).toEqual([
+			expect(o.update({ bar: 'UPDATED' })(sourceUndefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'nomatch' },
 				{ bar: 'foo' },
@@ -46,38 +42,31 @@ describe('find', () => {
 	describe('modify', () => {
 		it('defined', () => {
 			expect(
-				update(focus, (x) => ({
-					bar: `${x.bar} UPDATED`,
-				}))(sourceDefined),
+				o.update((x) => ({ bar: `${x.bar} UPDATED` }))(sourceDefined),
 			).toEqual([{ bar: 'baz' }, { bar: 'quux UPDATED' }, { bar: 'foo' }])
 		})
 		it('undefined', () => {
 			expect(
-				update(focus, (x) => ({
-					bar: `${x.bar} UPDATED`,
-				}))(sourceUndefined),
+				o.update((x) => ({ bar: `${x.bar} UPDATED` }))(sourceUndefined),
 			).toEqual(sourceUndefined)
 		})
 	})
 	describe('remove', () => {
 		it('defined', () => {
-			expect(command(focus, REMOVE)(sourceDefined)).toEqual([
+			expect(o.command(REMOVE, sourceDefined)).toEqual([
 				{ bar: 'baz' },
 				{ bar: 'foo' },
 			])
 		})
 		it('undefined', () => {
-			expect(update(focus, REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
+			expect(o.update(REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
 		})
 	})
 	test('refine type', () => {
 		type T = number | string
-		const focus = flow(
-			eq<T[]>(),
-			findOne((item) => typeof item === 'string'),
-		)
+		const o = focus<T[]>()(findOne((item) => typeof item === 'string'))
 		const source: T[] = []
-		const res = view(focus)(source)
+		const res = o.view(source)
 		expectTypeOf(res).toEqualTypeOf<string | undefined>()
 	})
 })

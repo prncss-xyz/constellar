@@ -17,20 +17,6 @@ export function pipe2<P, Q, R>(f: (p: P) => Q, g: (q: Q) => R): (p: P) => R {
 	return (p: P) => g(f(p))
 }
 
-const INIT = Symbol('INIT')
-
-export function memo1<A, R>(f: (a: A) => R): (a: A) => R {
-	let a_: A | typeof INIT = INIT
-	let memo: R
-	return (a: A) => {
-		if (!Object.is(a_, a)) {
-			memo = f(a)
-			a_ = a
-		}
-		return memo
-	}
-}
-
 export function fromInit<T>(init: Init<T, void>): T {
 	return isFunction(init) ? init() : init
 }
@@ -45,4 +31,21 @@ export function isEmpty(obj?: object) {
 		return false
 	}
 	return true
+}
+
+export function curry1<A, Args extends unknown[], R>(
+	f: (...args: [A, ...Args]) => R,
+) {
+	return function (a: A) {
+		return function (...args: Args) {
+			return f(a, ...args)
+		}
+	}
+}
+
+export function curry<P extends unknown[], Q extends unknown[], R>(
+	f: (...args: [...P, ...Q]) => R,
+	...args: P
+) {
+	return (...args2: Q) => f(...args, ...args2)
 }

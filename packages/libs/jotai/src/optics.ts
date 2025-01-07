@@ -2,14 +2,10 @@
 import {
 	Ctx,
 	disabled,
-	eq,
+	focus as foc,
 	Focus,
-	fold,
 	FoldForm,
-	put,
-	update,
 	Updater,
-	view,
 } from '@constellar/core'
 import { atom, Atom, WritableAtom } from 'jotai'
 
@@ -28,7 +24,8 @@ export function viewAtom<Part, Whole, Fail, Command, S>(
 	wholeAtom: Atom<Whole>,
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	return mappedAtom(wholeAtom, (whole) => view(focus(eq<Whole>()))(whole))
+	const o = foc<Whole>()(focus)
+	return mappedAtom(wholeAtom, (whole) => o.view(whole))
 }
 
 export function foldAtom<Part, Whole, Fail, Command, S>(
@@ -44,9 +41,10 @@ export function foldAtom<Part, Whole, Fail, Command, S>(
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
 	return function <Acc>(form: FoldForm<Part, Acc, Ctx>) {
-		return mappedAtom(wholeAtom, (whole) =>
-			fold(focus(eq<Whole>()))(form, whole),
-		) as Atom<Acc | Promise<Acc>>
+		const o = foc<Whole>()(focus)
+		return mappedAtom(wholeAtom, (whole) => o.fold(form, whole)) as Atom<
+			Acc | Promise<Acc>
+		>
 	}
 }
 
@@ -66,13 +64,13 @@ export function focusAtom<Part, Whole, Fail, Command, R, S>(
 	wholeAtom: WritableAtom<Whole, [NonFunction<Whole>], R>,
 	focus: Focus<Part, Whole, Fail, Command, S>,
 ) {
-	const optic = focus(eq<Whole>())
+	const o = foc<Whole>()(focus)
 	return atom(
-		(get) => unwrap(get(wholeAtom), view(optic)),
+		(get) => unwrap(get(wholeAtom), o.view.bind(o)),
 		(get, set, arg: Updater<Part, Command>) =>
 			set(
 				wholeAtom,
-				unwrap(get(wholeAtom), update(optic, arg)) as NonFunction<Whole>,
+				unwrap(get(wholeAtom), o.update(arg)) as NonFunction<Whole>,
 			),
 	)
 }
@@ -98,13 +96,13 @@ export function disabledFocusAtom<Part, Whole, Fail, Command, R, S>(
 	part: Updater<Part, Command>,
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const optic = disabled(part as any)(focus(eq<Whole>()))
+	const o = disabled(part as any)(foc<Whole>()(focus))
 	return atom(
-		(get) => unwrap(get(wholeAtom), view(optic)),
+		(get) => unwrap(get(wholeAtom), o.view.bind(o)),
 		(get, set) =>
 			set(
 				wholeAtom,
-				unwrap(get(wholeAtom), put(optic, true)) as NonFunction<Whole>,
+				unwrap(get(wholeAtom), o.update(true)) as NonFunction<Whole>,
 			),
 	)
 }

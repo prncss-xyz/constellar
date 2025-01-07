@@ -64,10 +64,17 @@ importers:
     dependencies:
       '@constellar/core':
         specifier: '*'
+<<<<<<< HEAD
         version: 2.3.0
       '@constellar/jotai':
         specifier: '*'
         version: 2.3.0(@constellar/core@2.3.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+=======
+        version: 2.4.1
+      '@constellar/jotai':
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+>>>>>>> dev
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -104,10 +111,17 @@ importers:
     dependencies:
       '@constellar/core':
         specifier: '*'
+<<<<<<< HEAD
         version: 2.3.0
       '@constellar/jotai':
         specifier: '*'
         version: 2.3.0(@constellar/core@2.3.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+=======
+        version: 2.4.1
+      '@constellar/jotai':
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+>>>>>>> dev
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -147,10 +161,17 @@ importers:
     dependencies:
       '@constellar/core':
         specifier: '*'
+<<<<<<< HEAD
         version: 2.3.0
       '@constellar/jotai':
         specifier: '*'
         version: 2.3.0(@constellar/core@2.3.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+=======
+        version: 2.4.1
+      '@constellar/jotai':
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+>>>>>>> dev
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -187,10 +208,17 @@ importers:
     dependencies:
       '@constellar/core':
         specifier: '*'
+<<<<<<< HEAD
         version: 2.3.0
       '@constellar/jotai':
         specifier: '*'
         version: 2.3.0(@constellar/core@2.3.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+=======
+        version: 2.4.1
+      '@constellar/jotai':
+        specifier: '*'
+        version: 2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)
+>>>>>>> dev
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.0(@types/node@22.2.0)(terser@5.32.0))
@@ -1239,6 +1267,22 @@ packages:
     resolution: {integrity: sha512-MBYY6shWeHVrRFutnLu9+/1P1KG4xxMtWqinpeIDjmQaqdhoUwQ8pO4PboSac8Ry9Bqkbu0WAALUtZGD27yq1w==}
     peerDependencies:
       '@constellar/core': ^2.3.0
+      jotai: '>=2.0.0'
+      react: '>=18.0.0'
+
+  '@constellar/core@2.4.1':
+    resolution:
+      {
+        integrity: sha512-lR9aTkTTEclWGyLvVzwiXJePYnsNksbsAjc/6osjkdja+Fy18wQatDsoTSHqVNSiwQoD36UyTboKhfuhmOOc7g==,
+      }
+
+  '@constellar/jotai@2.4.1':
+    resolution:
+      {
+        integrity: sha512-I3NFvGHSgFPsgJRNuaijy9rLaYSia8sIedwypgmU0gOBwkH3LzrDdV1dNyDWAKzhvGewNQwvlcrkNaz1M6ytmw==,
+      }
+    peerDependencies:
+      '@constellar/core': ^2.4.1
       jotai: '>=2.0.0'
       react: '>=18.0.0'
 
@@ -8531,11 +8575,19 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.0
       chalk: 5.3.0
 
+<<<<<<< HEAD
   '@constellar/core@2.3.0': {}
 
   '@constellar/jotai@2.3.0(@constellar/core@2.3.0)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@constellar/core': 2.3.0
+=======
+  '@constellar/core@2.4.1': {}
+
+  '@constellar/jotai@2.4.1(@constellar/core@2.4.1)(jotai@2.9.3(@types/react@18.3.3)(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@constellar/core': 2.4.1
+>>>>>>> dev
       jotai: 2.9.3(@types/react@18.3.3)(react@18.3.1)
       react: 18.3.1
 

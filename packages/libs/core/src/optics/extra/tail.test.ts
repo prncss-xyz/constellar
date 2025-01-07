@@ -1,44 +1,43 @@
 import { tail } from '.'
-import { flow } from '../../utils'
-import { eq, REMOVE, update, view } from '../core'
+import { focus, REMOVE } from '../core'
 
 describe('tail', () => {
 	type Source = string[]
 	const sourceDefined: Source = ['a', 'b', 'c']
 	const sourceEmpty: Source = ['a']
 	const sourceUndefined: Source = []
-	const focus = flow(eq<string[]>(), tail())
+	const o = focus<string[]>()(tail())
 	describe('view', () => {
 		it('defined', () => {
-			expect(view(focus)(sourceDefined)).toEqual(['b', 'c'])
+			expect(o.view(sourceDefined)).toEqual(['b', 'c'])
 		})
 		it('empty', () => {
-			expect(view(focus)(sourceEmpty)).toEqual([])
+			expect(o.view(sourceEmpty)).toEqual([])
 		})
 		it('undefined', () => {
-			expect(view(focus)(sourceUndefined)).toBeUndefined()
+			expect(o.view(sourceUndefined)).toBeUndefined()
 		})
 	})
 	describe('put', () => {
 		it('defined', () => {
-			expect(update(focus, ['P', 'Q'])(sourceDefined)).toEqual(['a', 'P', 'Q'])
+			expect(o.update(['P', 'Q'])(sourceDefined)).toEqual(['a', 'P', 'Q'])
 		})
 		it('empty', () => {
-			expect(update(focus, ['P', 'Q'])(sourceEmpty)).toEqual(['a', 'P', 'Q'])
+			expect(o.update(['P', 'Q'])(sourceEmpty)).toEqual(['a', 'P', 'Q'])
 		})
 		it('undefined', () => {
-			expect(update(focus, ['P', 'Q'])(sourceUndefined)).toEqual([])
+			expect(o.update(['P', 'Q'])(sourceUndefined)).toEqual([])
 		})
 	})
 	describe('remove', () => {
 		it('defined', () => {
-			expect(update(focus, REMOVE)(sourceDefined)).toEqual(['a'])
+			expect(o.update(REMOVE)(sourceDefined)).toEqual(['a'])
 		})
 		it('empty', () => {
-			expect(update(focus, REMOVE)(sourceEmpty)).toEqual(['a'])
+			expect(o.update(REMOVE)(sourceEmpty)).toEqual(['a'])
 		})
 		it('undefined', () => {
-			expect(update(focus, REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
+			expect(o.update(REMOVE)(sourceUndefined)).toEqual(sourceUndefined)
 		})
 	})
 })

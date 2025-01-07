@@ -56,10 +56,6 @@ export function forbidden<Part, Whole>(_part: Part, _whole: Whole): Whole {
 	throw new Error('forbidden')
 }
 
-export function inert<Part, Whole>(_: Part, whole: Whole) {
-	return whole
-}
-
 // S (setter) extends void | unknown; use `void` to represent a prism, `never` otherwise
 export type PRISM = void
 export type NON_PRISM = never
@@ -70,7 +66,7 @@ type Com<Part, Whole> = (p: Part, w: Whole) => Whole
 type Getter<Part, Whole, Fail> = (w: Whole) => Fail | Part
 
 export interface IOptic<Part, Whole, Fail, Command, S> {
-	command: Com<Command, Whole>
+	com: Com<Command, Whole>
 	getter?: Getter<Part, Whole, Fail>
 	isCommand: (v: unknown) => v is Command
 	isFailure: (v: unknown) => v is Fail
@@ -79,72 +75,86 @@ export interface IOptic<Part, Whole, Fail, Command, S> {
 	setter?: Setter<Part, Whole, S>
 }
 
-export function view<Part, Whole, Fail, Command, S>(
-	focus: IOptic<Part, Whole, Fail, Command, S>,
-) {
-	if (focus.getter) return focus.getter
-	const f = fold(focus)
-	return (whole: Whole) => f(toFirst<Part, Fail, Ctx>(undefined as Fail), whole)
-}
-
-export function fold<Part, Whole, Fail, Command, T>(
-	focus: IOptic<Part, Whole, Fail, Command, T>,
-) {
-	return function <Acc>(form: FoldForm<Part, Acc, Ctx>, whole: Whole) {
-		return focus.refold(form.foldFn)(whole, fromInit(form.init), ctxNull)
+export class COptic<Part, Whole, Fail, Command, S>
+	implements IOptic<Part, Whole, Fail, Command, S>
+{
+	com: Com<Command, Whole>
+	getter?: Getter<Part, Whole, Fail>
+	isCommand: (v: unknown) => v is Command
+	isFailure: (v: unknown) => v is Fail
+	mapper: Mapper<Part, Whole>
+	refold: <Acc>(fold: FoldFn<Part, Acc, Ctx>) => FoldFn<Whole, Acc, Ctx>
+	setter?: Setter<Part, Whole, S>
+	constructor(opts: {
+		com: Com<Command, Whole>
+		getter?: Getter<Part, Whole, Fail>
+		isCommand: (v: unknown) => v is Command
+		isFailure: (v: unknown) => v is Fail
+		mapper: Mapper<Part, Whole>
+		refold: <Acc>(fold: FoldFn<Part, Acc, Ctx>) => FoldFn<Whole, Acc, Ctx>
+		setter?: Setter<Part, Whole, S>
+	}) {
+		this.com = opts.com
+		this.getter = opts.getter
+		this.isCommand = opts.isCommand
+		this.isFailure = opts.isFailure
+		this.mapper = opts.mapper
+		this.refold = opts.refold
+		this.setter = opts.setter
+	}
+	static eq<Whole>() {
+		return new COptic({
+			com: id,
+			getter: id<Whole>,
+			isCommand: isNever,
+			isFailure: isNever,
+			mapper: apply,
+			refold: id,
+			setter: id,
+		})
+	}
+	command(token: Command, whole: Whole) {
+		return this.com(token, whole)
+	}
+	fold<Acc>(form: FoldForm<Part, Acc, Ctx>, whole: Whole) {
+		return this.refold(form.foldFn)(whole, fromInit(form.init), ctxNull)
+	}
+	modify(mod: Modify<Part>, whole: Whole) {
+		return this.mapper(mod, whole)
+	}
+	put(part: Part, whole: S | Whole) {
+		if (this.setter) return this.setter!(part, whole)
+		return this.mapper(() => part, whole as Whole)
+	}
+	update(arg: ((p: Part) => Part) | Command | Part) {
+		if (this.isCommand(arg)) return (whole: Whole) => this.com(arg, whole)
+		if (isFunction(arg)) return (whole: Whole) => this.modify(arg, whole)
+		return (whole: Whole) => this.put(arg, whole)
+	}
+	view<A = undefined>(
+		whole: Whole,
+		or?: Init<A, Fail>,
+	): (Fail extends never ? never : A) | Part {
+		const res = this.getter
+			? this.getter(whole)
+			: this.fold(toFirst<Part, Fail, Ctx>(undefined as Fail), whole)
+		if (this.isFailure(res)) {
+			if (isFunction(or)) return or(res)
+			return or as any
+		}
+		return res
 	}
 }
 
-export function encode<Part, Whole, Fail, Command>(
-	focus: IOptic<Part, Whole, Fail, Command, PRISM>,
-) {
-	return (part: Part) => focus.setter!(part)
-}
-
-export function put<Part, Whole, Fail, Command, S>(
-	focus: IOptic<Part, Whole, Fail, Command, S>,
-	part: Part,
-) {
-	if (focus.setter) return (whole: S | Whole) => focus.setter!(part, whole)
-	return (whole: S | Whole) => focus.mapper(() => part, whole as Whole)
-}
-
-export function modify<Part, Whole, Fail, Command, T>(
-	focus: IOptic<Part, Whole, Fail, Command, T>,
-	mod: Modify<Part>,
-) {
-	return (whole: Whole) => focus.mapper(mod, whole)
-}
-
-export function command<Part, Whole, Fail, Command, T>(
-	focus: IOptic<Part, Whole, Fail, Command, T>,
-	command: Command,
-) {
-	return (whole: Whole) => focus.command(command, whole)
-}
-
-export function update<Part, Whole, Fail, Command, T>(
-	focus: IOptic<Part, Whole, Fail, Command, T>,
-	arg: ((p: Part) => Part) | Command | Part,
-) {
-	if (focus.isCommand(arg)) return command(focus, arg)
-	if (isFunction(arg)) return modify(focus, arg)
-	return put(focus, arg)
-}
-
 export type Focus<Part, Whole, Fail, Command, T> = (
-	eq: IOptic<Whole, Whole, never, never, void>,
-) => IOptic<Part, Whole, Fail, Command, T>
+	eq: COptic<Whole, Whole, never, never, void>,
+) => COptic<Part, Whole, Fail, Command, T>
 
-export function eq<T>(): IOptic<T, T, never, never, PRISM> {
-	return {
-		command: id,
-		getter: id<T>,
-		isCommand: isNever,
-		isFailure: isNever,
-		mapper: apply,
-		refold: id,
-		setter: id,
+export function focus<Whole>() {
+	return function <Part, Fail, Command, S>(
+		o: Focus<Part, Whole, Fail, Command, S>,
+	) {
+		return o(COptic.eq<Whole>())
 	}
 }
 
@@ -251,11 +261,9 @@ type IOpticArgs<Part, Whole, Fail, Command, S> =
 export function opticPrism<Part, Whole, Fail, Command>(
 	r: IOptional<Part, Whole, Fail, Command, PRISM>,
 ) {
-	return function <Mega, FL, CL, SL>(
-		l: IOptic<Whole, Mega, FL, CL, SL>,
-	): IOptic<Part, Mega, Fail | FL, Command, PRISM & SL> {
-		return {
-			command: (c, a) => l.mapper((p) => r.command(c, p), a),
+	return function <Mega, FL, CL, SL>(l: IOptic<Whole, Mega, FL, CL, SL>) {
+		return new COptic<Part, Mega, Fail | FL, Command, PRISM & SL>({
+			com: (c, a) => l.mapper((p) => r.command(c, p), a),
 			getter: composeGetter(l.isFailure, l.getter, r.getter),
 			isCommand: r.isCommand,
 			isFailure: composeFailure(l.isFailure, r.isFailure),
@@ -279,18 +287,16 @@ export function opticPrism<Part, Whole, Fail, Command>(
 				l.refold,
 			),
 			setter: composePrismSetter(l.getter, l.setter, r.setter),
-		}
+		})
 	}
 }
 
 export function opticNonPrism<Part, Whole, Fail, Command>(
 	r: IOpticArgs<Part, Whole, Fail, Command, NON_PRISM>,
 ) {
-	return function <Mega, FL, CL, SL>(
-		l: IOptic<Whole, Mega, FL, CL, SL>,
-	): IOptic<Part, Mega, Fail | FL, Command, NON_PRISM & SL> {
-		return {
-			command: (c, a) => l.mapper((p) => r.command(c, p), a),
+	return function <Mega, FL, CL, SL>(l: IOptic<Whole, Mega, FL, CL, SL>) {
+		return new COptic<Part, Mega, Fail | FL, Command, NON_PRISM & SL>({
+			com: (c, a) => l.mapper((p) => r.command(c, p), a),
 			getter: composeGetter(l.isFailure, l.getter, r.getter),
 			isCommand: r.isCommand,
 			isFailure: composeFailure(l.isFailure, r.isFailure),
@@ -314,7 +320,7 @@ export function opticNonPrism<Part, Whole, Fail, Command>(
 				l.refold,
 			),
 			setter: composeSetter(l.getter, l.setter, l.isFailure, r.setter),
-		}
+		})
 	}
 }
 
@@ -328,7 +334,7 @@ export function iso<Part, Whole>({
 	setter: (part: Part) => Whole
 }) {
 	return opticPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isNever,
@@ -353,7 +359,7 @@ export function lens<Part, Whole>({
 	setter: (part: Part, whole: Whole) => Whole
 }) {
 	return opticNonPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isNever,
@@ -378,7 +384,7 @@ export function prism<Part, Whole>({
 	setter: Setter<Part, Whole, PRISM>
 }) {
 	return opticPrism({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isUndefined,
@@ -399,7 +405,7 @@ export function optional<Part, Whole>({
 	setter: Setter<Part, Whole, NON_PRISM>
 }) {
 	return opticNonPrism<Part, Whole, undefined, never>({
-		command: inert,
+		command: forbidden,
 		getter,
 		isCommand: isNever,
 		isFailure: isUndefined,
@@ -437,7 +443,7 @@ export function traversal<Part, Whole, Index>({
 	form: () => FoldForm<Part, Whole, Ctx>
 }) {
 	return opticNonPrism<Part, Whole, undefined, never>({
-		command: inert,
+		command: forbidden,
 		isCommand: isNever,
 		isFailure: isUndefined,
 		mapper: (mod, whole: Whole) => {
@@ -466,25 +472,25 @@ export function traversal<Part, Whole, Index>({
 
 export function disabled<Part>(value: ((p: Part) => Part) | Part) {
 	return function <Whole, Fail, Command, S>(
-		o: IOptic<Part, Whole, Fail, Command, S>,
-	): IOptic<boolean, Whole, never, never, NON_PRISM> {
-		const getter = (whole: Whole) => Object.is(update(o, value)(whole), whole)
+		o: COptic<Part, Whole, Fail, Command, S>,
+	) {
+		const getter = (whole: Whole) => Object.is(o.update(value)(whole), whole)
 		const setter: Setter<boolean, Whole, NON_PRISM> = (
 			d: boolean,
 			whole: Whole,
 		) => {
-			if (d) return update(o, value)(whole)
+			if (d && !getter(whole)) return o.update(value)(whole)
 			return whole
 		}
-		return {
-			command: id,
+		return new COptic<boolean, Whole, never, never, NON_PRISM>({
+			com: id,
 			getter,
 			isCommand: isNever,
 			isFailure: isNever,
 			mapper: makeMapper(setter, getter),
 			refold: (fold) => (v, acc, ctx) => fold(getter(v), acc, ctx),
 			setter,
-		}
+		})
 	}
 }
 
@@ -493,7 +499,7 @@ export function disabled<Part>(value: ((p: Part) => Part) | Part) {
 export function valueOr<Part>(value: Init<Part>) {
 	return function <Whole, Fail, Command, S>(
 		o: IOptic<Part, Whole, Fail, Command, S>,
-	): IOptic<Part, Whole, never, Command, S> {
+	) {
 		if (!(o.getter && o.setter))
 			throw new Error("valueOr don't work with traversals")
 		const getter = (whole: Whole) => {
@@ -501,8 +507,8 @@ export function valueOr<Part>(value: Init<Part>) {
 			if (o.isFailure(part)) return fromInit(value)
 			return part
 		}
-		return {
-			command: o.command,
+		return new COptic<Part, Whole, never, Command, S>({
+			com: o.com,
 			getter,
 			isCommand: o.isCommand,
 			isFailure: isNever,
@@ -515,6 +521,6 @@ export function valueOr<Part>(value: Init<Part>) {
 						: lastFold(whole, acc, ctx)
 			},
 			setter: o.setter,
-		}
+		})
 	}
 }

@@ -1,6 +1,15 @@
-import { append, id, prepend, remove, replace } from '../../utils'
+import {
+	append,
+	id,
+	insertValue,
+	prepend,
+	remove,
+	removeValue,
+	replace,
+} from '../../utils'
 import { fromArray, toArray } from '../collections'
 import {
+	COptic,
 	forbidden,
 	IOptic,
 	iso,
@@ -19,12 +28,12 @@ export function to<Micro, Part>(
 	getter: (v: Part) => Micro,
 ): <Mega, FL, CL, SL>(
 	l: IOptic<Part, Mega, FL, CL, SL>,
-) => IOptic<Micro, Mega, FL, never, SL>
+) => COptic<Micro, Mega, FL, never, SL>
 export function to<Micro, Part>(
 	getter: (v: Part) => Micro | undefined,
 ): <Mega, FL, CL, SL>(
 	l: IOptic<Part, Mega, FL, CL, SL>,
-) => IOptic<Micro, Mega, FL | undefined, never, SL>
+) => COptic<Micro, Mega, FL | undefined, never, SL>
 export function to<Micro, Part>(getter: (v: Part) => Micro | undefined) {
 	return optional<Micro, Part>({
 		getter,
@@ -67,6 +76,7 @@ export function linear(m: number, b = 0) {
 
 // lenses
 
+// focus on nth element of tuple, use `at` for arrays
 export function nth<Index extends keyof O & number, O extends unknown[]>(
 	index: Index,
 ) {
@@ -76,17 +86,11 @@ export function nth<Index extends keyof O & number, O extends unknown[]>(
 	})
 }
 
-// equivalence relation
+// we could have a sorted version
 export function includes<X>(x: X) {
 	return lens<boolean, X[]>({
 		getter: (xs) => xs.includes(x),
-		setter: (v, xs) => {
-			if (xs.includes(x) === v) return xs
-			if (v) return xs.concat(x)
-			return xs.filter((x_) => x_ !== x)
-		},
-		// mapper could improve speed
-		// sorted list could improve speed
+		setter: (v, xs) => (v ? insertValue(x, xs) : removeValue(x, xs)),
 	})
 }
 
@@ -96,12 +100,12 @@ export function when<Part, Micro extends Part>(
 	p: (v: Part) => v is Micro,
 ): <Mega, FL, CL, SL>(
 	l: IOptic<Part, Mega, FL, CL, SL>,
-) => IOptic<Micro, Mega, FL | undefined, never, SL & void>
+) => COptic<Micro, Mega, FL | undefined, never, SL & void>
 export function when<Part>(
 	p: (v: Part) => unknown,
 ): <Mega, FL, CL, SL>(
 	l: IOptic<Part, Mega, FL, CL, SL>,
-) => IOptic<Part, Mega, FL | undefined, never, SL & void>
+) => COptic<Part, Mega, FL | undefined, never, SL & void>
 export function when<V>(p: (v: V) => unknown) {
 	return prism<V, V>({
 		getter: (v) => (p(v) ? v : undefined),
@@ -130,7 +134,7 @@ export function prop<Key extends keyof O, O extends object>(
 	key: Key,
 ): <A, F1, C, S>(
 	p: IOptic<O, A, F1, C, S>,
-) => IOptic<
+) => COptic<
 	Exclude<O[Key], undefined>,
 	A,
 	F1 | (Key extends OptionalKeys<O> ? undefined : never),
@@ -167,12 +171,12 @@ export function findOne<X, Y extends X>(
 	p: (x: X) => x is Y,
 ): <Mega, F2, C2, S>(
 	o: IOptic<X[], Mega, F2, C2, S>,
-) => IOptic<Y, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
+) => COptic<Y, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
 export function findOne<X>(
 	p: (x: X) => unknown,
 ): <Mega, F2, C2, S>(
 	o: IOptic<X[], Mega, F2, C2, S>,
-) => IOptic<X, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
+) => COptic<X, Mega, F2 | undefined, typeof REMOVE, NON_PRISM>
 export function findOne<X>(p: (x: X) => unknown) {
 	return removable<X, X[]>({
 		getter: (xs) => xs.find(p),
@@ -200,12 +204,12 @@ export function findMany<X, Y extends X>(
 	p: (x: X) => x is Y,
 ): <A, F, C, S>(
 	o: IOptic<X[], A, F, C, S>,
-) => IOptic<Y[], A, F, never, NON_PRISM>
+) => COptic<Y[], A, F, never, NON_PRISM>
 export function findMany<X>(
 	p: (x: X) => unknown,
 ): <A, F, C, S>(
 	o: IOptic<X[], A, F, C, S>,
-) => IOptic<X[], A, F, never, NON_PRISM>
+) => COptic<X[], A, F, never, NON_PRISM>
 export function findMany<X>(p: (x: X) => unknown) {
 	return lens<X[], X[]>({
 		getter: (xs) => xs.filter(p),

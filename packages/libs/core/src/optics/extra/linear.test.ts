@@ -1,15 +1,14 @@
 import { linear } from '.'
-import { flow } from '../../utils'
-import { eq, update, view } from '../core'
+import { focus } from '../core'
 
 describe('linear', () => {
-	const focus = flow(eq<number>(), linear(1.8, 32))
+	const o = focus<number>()(linear(1.8, 32))
 	it('celsius to fahrenheit', () => {
-		expect(view(focus)(-40)).toBe(-40)
-		expect(view(focus)(100)).toBe(212)
+		expect(o.view(-40)).toBe(-40)
+		expect(o.view(100)).toBe(212)
 	})
 	it('fahrenheit to celsius', () => {
-		expect(update(focus, -40)(0)).toBe(-40)
-		expect(update(focus, 212)(0)).toBe(100)
+		expect(o.update(-40)(0)).toBe(-40)
+		expect(o.update(212)(0)).toBe(100)
 	})
 })
