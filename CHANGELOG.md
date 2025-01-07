@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4.2
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Change optic API &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(4fa0d)</samp>](https://github.com/prncss-xyz/constellar/commit/4fa0d3f)
+- **utils**: Curry1 &nbsp;-&nbsp; by **Juliette Lamarche** [<samp>(8cd15)</samp>](https://github.com/prncss-xyz/constellar/commit/8cd15c6)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/prncss-xyz/constellar/compare/2.4.1...2.4.2)
+
 ## 2.4.1
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
