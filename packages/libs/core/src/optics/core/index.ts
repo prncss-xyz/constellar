@@ -479,7 +479,7 @@ export function disabled<Part>(value: ((p: Part) => Part) | Part) {
 			d: boolean,
 			whole: Whole,
 		) => {
-			if (d) return o.update(value)(whole)
+			if (d && !getter(whole)) return o.update(value)(whole)
 			return whole
 		}
 		return new COptic<boolean, Whole, never, never, NON_PRISM>({

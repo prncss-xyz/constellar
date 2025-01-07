@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { multiStateMachine } from '@constellar/core'
 import { renderHook } from '@testing-library/react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 import { useMachine, useMachineEffects, valueEvent } from './machine'
 
-describe.skip('machine', () => {
+describe('machine', () => {
 	const someMachine = multiStateMachine<
 		{ type: 'add' },
 		{ n: number; type: 'main' },
@@ -45,31 +45,26 @@ describe.skip('machine', () => {
 	test('effects', () => {
 		const m = someMachine()
 		const listener = vi.fn()
-		const { result } = renderHook(() => {
+		const cbIn = vi.fn((..._: unknown[]) => {})
+		const cbOut = vi.fn(() => {})
+		const effects = {
+			a: (e: number) => {
+				cbIn(e)
+				return () => cbOut()
+			},
+		}
+		renderHook(() => {
 			const [state, send] = useMachine(m, listener)
 			useEffect(() => {
 				send('add')
 			}, [])
+			useMachineEffects(m, state, listener, effects)
 			return state
 		})
-		const cbIn = vi.fn((..._: unknown[]) => {})
-		const cbOut = vi.fn(() => {})
-		useMachineEffects(
-			m,
-			result.current,
-			listener,
-			useMemo(
-				() => ({
-					a: (e: number) => {
-						cbIn(e)
-						return () => cbOut()
-					},
-				}),
-				[],
-			),
-		)
 		expect(listener).toHaveBeenCalledTimes(1)
 		expect(listener).toHaveBeenCalledWith({ type: 'hi' })
+		expect(cbIn).toHaveBeenCalledTimes(2)
+		expect(cbOut).toHaveBeenCalledTimes(1)
 	})
 })
 

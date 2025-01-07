@@ -33,7 +33,7 @@ export function focusValue<Part, Whole, Fail, Command, S>(
 ) {
 	const o = foc<Whole>()(focus)
 	return [
-		o.view.bind(o),
+		o.view(whole),
 		(arg: Updater<Part, Command>) => {
 			setWhole(o.update(arg)(whole))
 		},
