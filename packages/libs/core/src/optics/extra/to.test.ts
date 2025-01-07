@@ -1,19 +1,15 @@
 import { to } from '.'
-import { flow } from '../../utils'
-import { eq, update, view } from '../core'
+import { focus } from '../core'
 
 describe('defined', () => {
-	const focus = flow(
-		eq<string>(),
-		to((s) => s.toUpperCase()),
-	)
+	const o = focus<string>()(to((s) => s.toUpperCase()))
 	it('view', () => {
-		const v = view(focus)('foo')
+		const v = o.view('foo')
 		expectTypeOf(v).toBeString()
 		expect(v).toBe('FOO')
 	})
 	it('update', () => {
-		expect(() => update(focus, '')('foo')).toThrowError()
+		expect(() => o.update('')('foo')).toThrowError()
 	})
 })
 
@@ -22,16 +18,16 @@ function firstVowel(s: string) {
 }
 
 describe('optional', () => {
-	const focus = flow(eq<string>(), to(firstVowel))
+	const o = focus<string>()(to(firstVowel))
 	it('view', () => {
-		const v = view(focus)('foo')
+		const v = o.view('foo')
 		expectTypeOf(v).toEqualTypeOf<string | undefined>()
-		expect(view(focus)('foo')).toBe('o')
+		expect(o.view('foo')).toBe('o')
 	})
 	it('view', () => {
-		expect(view(focus)('rrr')).toBeUndefined()
+		expect(o.view('rrr')).toBeUndefined()
 	})
 	it('update', () => {
-		expect(() => update(focus, '')('foo')).toThrowError()
+		expect(() => o.update('')('foo')).toThrowError()
 	})
 })

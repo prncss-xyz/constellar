@@ -1,19 +1,18 @@
 import { strToNum } from '.'
-import { flow } from '../../utils'
-import { encode, eq, view } from '../core'
+import { focus } from '../core'
 
 describe('strToNum', () => {
-	const focus = flow(eq<string>(), strToNum())
+	const o = focus<string>()(strToNum())
 	test('view undefined', () => {
-		expect(view(focus)('a')).toBeUndefined()
+		expect(o.view('a')).toBeUndefined()
 	})
 	test('view defined', () => {
-		expect(view(focus)('')).toBeUndefined()
+		expect(o.view('')).toBeUndefined()
 	})
 	test('view defined', () => {
-		expect(view(focus)('3')).toBe(3)
+		expect(o.view('3')).toBe(3)
 	})
-	test('encode', () => {
-		expect(encode(focus)(3)).toEqual('3')
+	test('put', () => {
+		expect(o.put(3)).toEqual('3')
 	})
 })

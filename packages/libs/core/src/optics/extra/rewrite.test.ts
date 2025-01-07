@@ -1,16 +1,12 @@
 import { rewrite } from '.'
-import { flow } from '../../utils'
-import { eq, update, view } from '../core'
+import { focus } from '../core'
 
 describe('rewrite', () => {
-	const focus = flow(
-		eq<string>(),
-		rewrite((s) => s.toUpperCase()),
-	)
+	const o = focus<string>()(rewrite((s) => s.toUpperCase()))
 	it('view', () => {
-		expect(view(focus)('foo')).toBe('foo')
+		expect(o.view('foo')).toBe('foo')
 	})
 	it('put', () => {
-		expect(update(focus, 'foo')('')).toBe('FOO')
+		expect(o.update('foo')('')).toBe('FOO')
 	})
 })

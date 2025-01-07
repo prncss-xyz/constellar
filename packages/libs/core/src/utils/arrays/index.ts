@@ -29,3 +29,21 @@ export function remove<T>(index: number, xs: T[]) {
 	if (index >= xs.length) return xs
 	return [...xs.slice(0, index), ...xs.slice(index + 1)]
 }
+
+export function insertValue<X>(element: X, xs: X[]) {
+	for (const x of xs) {
+		if (Object.is(x, element)) return xs
+	}
+	return xs.concat(element)
+}
+
+export function removeValue<X>(element: X, xs: X[]) {
+	let dirty = false
+	const res: X[] = []
+	for (const x of xs) {
+		if (Object.is(x, element)) {
+			dirty = true
+		} else res.push(x)
+	}
+	return dirty ? res : xs
+}

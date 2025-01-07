@@ -1,5 +1,5 @@
 // https://github.com/nodeshapes/js-optics-benchmark
-import { eq, findOne, flow, prop, update, view } from '@constellar/core'
+import { findOne, focus, pipe, prop } from '@constellar/core'
 import * as O from 'optics-ts'
 // @ts-expect-error no declaration file
 import * as L from 'partial.lenses'
@@ -39,11 +39,8 @@ describe('find 2', () => {
 	const data2 = data.m.n.names
 	type Data2 = typeof data2
 	;(() => {
-		const optics = flow(
-			eq<Data2>(),
-			findOne((name: Child) => name.id === id),
-		)
-		const v = view(optics)
+		const optics = focus<Data2>()(findOne((name: Child) => name.id === id))
+		const v = optics.view.bind(optics)
 		const fn = () => v(data2)
 		bench('constellar', fn as () => void)
 		expect(fn()).toEqual({ id, name })
@@ -65,14 +62,15 @@ describe('find 2', () => {
 
 describe('find read array element by predicate', () => {
 	;(() => {
-		const optics = flow(
-			eq<Data>(),
-			prop('m'),
-			prop('n'),
-			prop('names'),
-			findOne((name: Child) => name.id === id),
+		const o = focus<Data>()(
+			pipe(
+				prop('m'),
+				prop('n'),
+				prop('names'),
+				findOne((name: Child) => name.id === id),
+			),
 		)
-		const v = view(optics)
+		const v = o.view.bind(o)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
 		expect(fn()).toEqual({ id, name })
@@ -102,17 +100,18 @@ describe('find read array element by predicate', () => {
 describe('find modify array element by predicate', () => {
 	const up = (obj: Child) => ({ ...obj, name: nameModified })
 	;(() => {
-		const optics = flow(
-			eq<Data>(),
-			prop('m'),
-			prop('n'),
-			prop('names'),
-			findOne((name: Child) => name.id === id),
+		const o = focus<Data>()(
+			pipe(
+				prop('m'),
+				prop('n'),
+				prop('names'),
+				findOne((name: Child) => name.id === id),
+			),
 		)
-		const v = update(optics, up)
+		const v = o.update(up).bind(o)
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(view(optics)(fn())).toEqual({ id, name: nameModified })
+		expect(o.view(fn())).toEqual({ id, name: nameModified })
 	})()
 	;(() => {
 		const optics = O.optic<Data>()
@@ -141,12 +140,12 @@ describe('find modify 2 array element by predicate', () => {
 	const data = 0 as number
 	type Data = typeof data
 	;(() => {
-		const optics = eq<Data>()
-		const v = update(optics, up)
+		const optics = focus<Data>()((x) => x)
+		const v = optics.update(up)
 		/* const v = (x: number) => optics.setter(up(optics.getter(x)), 0) */
 		const fn = () => v(data)
 		bench('constellar', fn as () => void)
-		expect(view(optics)(fn())).toEqual(1)
+		expect(optics.view.bind(optics)(fn())).toEqual(1)
 	})()
 	;(() => {
 		const optics = O.optic<Data>()
@@ -162,14 +161,11 @@ describe.only('find modify 2 array element by predicate', () => {
 	const data2 = data.m.n.names
 	type Data2 = typeof data2
 	;(() => {
-		const optics = flow(
-			eq<Data2>(),
-			findOne((name: Child) => name.id === id),
-		)
-		const v = update(optics, up)
+		const optics = focus<Data2>()(findOne((name: Child) => name.id === id))
+		const v = optics.update(up)
 		const fn = () => v(data2)
 		bench('constellar', fn as () => void)
-		expect(view(optics)(fn())).toEqual({ id, name: nameModified })
+		expect(optics.view.bind(optics)(fn())).toEqual({ id, name: nameModified })
 	})()
 	;(() => {
 		const optics = O.optic<Data2>().find((name: Child) => name.id === id)
