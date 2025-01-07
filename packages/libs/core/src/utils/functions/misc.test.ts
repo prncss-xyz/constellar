@@ -1,4 +1,4 @@
-import { curry, isEmpty } from './misc'
+import { curry, curry1, isEmpty } from './misc'
 
 describe('isEmpty', () => {
 	test('empty', () => {
@@ -23,5 +23,13 @@ describe('curry', () => {
 	test('3 arguments', () => {
 		const g = curry(f, 1, 2, 3)
 		expect(g()).toBe(6)
+	})
+})
+
+describe('curry1', () => {
+	const f = (a: number, b: number, c: number) => a + b + c
+	test('0 arguments', () => {
+		const g = curry1(f)
+		expect(g(1)(2, 3)).toBe(6)
 	})
 })

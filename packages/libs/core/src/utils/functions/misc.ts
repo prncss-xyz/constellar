@@ -33,6 +33,16 @@ export function isEmpty(obj?: object) {
 	return true
 }
 
+export function curry1<A, Args extends unknown[], R>(
+	f: (...args: [A, ...Args]) => R,
+) {
+	return function (a: A) {
+		return function (...args: Args) {
+			return f(a, ...args)
+		}
+	}
+}
+
 export function curry<P extends unknown[], Q extends unknown[], R>(
 	f: (...args: [...P, ...Q]) => R,
 	...args: P
